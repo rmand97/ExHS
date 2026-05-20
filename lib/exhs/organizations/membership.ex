@@ -28,6 +28,15 @@ defmodule Exhs.Organizations.Membership do
       change set_attribute(:activated_at, &DateTime.utc_now/0)
     end
 
+    create :join do
+      accept []
+      change relate_actor(:user)
+      change set_attribute(:role, :member)
+      change set_attribute(:status, :active)
+      change set_attribute(:joined_at, &DateTime.utc_now/0)
+      change set_attribute(:activated_at, &DateTime.utc_now/0)
+    end
+
     update :activate do
       accept []
       change set_attribute(:status, :active)
@@ -42,15 +51,53 @@ defmodule Exhs.Organizations.Membership do
     end
 
     update :set_role do
+      require_atomic? false
       accept [:role]
+      validate Exhs.Organizations.Membership.Validations.NotLastAdmin
     end
 
-    destroy :leave
+    destroy :leave do
+      require_atomic? false
+      validate Exhs.Organizations.Membership.Validations.NotLastAdminDestroy
+    end
   end
 
   policies do
     bypass AshAuthentication.Checks.AshAuthenticationInteraction do
       authorize_if always()
+    end
+
+    bypass Exhs.Checks.Superadmin do
+      authorize_if always()
+    end
+
+    policy action(:join) do
+      authorize_if actor_present()
+    end
+
+    policy action_type(:read) do
+      authorize_if {Exhs.Checks.HasMembershipRole, roles: [:admin, :board]}
+      authorize_if expr(user_id == ^actor(:id))
+    end
+
+    policy action(:invite) do
+      authorize_if {Exhs.Checks.HasMembershipRole, roles: [:admin]}
+    end
+
+    policy action(:activate) do
+      authorize_if {Exhs.Checks.HasMembershipRole, roles: [:admin]}
+    end
+
+    policy action(:deactivate) do
+      authorize_if {Exhs.Checks.HasMembershipRole, roles: [:admin]}
+    end
+
+    policy action(:set_role) do
+      authorize_if {Exhs.Checks.HasMembershipRole, roles: [:admin]}
+    end
+
+    policy action(:leave) do
+      authorize_if expr(user_id == ^actor(:id))
     end
   end
 

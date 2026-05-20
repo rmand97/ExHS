@@ -199,12 +199,40 @@ defmodule Exhs.AccountsTest do
     end
   end
 
-  describe "authorization (placeholder — full policies in Task 5)" do
-    test "unauthenticated read is forbidden" do
+  describe "authorization — User policies" do
+    test "user can read own profile" do
+      user = register_user!()
+      assert {:ok, _} = Accounts.get_user_by_id(user.id, actor: user)
+    end
+
+    test "user cannot read another user" do
+      user = register_user!()
+      other = register_user!()
+
+      assert {:error, %Ash.Error.Invalid{}} = Accounts.get_user_by_id(other.id, actor: user)
+    end
+
+    test "unauthenticated read returns not found (filtered)" do
       register_user!()
 
+      assert {:error, _} = Accounts.get_user_by_email("test@example.com", actor: nil)
+    end
+
+    test "user can update own profile" do
+      user = register_user!()
+
+      assert {:ok, updated} =
+               Accounts.update_profile(user, %{first_name: "Ola"}, actor: user)
+
+      assert updated.first_name == "Ola"
+    end
+
+    test "user cannot update another user's profile" do
+      user = register_user!()
+      other = register_user!()
+
       assert {:error, %Ash.Error.Forbidden{}} =
-               Accounts.get_user_by_email("test@example.com", actor: nil)
+               Accounts.update_profile(other, %{first_name: "Nope"}, actor: user)
     end
 
     test "unauthenticated profile update is forbidden" do
@@ -214,12 +242,35 @@ defmodule Exhs.AccountsTest do
                Accounts.update_profile(user, %{first_name: "Hacker"}, actor: nil)
     end
 
-    test "authenticated user is also forbidden without policies granting access" do
+    test "user can change own password" do
+      user = register_user!()
+
+      assert {:ok, _} =
+               Accounts.change_password(
+                 user,
+                 %{
+                   current_password: "password123",
+                   password: "newpassword456",
+                   password_confirmation: "newpassword456"
+                 },
+                 actor: user
+               )
+    end
+
+    test "user cannot change another user's password" do
       user = register_user!()
       other = register_user!()
 
       assert {:error, %Ash.Error.Forbidden{}} =
-               Accounts.update_profile(other, %{first_name: "Nope"}, actor: user)
+               Accounts.change_password(
+                 other,
+                 %{
+                   current_password: "password123",
+                   password: "newpassword456",
+                   password_confirmation: "newpassword456"
+                 },
+                 actor: user
+               )
     end
   end
 end

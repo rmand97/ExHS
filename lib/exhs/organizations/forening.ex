@@ -58,6 +58,26 @@ defmodule Exhs.Organizations.Forening do
     bypass AshAuthentication.Checks.AshAuthenticationInteraction do
       authorize_if always()
     end
+
+    bypass Exhs.Checks.Superadmin do
+      authorize_if always()
+    end
+
+    policy action_type(:read) do
+      authorize_if actor_present()
+    end
+
+    policy action_type(:create) do
+      forbid_if always()
+    end
+
+    policy action(:update) do
+      authorize_if {Exhs.Checks.HasMembershipRole, roles: [:admin]}
+    end
+
+    policy action(:archive) do
+      forbid_if always()
+    end
   end
 
   attributes do

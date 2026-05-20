@@ -300,6 +300,22 @@ defmodule Exhs.Accounts.User do
     bypass AshAuthentication.Checks.AshAuthenticationInteraction do
       authorize_if always()
     end
+
+    bypass Exhs.Checks.Superadmin do
+      authorize_if always()
+    end
+
+    policy action_type(:read) do
+      authorize_if expr(id == ^actor(:id))
+    end
+
+    policy action(:update_profile) do
+      authorize_if expr(id == ^actor(:id))
+    end
+
+    policy action(:change_password) do
+      authorize_if expr(id == ^actor(:id))
+    end
   end
 
   attributes do

@@ -19,6 +19,7 @@ defmodule Exhs.Organizations do
 
     resource Exhs.Organizations.Membership do
       define :invite_member, action: :invite, args: [:user_id]
+      define :join_forening, action: :join
       define :activate_member, action: :activate
       define :deactivate_member, action: :deactivate
       define :set_member_role, action: :set_role

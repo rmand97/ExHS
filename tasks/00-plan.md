@@ -46,6 +46,9 @@ This file indexes all tasks. Each task is a self-contained chunk of work with it
 - [ ] [Task 21 — Backups & DR](./21-backups-dr.md)
 - [ ] [Task 22 — Deployment & CI/CD](./22-deployment.md)
 
+### Admin tools
+- [ ] [Task 23 — Merge duplicate user accounts](./23-merge-users.md)
+
 ## Global open decisions
 
 These are unresolved cross-cutting questions. Each is also surfaced inside the relevant task file.
