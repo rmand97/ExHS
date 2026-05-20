@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "tidewave": {
+      "type": "http",
+      "url": "http://localhost:4000/tidewave/mcp"
+    },
+    "ash_ai": {
+      "type": "http",
+      "url": "http://localhost:4000/ash_ai/mcp"
+    }
+  }
+}
