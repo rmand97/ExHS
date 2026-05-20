@@ -73,7 +73,11 @@ After resource changes, run `mix ash.codegen --dev` iteratively, then a final `m
 
 ## Code quality
 
-`mix credo --strict` runs the ExSlop plugin (30+ AI-slop checks) alongside standard Credo. It flags patterns like blanket rescues, narrator-style comments/docs, N+1 Ecto queries, redundant Enum chains, and identity passthroughs. Run `mix precommit` before finishing a chunk of work — it includes credo.
+`mix credo --strict` runs two plugins alongside standard Credo:
+- **ExSlop** (35 checks) — catches AI-generated slop: blanket rescues, narrator-style comments/docs, N+1 Ecto queries, redundant Enum chains, identity passthroughs.
+- **ExDNA** (clone detection) — flags duplicated code across modules using AST-aware analysis. When it reports a clone, extract the shared logic into a helper module.
+
+Both plugins and all their checks are explicitly listed in `.credo.exs` under `checks: %{enabled: [...]}`. Run `mix precommit` before finishing a chunk of work — it includes credo.
 
 ## Do not
 

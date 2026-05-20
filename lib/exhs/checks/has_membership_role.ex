@@ -2,6 +2,8 @@ defmodule Exhs.Checks.HasMembershipRole do
   @moduledoc false
   use Ash.Policy.SimpleCheck
 
+  import Exhs.Checks.Helpers, only: [get_tenant: 1, lookup_membership: 2]
+
   @impl true
   def describe(opts) do
     roles = Keyword.get(opts, :roles, [:admin])
@@ -23,18 +25,5 @@ defmodule Exhs.Checks.HasMembershipRole do
         _ -> false
       end
     end
-  end
-
-  defp get_tenant(%{subject: %{tenant: tenant}}) when tenant != nil, do: tenant
-  defp get_tenant(%{changeset: %{tenant: tenant}}) when tenant != nil, do: tenant
-  defp get_tenant(%{query: %{tenant: tenant}}) when tenant != nil, do: tenant
-  defp get_tenant(_), do: nil
-
-  defp lookup_membership(user_id, tenant) do
-    require Ash.Query
-
-    Exhs.Organizations.Membership
-    |> Ash.Query.filter(user_id == ^user_id)
-    |> Ash.read_one(tenant: tenant, authorize?: false)
   end
 end

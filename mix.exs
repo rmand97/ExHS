@@ -112,6 +112,7 @@ defmodule Exhs.MixProject do
       {:sweet_xml, "~> 0.7"},
       {:dotenvy, "~> 1.1"},
       {:ex_slop, "~> 0.1", only: [:dev, :test]},
+      {:ex_dna, "~> 1.5", only: [:dev, :test], runtime: false},
       {:tidewave, "~> 0.5", only: [:dev]},
       {:credo, "~> 1.7", only: [:dev, :test], runtime: false},
       {:dialyxir, "~> 1.4", only: [:dev, :test], runtime: false},
