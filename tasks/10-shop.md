@@ -30,6 +30,11 @@ Foreninger can sell merchandise (physical + digital). The shape of this task is 
 - [ ] `Exhs.Shop.list_products/1`
 - [ ] `Exhs.Shop.purchase/3` (creates pending order + Stripe checkout)
 
+### Tests (placeholder — scope-dependent)
+- [ ] Once scope is settled, follow the standard pattern: per-resource action tests via code interfaces, happy path + obvious failures
+- [ ] `DecrementStock` change tested for atomicity under contention (concurrent purchases of the last unit)
+- [ ] Stripe checkout integration tested with a mock/fake — do not call the real Stripe sandbox from unit tests
+
 ## Open decisions (all TBD)
 - [ ] **Digital products** — what counts as "digital"? PDF downloads? Software licenses? Access codes? Streaming?
 - [ ] **Digital delivery mechanism** — signed S3 URLs, in-app download page, emailed link?

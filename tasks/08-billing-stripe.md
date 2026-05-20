@@ -56,10 +56,15 @@ Stripe-backed yearly kontingent subscriptions and one-time charges (event ticket
 - [ ] Payment: read own (member), read all (admin/board), refund (admin)
 
 ### Tests
-- [ ] Use Stripe's test mode + signed webhook fixtures
-- [ ] Subscription creation flow with mocked checkout
-- [ ] Webhook idempotency
+External dep — test thoroughly. Never hit real Stripe; use signed webhook fixtures + mock the API client.
+
+- [ ] Subscription creation flow (happy path) with mocked Stripe checkout
+- [ ] Webhook signature verification rejects invalid/expired signatures
+- [ ] Webhook idempotency (same event id arriving twice does nothing the second time)
+- [ ] All relevant event types covered: `checkout.session.completed`, `invoice.payment_succeeded`, `invoice.payment_failed`, `customer.subscription.deleted`, refunds
 - [ ] Refund creates corresponding Payment update
+- [ ] Failure paths: API timeout, API 5xx, declined card — verify we surface a sensible error and don't half-commit state
+- [ ] Reconciliation job: drift between Stripe and our DB is detected and logged
 
 ## Open decisions
 - [ ] **Stripe Connect vs platform account** — Connect gives each forening their own balance and KYC, but adds onboarding friction. Platform account is simpler but mixes funds. Strong recommendation: Connect (Standard or Express). Confirm.

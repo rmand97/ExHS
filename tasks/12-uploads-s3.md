@@ -36,9 +36,14 @@ Uniform file upload pipeline backed by S3-compatible storage (Minio in dev, real
 - [ ] Orphan-sweeper Oban job (Task 13)
 
 ### Tests
+S3 is an external dep — test thoroughly against local Minio (the same protocol as prod S3).
+
 - [ ] Upload roundtrip against Minio in test env
 - [ ] Presigned URL works and expires
 - [ ] Deleting a resource removes its object
+- [ ] Failure paths: network error, 4xx (e.g. forbidden), 5xx — verify we don't leak orphans on the DB side
+- [ ] Orphan-sweeper job removes objects without a referencing resource and only those
+- [ ] File-size limit enforced before we hit the bucket
 
 ## Open decisions
 - [ ] **Prod S3 provider** — AWS S3, Cloudflare R2 (zero egress), Backblaze B2 (cheap), Hetzner Object Storage (EU)

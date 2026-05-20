@@ -53,6 +53,10 @@ A consistent visual language and a reusable component library built on **Tailwin
 - [ ] ARIA where appropriate
 - [ ] Color contrast ≥ WCAG AA
 
+### Tests
+- [ ] The `/dev/components` showcase LiveView mounts and renders without errors (one LiveView test) — that's enough; visual correctness is not unit-testable
+- [ ] No per-component unit tests for cosmetics; rely on the showcase + manual review
+
 ### Branding-per-forening
 - [ ] CSS custom properties driven by forening branding (primary color, logo)
 - [ ] Layout components consume CSS vars (compose with DaisyUI theme variables)

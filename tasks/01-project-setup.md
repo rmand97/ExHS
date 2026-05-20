@@ -70,6 +70,10 @@ Get a developer from `git clone` to a running app with all dependencies installe
 - [x] Postgres 17 service container
 - [x] Deps + `_build` cache keyed on `mix.lock`
 
+### Tests
+- [ ] Trivial smoke test: `mix test` passes on a freshly-set-up clone (Postgres + Oban + `Exhs.Application` boot without errors)
+- [ ] CI green on the skeleton
+
 ### Repo hygiene
 - [x] README updated with prerequisites, setup steps, common commands, pointer to `tasks/00-plan.md`
 - [x] `.gitignore` ignores `.env`, `.env.*` (keeps `.env.example`), `priv/plts/`, editor folders

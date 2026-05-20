@@ -58,6 +58,10 @@ Not setting up yet — revisit later. `dialyxir` dep stays in `mix.exs` for when
 ### Pre-commit (optional)
 - [x] **Decision: CI-only** — no local pre-commit hooks. CI catches everything; CLAUDE.md instructs agents to run format + credo before finishing.
 
+### Tests
+- [x] CI runs `mix credo --strict`, `mix format --check-formatted`, and the skills drift check on every PR — these are the tests for this task's deliverables
+- [ ] No ExUnit tests for tooling itself (would be over-engineering)
+
 ### Claude Code skills / config
 - [x] Skills audit: `ash-framework`, `phoenix-framework` are the only project-local skills, both auto-managed
 - [x] Expand `.claude/settings.local.json` allow-list with common safe commands (`mix help *`, `mix compile *`, `mix format *`, `mix test *`, `mix ash.*`, `mix phx.gen.*`, `mix usage_rules.*`, etc.)

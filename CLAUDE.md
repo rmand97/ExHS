@@ -13,6 +13,19 @@ Start with generators wherever possible. They provide a starting point for your 
 ### Logs & tests
 When you're done executing code, try to compile the code, and check the logs or run any applicable tests to see what effect your changes have had.
 
+### Seed data
+`priv/repo/seeds.exs` is the living "from-zero-to-running-system" script. It runs on `mix setup` / `mix ecto.reset` and must stay idempotent (look up first, create only if missing).
+
+Every new feature extends the seed. When you add a domain or resource that a developer would reasonably want pre-populated to explore the app — a forening, an event, a sample order, a board member — append a new section to `seeds.exs` so a fresh clone gives a fully populated app with one command.
+
+### Testing
+Every feature ships with tests. Keep them simple and follow standard Elixir/ExUnit conventions — one happy-path test plus the obvious failure cases. Don't over-engineer: skip elaborate factories, custom DSLs, or speculative edge cases. Prefer testing through code interfaces (the same entry point real callers use) over poking at internals.
+
+Two cases that warrant more thoroughness:
+
+- **External dependencies (Stripe, S3, email providers, webhook senders, etc.)** — test the integration thoroughly. Cover success, failure, retries/timeouts, and webhook/callback handling. Use fakes or library-provided test adapters (`Swoosh.Adapters.Test`, `Stripe` mock, `ExAws` overrides) — never hit the real third-party service from a test. Verify both directions: what we send AND how we react to their responses.
+- **LiveViews** — test with `Phoenix.LiveViewTest` whenever a LiveView has interactive behavior (form submit, click handlers, real-time updates). At minimum: it mounts, the primary user action works, and authorization redirects fire when expected. Skip LiveView tests only for pages that are pure static render.
+
 ## Tidewave
 
 Use Tidewave MCP tools — they let you interrogate the running application in various useful ways.

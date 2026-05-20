@@ -44,6 +44,11 @@ Repeatable, automated deploys to staging and production with zero-downtime. CI r
 - Aspire is the **local-infrastructure orchestrator** (Postgres + Minio); it is **not** used in production.
 - Prod uses hosting-provider primitives (chosen above). No carry-over of Aspire concepts.
 
+### Tests
+- [ ] No ExUnit tests for deployment itself — CI runs the whole test suite on every PR, that's the gate
+- [ ] Smoke check after each deploy: hit `/health` and one authenticated route on staging before promoting to prod
+- [ ] Rollback procedure executed at least once on staging to verify it works
+
 ### Staging environment
 - [ ] Separate cluster/region from prod
 - [ ] Production-like config but with test Stripe keys and Minio (or staging bucket)

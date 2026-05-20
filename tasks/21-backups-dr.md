@@ -38,6 +38,10 @@ Postgres point-in-time recovery, S3 object versioning, documented and tested res
 - [ ] Time the drill against RTO target
 - [ ] Runbook at `docs/ops/restore-runbook.md`
 
+### Tests
+- [ ] No ExUnit tests for this task — the quarterly restore drill is the test
+- [ ] Monitoring/alerting checks that backups ran (covered in Task 20 observability)
+
 ### Documentation
 - [ ] `docs/ops/dr-plan.md` describing RPO, RTO, scenarios, contacts
 - [ ] Tabletop exercise once per year

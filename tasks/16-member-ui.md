@@ -35,9 +35,13 @@ Logged-in members manage their profile, see payment history, register for events
 - [ ] No cross-forening data leakage — each subdomain shows only its forening's data
 
 ### Tests
-- [ ] Cannot access member area without active session
-- [ ] Cannot access forening B's member area while only being a member of A
-- [ ] Profile updates persist; avatar upload roundtrips
+LiveView tests via `Phoenix.LiveViewTest` — at least mount + the main interaction per LiveView.
+
+- [ ] Unauthenticated request to member area redirects to sign-in
+- [ ] Cross-tenant guard: forening A member cannot reach forening B's member area
+- [ ] Profile update form submits and persists; avatar upload roundtrips
+- [ ] Notification-preferences toggles save and reload correctly
+- [ ] Anything triggering a real-time update (LV `assign`/`stream` after PubSub) is exercised
 
 ## Open decisions
 - [ ] **Notification preferences** — email-only or in-app too? (toggle per category)

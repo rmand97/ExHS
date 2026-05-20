@@ -73,9 +73,13 @@ The forening admin's command center: members, events, shop, newsletters, economy
 - [ ] Oban dashboard mount (Task 13)
 
 ### Tests
-- [ ] Admin-only routes deny non-admin
-- [ ] Board sees read-only views, can't write
+LiveView tests via `Phoenix.LiveViewTest` — every interactive admin screen gets at least one test.
+
+- [ ] Admin-only routes deny non-admin (sign-in redirect or 403)
+- [ ] Board role sees read-only views; write actions are absent or rejected
+- [ ] Primary create/update/destroy action per admin LiveView submits and updates the page
 - [ ] All admin actions appear in audit log
+- [ ] Bulk-action selection + apply works for at least one resource
 
 ## Open decisions
 - [ ] **Bulk actions UX** — selection model (page-level vs filter-based "select all matching")

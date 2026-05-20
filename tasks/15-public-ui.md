@@ -39,9 +39,12 @@ Each forening has a public-facing site at `forening.exhs.dk` with branding, info
 - [ ] Preferences stored in cookie + respected by analytics scripts
 
 ### Tests
-- [ ] Public pages render without authentication
-- [ ] Branding loads correctly
+LiveView tests via `Phoenix.LiveViewTest` — focus on mount + primary interactions, not markup details.
+
+- [ ] Public pages mount and render without authentication
+- [ ] Branding loads correctly (forening colour/logo show up on the right subdomain)
 - [ ] Visiting wrong subdomain shows branded 404
+- [ ] Sign-up / contact form (if any) submits and produces the expected effect
 
 ## Open decisions
 - [ ] **Static content management** — admin-editable "about" page (rich text editor) vs developer-managed?

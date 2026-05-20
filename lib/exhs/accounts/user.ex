@@ -277,6 +277,23 @@ defmodule Exhs.Accounts.User do
       argument :api_key, :string, allow_nil?: false
       prepare AshAuthentication.Strategy.ApiKey.SignInPreparation
     end
+
+    read :get_by_id do
+      get_by :id
+    end
+
+    update :update_profile do
+      accept [
+        :first_name,
+        :last_name,
+        :phone,
+        :address_line_1,
+        :address_line_2,
+        :postal_code,
+        :city,
+        :avatar_url
+      ]
+    end
   end
 
   policies do
@@ -298,6 +315,23 @@ defmodule Exhs.Accounts.User do
     end
 
     attribute :confirmed_at, :utc_datetime_usec
+
+    attribute :first_name, :string, public?: true
+    attribute :last_name, :string, public?: true
+    attribute :phone, :string, public?: true
+    attribute :address_line_1, :string, public?: true
+    attribute :address_line_2, :string, public?: true
+    attribute :postal_code, :string, public?: true
+    attribute :city, :string, public?: true
+    attribute :avatar_url, :string, public?: true
+
+    attribute :is_superadmin, :boolean do
+      default false
+      allow_nil? false
+    end
+
+    create_timestamp :inserted_at
+    update_timestamp :updated_at
   end
 
   relationships do

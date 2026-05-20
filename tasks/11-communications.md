@@ -60,9 +60,14 @@ Admins compose and send segmented newsletters; we track delivery and opens. Reus
 - [ ] Suppression list per forening (do-not-email)
 
 ### Tests
+Email provider is an external dep — test the integration thoroughly with `Swoosh.Adapters.Test` (never hit the real provider in tests).
+
 - [ ] Segment resolution returns expected memberships
 - [ ] Sending creates NewsletterRecipient rows
-- [ ] Worker handles partial-batch failures (retries individuals)
+- [ ] Worker handles partial-batch failures (retries individuals, marks the rest delivered)
+- [ ] Provider failure modes: timeout, 4xx (bad address — don't retry), 5xx (transient — retry), rate-limit
+- [ ] Bounce/complaint webhook updates suppression list and is signature-verified
+- [ ] Unsubscribe link works and is honoured on the next send
 - [ ] Open tracking endpoint records hits
 
 ## Open decisions
