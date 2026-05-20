@@ -93,6 +93,25 @@ defmodule Exhs.OrganizationsTest do
       archived = Organizations.archive_forening!(forening, authorize?: false)
       assert archived.active == false
     end
+
+    test "archived forening is still retrievable" do
+      forening = create_forening!()
+      Organizations.archive_forening!(forening, authorize?: false)
+
+      found = Organizations.get_forening_by_id!(forening.id, authorize?: false)
+      assert found.active == false
+    end
+
+    test "archived forening still appears in list" do
+      forening = create_forening!()
+      Organizations.archive_forening!(forening, authorize?: false)
+
+      ids =
+        Organizations.list_foreninger!(authorize?: false)
+        |> Enum.map(& &1.id)
+
+      assert forening.id in ids
+    end
   end
 
   describe "list_foreninger" do

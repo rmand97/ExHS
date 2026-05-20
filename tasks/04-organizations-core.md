@@ -57,10 +57,8 @@ The `Forening` (tenant), `Membership` (User ↔ Forening bridge), and the attrib
 ## Decided
 - **Subdomain dev handling** — `*.lvh.me` in dev/test, configured via `config :exhs, :base_host`
 - **Superadmin** — dedicated subdomain `admin.exhs.dk`, reserved in the plug
-
-## Open decisions
-- [ ] **Custom domains** — do foreninger get custom domains in v1, or only `*.exhs.dk`?
-- [ ] **Forening archival** — soft-delete or hard-delete? GDPR implications (Task 18)
+- **Custom domains** — not in v1, only `*.exhs.dk` subdomains
+- **Forening archival** — soft-delete via `archive` action (sets `active: false`). GDPR hard-delete deferred to Task 18
 
 ## Done when
 - Two foreninger can coexist with overlapping members
