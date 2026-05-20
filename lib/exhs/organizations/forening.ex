@@ -4,11 +4,23 @@ defmodule Exhs.Organizations.Forening do
     otp_app: :exhs,
     domain: Exhs.Organizations,
     data_layer: AshPostgres.DataLayer,
-    authorizers: [Ash.Policy.Authorizer]
+    authorizers: [Ash.Policy.Authorizer],
+    extensions: [AshPaperTrail.Resource]
 
   postgres do
     table "foreninger"
     repo Exhs.Repo
+  end
+
+  paper_trail do
+    primary_key_type :uuid_v7
+    change_tracking_mode :changes_only
+    store_action_name? true
+    sensitive_attributes :ignore
+    only_when_changed? true
+    reference_source? false
+    ignore_attributes [:inserted_at, :updated_at]
+    belongs_to_actor :user, Exhs.Accounts.User, domain: Exhs.Accounts
   end
 
   actions do

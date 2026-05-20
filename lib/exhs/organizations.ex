@@ -1,9 +1,13 @@
 defmodule Exhs.Organizations do
   @moduledoc false
-  use Ash.Domain, otp_app: :exhs, extensions: [AshAdmin.Domain]
+  use Ash.Domain, otp_app: :exhs, extensions: [AshAdmin.Domain, AshPaperTrail.Domain]
 
   admin do
     show? true
+  end
+
+  paper_trail do
+    include_versions? true
   end
 
   resources do

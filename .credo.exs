@@ -226,7 +226,7 @@
           #
           ## ExDNA clone detection
           #
-          {ExDNA.Credo, []}
+          {ExDNA.Credo, [min_mass: 40]}
         ],
         disabled: [
           #
