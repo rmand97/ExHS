@@ -64,7 +64,6 @@ After resource changes, run `mix ash.codegen --dev` iteratively, then a final `m
 
 - Do not use raw Ecto in domain code (use Ash).
 - Do not use `String.to_atom/1` on user input (memory leak risk).
-- Do not use DaisyUI components — write Tailwind components by hand. See Task 14 for the design system.
 - Do not set `require_atomic? false` without a justified reason; prefer atomic changes.
 - Do not write inline `<script>` tags in templates. Use colocated JS hooks (`:type={Phoenix.LiveView.ColocatedHook}`) or external hooks under `assets/js/`.
 - Do not reference external vendor scripts/CSS via `src`/`href` in layouts. Bundle them through `app.js` / `app.css`.

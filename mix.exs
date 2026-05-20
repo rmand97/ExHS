@@ -114,7 +114,8 @@ defmodule Exhs.MixProject do
       {:ex_slop, "~> 0.1", only: [:dev, :test]},
       {:tidewave, "~> 0.5", only: [:dev]},
       {:credo, "~> 1.7", only: [:dev, :test], runtime: false},
-      {:dialyxir, "~> 1.4", only: [:dev, :test], runtime: false}
+      {:dialyxir, "~> 1.4", only: [:dev, :test], runtime: false},
+      {:canonical_tailwind, "~> 0.1", only: [:dev, :test], runtime: false}
     ]
   end
 
