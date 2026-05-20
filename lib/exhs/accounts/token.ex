@@ -1,4 +1,5 @@
 defmodule Exhs.Accounts.Token do
+  @moduledoc false
   use Ash.Resource,
     otp_app: :exhs,
     domain: Exhs.Accounts,

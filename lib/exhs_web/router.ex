@@ -5,6 +5,15 @@ defmodule ExhsWeb.Router do
 
   import AshAuthentication.Plug.Helpers
 
+  pipeline :mcp do
+    plug AshAuthentication.Strategy.ApiKey.Plug,
+      resource: Exhs.Accounts.User,
+      # Use `required?: false` to allow unauthenticated
+      # users to connect, for example if some tools
+      # are publicly accessible.
+      required?: true
+  end
+
   pipeline :browser do
     plug :accepts, ["html"]
     plug :fetch_session
@@ -19,6 +28,25 @@ defmodule ExhsWeb.Router do
     plug :accepts, ["json"]
     plug :load_from_bearer
     plug :set_actor, :user
+
+    plug AshAuthentication.Strategy.ApiKey.Plug,
+      resource: Exhs.Accounts.User,
+      # if you want to require an api key to be supplied, set `required?` to true
+      required?: false
+  end
+
+  scope "/mcp" do
+    pipe_through :mcp
+
+    forward "/", AshAi.Mcp.Router,
+      tools: [
+        # list your tools here
+        # :tool1,
+        # :tool2,
+        # For many tools, you will need to set the `protocol_version_statement` to the older version.
+      ],
+      protocol_version_statement: "2024-11-05",
+      otp_app: :exhs
   end
 
   scope "/", ExhsWeb do

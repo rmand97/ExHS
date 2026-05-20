@@ -1,4 +1,5 @@
 defmodule Exhs.Accounts do
+  @moduledoc false
   use Ash.Domain, otp_app: :exhs, extensions: [AshAdmin.Domain]
 
   admin do
@@ -8,5 +9,6 @@ defmodule Exhs.Accounts do
   resources do
     resource Exhs.Accounts.Token
     resource Exhs.Accounts.User
+    resource Exhs.Accounts.ApiKey
   end
 end

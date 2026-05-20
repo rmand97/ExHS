@@ -18,31 +18,20 @@ defmodule Exhs.MixProject do
   end
 
   defp usage_rules do
-    # Example for those using claude.
+    # Framework usage rules are surfaced via Claude Code skills only.
+    # CLAUDE.md is hand-maintained with project-specific content; sync does not touch it.
     [
-      file: "CLAUDE.md",
-      # rules to include directly in CLAUDE.md
-      # :usage_rules itself provides rules for search_docs, docs, etc.
-      # use a regex to match multiple deps, or atoms/strings for specific ones
-      usage_rules: [:usage_rules, :ash, ~r/^ash_/],
-      # If your CLAUDE.md is getting too big, link instead of inlining:
-      usage_rules: [:ash, {~r/^ash_/, link: :markdown}],
-      # or use skills
       skills: [
         location: ".claude/skills",
-        # build skills that combine multiple usage rules
         build: [
           "ash-framework": [
-            # The description tells people how to use this skill.
             description:
               "Use this skill working with Ash Framework or any of its extensions. Always consult this when making any domain changes, features or fixes.",
-            # Include all Ash dependencies
             usage_rules: [:ash, ~r/^ash_/]
           ],
           "phoenix-framework": [
             description:
               "Use this skill working with Phoenix Framework. Consult this when working with the web layer, controllers, views, liveviews etc.",
-            # Include all Phoenix dependencies
             usage_rules: [:phoenix, ~r/^phoenix_/]
           ]
         ]
@@ -83,6 +72,10 @@ defmodule Exhs.MixProject do
       {:ash_authentication_phoenix, "~> 2.0"},
       {:ash_authentication, "~> 4.0"},
       {:ash_postgres, "~> 2.0"},
+      {:ash_paper_trail, "~> 0.5"},
+      {:ash_oban, "~> 0.4"},
+      {:ash_ai, "~> 0.3"},
+      {:oban, "~> 2.18"},
       {:sourceror, "~> 1.8", only: [:dev, :test]},
       {:ash_phoenix, "~> 2.0"},
       {:ash, "~> 3.0"},
@@ -112,7 +105,16 @@ defmodule Exhs.MixProject do
       {:gettext, "~> 1.0"},
       {:jason, "~> 1.2"},
       {:dns_cluster, "~> 0.2.0"},
-      {:bandit, "~> 1.5"}
+      {:bandit, "~> 1.5"},
+      {:stripity_stripe, "~> 3.2"},
+      {:ex_aws, "~> 2.5"},
+      {:ex_aws_s3, "~> 2.5"},
+      {:sweet_xml, "~> 0.7"},
+      {:dotenvy, "~> 1.1"},
+      {:ex_slop, "~> 0.1", only: [:dev, :test]},
+      {:tidewave, "~> 0.5", only: [:dev]},
+      {:credo, "~> 1.7", only: [:dev, :test], runtime: false},
+      {:dialyxir, "~> 1.4", only: [:dev, :test], runtime: false}
     ]
   end
 
@@ -135,7 +137,15 @@ defmodule Exhs.MixProject do
         "esbuild exhs --minify",
         "phx.digest"
       ],
-      precommit: ["compile --warnings-as-errors", "deps.unlock --unused", "format", "test"]
+      precommit: [
+        "compile --warnings-as-errors",
+        "deps.unlock --check-unused",
+        "format --check-formatted",
+        "usage_rules.sync --yes",
+        "cmd git diff --exit-code .claude/skills/",
+        "credo --strict",
+        "test"
+      ]
     ]
   end
 end

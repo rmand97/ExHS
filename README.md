@@ -1,18 +1,54 @@
 # Exhs
 
-To start your Phoenix server:
+Multi-organization platform for Danish foreninger. See [`tasks/00-plan.md`](./tasks/00-plan.md) for scope, domain breakdown, and the full implementation roadmap.
 
-* Run `mix setup` to install and setup dependencies
-* Start Phoenix endpoint with `mix phx.server` or inside IEx with `iex -S mix phx.server`
+## Prerequisites
 
-Now you can visit [`localhost:4000`](http://localhost:4000) from your browser.
+- [mise](https://mise.jdx.dev/) — tool version manager
+- Docker + Docker Compose — for local Postgres and Minio (S3-compatible)
 
-Ready to run in production? Please [check our deployment guides](https://hexdocs.pm/phoenix/deployment.html).
+## First-time setup
 
-## Learn more
+```sh
+# Install Erlang, Elixir, Node per mise.toml
+mise trust
+mise install
 
-* Official website: https://www.phoenixframework.org/
-* Guides: https://hexdocs.pm/phoenix/overview.html
-* Docs: https://hexdocs.pm/phoenix
-* Forum: https://elixirforum.com/c/phoenix-forum
-* Source: https://github.com/phoenixframework/phoenix
+# Start local services
+docker compose up -d
+
+# Install deps and run setup
+mix setup
+
+# Start the dev server
+mix phx.server
+```
+
+Visit [`localhost:4000`](http://localhost:4000).
+
+## Common commands
+
+- `mix phx.server` — start Phoenix dev server
+- `mix test` — run tests
+- `mix precommit` — compile (warnings as errors), unlock unused deps, format, test
+- `mix ash.codegen --dev` — generate dev migrations after resource changes
+- `mix ash.migrate` — apply migrations
+- `docker compose up -d` — start Postgres + Minio
+- `docker compose down` — stop them
+
+## Project orientation
+
+- `tasks/00-plan.md` — task index and global open decisions
+- `CLAUDE.md` — project-specific agent rules
+- `AGENTS.md` — dep usage rules (synced via `mix usage_rules.sync`)
+
+## Tooling
+
+- Elixir 1.19 / OTP 28 (see `mise.toml`)
+- Phoenix 1.8 with LiveView 1.1
+- Ash 3.x + ash_postgres + ash_authentication + ash_paper_trail + ash_oban
+- Postgres 17 (Docker)
+- Minio (Docker) — S3-compatible local storage
+- Stripe for payments
+- Oban for background jobs
+- Tailwind CSS 4 (no DaisyUI)

@@ -40,10 +40,9 @@ Repeatable, automated deploys to staging and production with zero-downtime. CI r
 - [ ] On main: above + build & push image, deploy to staging
 - [ ] Manual workflow: promote staging image → production
 
-### Aspire
-- [ ] Re-evaluate whether .NET Aspire fits here at all (it's primarily for .NET service orchestration)
-- [ ] More likely: `docker compose` for local (Task 1), and hosting-provider primitives for prod
-- [ ] If Aspire is intended for cross-service orchestration (e.g. embedding a .NET service), document the boundary
+### Aspire (local only — settled in Task 1)
+- Aspire is the **local-infrastructure orchestrator** (Postgres + Minio); it is **not** used in production.
+- Prod uses hosting-provider primitives (chosen above). No carry-over of Aspire concepts.
 
 ### Staging environment
 - [ ] Separate cluster/region from prod
@@ -66,7 +65,6 @@ Repeatable, automated deploys to staging and production with zero-downtime. CI r
 
 ## Open decisions
 - [ ] **Hosting platform** — biggest blocker for this task
-- [ ] **Aspire** — keep or drop?
 - [ ] **Containerization vs native release** — depends on hosting choice
 - [ ] **Cluster size & autoscaling**
 

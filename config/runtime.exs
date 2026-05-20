@@ -7,6 +7,13 @@ import Config
 # any compile-time configuration in here, as it won't be applied.
 # The block below contains prod specific runtime configuration.
 
+# Load .env in dev/test. In prod, env vars come from the host.
+if config_env() in [:dev, :test] do
+  import Dotenvy
+
+  source([".env", ".env.#{config_env()}", System.get_env()])
+end
+
 # ## Using releases
 #
 # If you use `mix release`, you need to explicitly enable the server
@@ -21,6 +28,13 @@ if System.get_env("PHX_SERVER") do
 end
 
 config :exhs, ExhsWeb.Endpoint, http: [port: String.to_integer(System.get_env("PORT", "4000"))]
+
+# Stripe (dev/prod). Test env does not hit Stripe.
+if config_env() in [:dev, :prod] do
+  config :stripity_stripe,
+    api_key: System.get_env("STRIPE_SECRET_KEY"),
+    webhook_signing_secret: System.get_env("STRIPE_WEBHOOK_SIGNING_SECRET")
+end
 
 if config_env() == :prod do
   database_url =
@@ -121,4 +135,19 @@ if config_env() == :prod do
   #     config :swoosh, :api_client, Swoosh.ApiClient.Req
   #
   # See https://hexdocs.pm/swoosh/Swoosh.html#module-installation for details.
+
+  # S3 — provider TBD (Task 12). Configure via env vars.
+  config :ex_aws,
+    access_key_id: System.get_env("AWS_ACCESS_KEY_ID"),
+    secret_access_key: System.get_env("AWS_SECRET_ACCESS_KEY"),
+    region: System.get_env("AWS_REGION", "eu-central-1")
+
+  if s3_endpoint = System.get_env("S3_ENDPOINT") do
+    config :ex_aws, :s3,
+      scheme: System.get_env("S3_SCHEME", "https://"),
+      host: s3_endpoint,
+      port: String.to_integer(System.get_env("S3_PORT", "443"))
+  end
+
+  config :exhs, :s3_bucket, System.fetch_env!("S3_BUCKET")
 end

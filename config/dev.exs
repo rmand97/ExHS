@@ -1,6 +1,18 @@
 import Config
 config :ash, policies: [show_policy_breakdowns?: true]
 
+# Local Minio (S3-compatible) — see docker-compose.yml
+config :ex_aws,
+  access_key_id: "minioadmin",
+  secret_access_key: "minioadmin"
+
+config :ex_aws, :s3,
+  scheme: "http://",
+  host: "localhost",
+  port: 9000
+
+config :exhs, :s3_bucket, "exhs-dev"
+
 # Configure your database
 config :exhs, Exhs.Repo,
   username: "postgres",

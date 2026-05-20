@@ -11,10 +11,8 @@ defmodule Exhs.Application do
       ExhsWeb.Telemetry,
       Exhs.Repo,
       {DNSCluster, query: Application.get_env(:exhs, :dns_cluster_query) || :ignore},
+      {Oban, Application.fetch_env!(:exhs, Oban)},
       {Phoenix.PubSub, name: Exhs.PubSub},
-      # Start a worker by calling: Exhs.Worker.start_link(arg)
-      # {Exhs.Worker, arg},
-      # Start to serve requests, typically the last entry
       ExhsWeb.Endpoint,
       {AshAuthentication.Supervisor, [otp_app: :exhs]}
     ]

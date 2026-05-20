@@ -1,5 +1,5 @@
 defmodule ExhsWeb.PageControllerTest do
-  use ExhsWeb.ConnCase
+  use ExhsWeb.ConnCase, async: true
 
   test "GET /", %{conn: conn} do
     conn = get(conn, ~p"/")

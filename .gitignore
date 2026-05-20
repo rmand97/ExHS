@@ -35,3 +35,15 @@ exhs-*.tar
 npm-debug.log
 /assets/node_modules/
 
+# Local env files (.env.example is checked in)
+.env
+.env.*
+!.env.example
+
+# Dialyzer PLTs
+/priv/plts/
+
+# Editor / OS
+.DS_Store
+.idea/
+.vscode/

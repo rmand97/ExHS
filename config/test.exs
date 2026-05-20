@@ -3,6 +3,21 @@ config :exhs, token_signing_secret: "CE11p10HNjaR+TROWM+NfRWaXsx9tpeH"
 config :bcrypt_elixir, log_rounds: 1
 config :ash, policies: [show_policy_breakdowns?: true], disable_async?: true
 
+# Run Oban jobs inline during tests
+config :exhs, Oban, testing: :inline
+
+# Local Minio for tests
+config :ex_aws,
+  access_key_id: "minioadmin",
+  secret_access_key: "minioadmin"
+
+config :ex_aws, :s3,
+  scheme: "http://",
+  host: "localhost",
+  port: 9000
+
+config :exhs, :s3_bucket, "exhs-test"
+
 # Configure your database
 #
 # The MIX_TEST_PARTITION environment variable can be used

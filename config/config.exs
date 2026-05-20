@@ -58,6 +58,28 @@ config :exhs,
   ash_domains: [Exhs.Accounts],
   ash_authentication: [return_error_on_invalid_magic_link_token?: true]
 
+# Oban — background job processing. Queues are sized per workload; see tasks/13.
+config :exhs, Oban,
+  engine: Oban.Engines.Basic,
+  repo: Exhs.Repo,
+  queues: [
+    default: 10,
+    mailers: 5,
+    webhooks: 10,
+    stripe: 5,
+    gdpr: 1,
+    maintenance: 1
+  ],
+  plugins: [
+    {Oban.Plugins.Pruner, max_age: 60 * 60 * 24 * 7}
+  ]
+
+# ex_aws / S3 defaults. Dev overrides point at local Minio (config/dev.exs).
+# Prod credentials come from env vars (config/runtime.exs).
+config :ex_aws,
+  json_codec: Jason,
+  region: "eu-central-1"
+
 # Configure the endpoint
 config :exhs, ExhsWeb.Endpoint,
   url: [host: "localhost"],

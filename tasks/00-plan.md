@@ -56,4 +56,7 @@ These are unresolved cross-cutting questions. Each is also surfaced inside the r
 - [ ] **PDF generation** — Needed for invoices/receipts? Library/service choice? (Task 8)
 - [ ] **Observability stack** — Sentry, AppSignal, OpenTelemetry collector, Grafana Cloud? (Task 20)
 - [ ] **Shop scope** — Physical vs digital, digital delivery mechanism, returns flow (Task 10)
-- [ ] **Aspire usage** — How does .NET Aspire fit into an Elixir stack? Is this for orchestration of supporting services only? (Task 1 / Task 22)
+
+## Decided
+
+- **Aspire** — used as the local-infrastructure orchestrator for Postgres + Minio (primary). `docker-compose.yml` kept as fallback for non-Aspire users and reference. Not used in production.
