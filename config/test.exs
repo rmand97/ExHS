@@ -41,6 +41,9 @@ config :exhs, ExhsWeb.Endpoint,
 # In test we don't send emails
 config :exhs, Exhs.Mailer, adapter: Swoosh.Adapters.Test
 
+# Subdomain resolution in tests
+config :exhs, :base_host, "lvh.me"
+
 # Disable swoosh api client as it is only required for production adapters
 config :swoosh, :api_client, false
 

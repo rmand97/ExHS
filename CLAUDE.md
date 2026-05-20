@@ -49,7 +49,9 @@ Use Tidewave MCP tools — they let you interrogate the running application in v
 ## Project conventions
 
 ### Multitenancy
-Most resources are tenant-scoped to a `Forening`. Use Ash's attribute multitenancy strategy on `:forening_id`. Pass tenant + actor via `Exhs.Scope` (`%Exhs.Scope{tenant: forening_id, actor: user}`) to every action. Code interface calls take `scope: socket.assigns.scope` from LiveViews; inside action hooks use the `context` parameter as the scope.
+Most resources are tenant-scoped to a `Forening`. Use Ash's attribute multitenancy strategy on `:forening_id`. Pass tenant + actor via `Exhs.Scope` (`%Exhs.Scope{tenant: forening_id, actor: user}`) to every action. Code interface calls take `scope: socket.assigns.current_scope` from LiveViews; inside action hooks use the `context` parameter as the scope.
+
+The subdomain plug (`ExhsWeb.Plugs.Subdomain`) resolves the host to a `Forening` and assigns `current_forening` + `current_tenant` on the conn. The LiveView hook (`ExhsWeb.LiveForeningAuth`) builds `current_scope` from those assigns. Use `on_mount {ExhsWeb.LiveForeningAuth, :require_forening}` in tenant-scoped LiveViews.
 
 ### Code interfaces are the only entry point
 - Define code interfaces on the domain (`define :register_user, action: :register`).

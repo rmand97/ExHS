@@ -101,5 +101,8 @@ config :phoenix_live_view,
   # Enable helpful, but potentially expensive runtime checks
   enable_expensive_runtime_checks: true
 
+# Subdomain resolution: use lvh.me in dev (resolves to 127.0.0.1)
+config :exhs, :base_host, "lvh.me"
+
 # Disable swoosh api client as it is only required for production adapters.
 config :swoosh, :api_client, false

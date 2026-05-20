@@ -1,8 +1,9 @@
 defmodule Exhs.AccountsTest do
   use Exhs.DataCase, async: true
 
-  alias Exhs.Accounts
   import Swoosh.TestAssertions
+
+  alias Exhs.Accounts
 
   defp unique_email, do: "user-#{System.unique_integer([:positive])}@example.com"
 

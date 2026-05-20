@@ -13,6 +13,9 @@ require Ash.Query
 require Logger
 
 alias Exhs.Accounts.User
+alias Exhs.Organizations
+alias Exhs.Organizations.Forening
+alias Exhs.Organizations.Membership
 
 defmodule Exhs.Seeds do
   @moduledoc false
@@ -24,12 +27,14 @@ defmodule Exhs.Seeds do
     Logger.info("Seeding…")
 
     user = upsert_test_user()
-    # forening = upsert_default_forening(user)   # Task 4
-    # _membership = upsert_membership(user, forening)   # Task 4
+    forening = upsert_default_forening()
+    upsert_membership(user, forening)
     # _event = upsert_sample_event(forening)     # Task 9
     # _product = upsert_sample_product(forening) # Task 10
 
-    Logger.info("Seed complete. Sign in with #{user.email} / #{@test_password}")
+    Logger.info(
+      "Seed complete. Sign in with #{user.email} / #{@test_password} — forening at #{forening.subdomain}.lvh.me"
+    )
   end
 
   defp upsert_test_user do
@@ -78,6 +83,58 @@ defmodule Exhs.Seeds do
       user
     else
       user
+    end
+  end
+
+  defp upsert_default_forening do
+    existing =
+      Forening
+      |> Ash.Query.filter(slug == "demo")
+      |> Ash.read_one!(authorize?: false)
+
+    case existing do
+      %Forening{} = f ->
+        Logger.info("Forening already exists: #{f.name}")
+        f
+
+      nil ->
+        f =
+          Organizations.create_forening!(
+            %{
+              name: "Demo Forening",
+              slug: "demo",
+              subdomain: "demo",
+              kontingent_amount_cents: 30_000,
+              kontingent_currency: "DKK"
+            },
+            authorize?: false
+          )
+
+        Logger.info("Created forening: #{f.name}")
+        f
+    end
+  end
+
+  defp upsert_membership(user, forening) do
+    existing =
+      Membership
+      |> Ash.Query.filter(user_id == ^user.id)
+      |> Ash.read_one!(tenant: forening.id, authorize?: false)
+
+    case existing do
+      %Membership{} = m ->
+        Logger.info("Membership already exists for #{user.email} in #{forening.name}")
+        m
+
+      nil ->
+        m =
+          Organizations.invite_member!(user.id, %{role: :admin},
+            tenant: forening.id,
+            authorize?: false
+          )
+
+        Logger.info("Created admin membership for #{user.email} in #{forening.name}")
+        m
     end
   end
 end
