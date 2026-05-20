@@ -15,6 +15,7 @@ require Logger
 alias Exhs.Accounts.User
 alias Exhs.Organizations
 alias Exhs.Organizations.Forening
+alias Exhs.Organizations.Group
 alias Exhs.Organizations.Membership
 
 defmodule Exhs.Seeds do
@@ -29,6 +30,7 @@ defmodule Exhs.Seeds do
     user = upsert_test_user()
     forening = upsert_default_forening()
     upsert_membership(user, forening)
+    upsert_groups(forening)
     # _event = upsert_sample_event(forening)     # Task 9
     # _product = upsert_sample_product(forening) # Task 10
 
@@ -136,6 +138,28 @@ defmodule Exhs.Seeds do
         Logger.info("Created admin membership for #{user.email} in #{forening.name}")
         m
     end
+  end
+
+  @seed_groups [
+    %{name: "Bestyrelse", color: "#3b82f6", description: "Board members"},
+    %{name: "Frivillige", color: "#22c55e", description: "Volunteers"},
+    %{name: "Ungdom", color: "#f59e0b", description: "Youth members under 25"}
+  ]
+
+  defp upsert_groups(forening) do
+    existing =
+      Group
+      |> Ash.read!(tenant: forening.id, authorize?: false)
+      |> MapSet.new(& &1.name)
+
+    Enum.each(@seed_groups, fn attrs ->
+      if MapSet.member?(existing, attrs.name) do
+        Logger.info("Group already exists: #{attrs.name}")
+      else
+        Organizations.create_group!(attrs, tenant: forening.id, authorize?: false)
+        Logger.info("Created group: #{attrs.name}")
+      end
+    end)
   end
 end
 

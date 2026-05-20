@@ -26,5 +26,19 @@ defmodule Exhs.Organizations do
       define :leave_forening, action: :leave
       define :list_memberships, action: :read
     end
+
+    resource Exhs.Organizations.Group do
+      define :create_group, action: :create
+      define :update_group, action: :update
+      define :destroy_group, action: :destroy
+      define :get_group_by_id, action: :get_by_id, args: [:id], get?: true
+      define :list_groups, action: :read
+    end
+
+    resource Exhs.Organizations.MemberGroup do
+      define :add_member_to_group, action: :add
+      define :remove_member_from_group, action: :remove
+      define :list_member_groups, action: :read
+    end
   end
 end

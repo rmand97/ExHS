@@ -137,6 +137,12 @@ defmodule Exhs.Organizations.Membership do
     belongs_to :forening, Exhs.Organizations.Forening do
       allow_nil? false
     end
+
+    many_to_many :groups, Exhs.Organizations.Group do
+      through Exhs.Organizations.MemberGroup
+      source_attribute_on_join_resource :membership_id
+      destination_attribute_on_join_resource :group_id
+    end
   end
 
   identities do

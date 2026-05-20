@@ -17,7 +17,7 @@ defmodule Exhs.Checks.ActiveMember do
       false
     else
       case lookup_membership(actor.id, tenant) do
-        {:ok, membership} -> membership.status == :active
+        {:ok, %{status: status}} -> status == :active
         _ -> false
       end
     end
