@@ -39,15 +39,16 @@ This file indexes all tasks. Each task is a self-contained chunk of work with it
 - [ ] [Task 16 — Member self-service UI](./16-member-ui.md)
 - [ ] [Task 17 — Admin dashboard UI](./17-admin-ui.md)
 
+### Admin tools (pre-deploy)
+- [ ] [Task 23 — Merge duplicate user accounts](./23-merge-users.md)
+- [ ] [Task 24 — Audit trail UI](./24-audit-trail-ui.md)
+
 ### Compliance & ops
 - [ ] [Task 18 — GDPR & data retention](./18-gdpr-retention.md)
 - [ ] [Task 19 — Internationalization](./19-i18n.md)
 - [ ] [Task 20 — Observability](./20-observability.md)
 - [ ] [Task 21 — Backups & DR](./21-backups-dr.md)
 - [ ] [Task 22 — Deployment & CI/CD](./22-deployment.md)
-
-### Admin tools
-- [ ] [Task 23 — Merge duplicate user accounts](./23-merge-users.md)
 
 ## Global open decisions
 

@@ -22,7 +22,8 @@ defmodule Exhs.Repo.Migrations.GroupsAndTagging do
             type: :uuid,
             prefix: "public",
             on_delete: :delete_all
-          ), null: false
+          ),
+          null: false
 
       add :membership_id,
           references(:memberships,
@@ -31,7 +32,8 @@ defmodule Exhs.Repo.Migrations.GroupsAndTagging do
             type: :uuid,
             prefix: "public",
             on_delete: :delete_all
-          ), null: false
+          ),
+          null: false
 
       add :group_id, :uuid, null: false
     end
@@ -75,7 +77,8 @@ defmodule Exhs.Repo.Migrations.GroupsAndTagging do
             type: :uuid,
             prefix: "public",
             on_delete: :delete_all
-          ), null: false
+          ),
+          null: false
     end
 
     create unique_index(:groups, [:forening_id, :name],
