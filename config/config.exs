@@ -71,7 +71,11 @@ config :exhs, Oban,
     maintenance: 1
   ],
   plugins: [
-    {Oban.Plugins.Pruner, max_age: 60 * 60 * 24 * 7}
+    {Oban.Plugins.Pruner, max_age: 60 * 60 * 24 * 7},
+    {Oban.Plugins.Cron,
+     crontab: [
+       {"0 3 * * *", Exhs.Billing.MembershipDeactivator}
+     ]}
   ]
 
 # ex_aws / S3 defaults. Dev overrides point at local Minio (config/dev.exs).

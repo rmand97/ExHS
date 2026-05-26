@@ -21,10 +21,11 @@ All recurring and async work happens via Oban with proper queue isolation, dashb
 
 ### Workers
 
-#### `Exhs.Workers.MembershipDeactivator`
-- [ ] Cron: daily
-- [ ] Finds memberships whose subscription lapsed past grace period → marks `:inactive`
-- [ ] Emits audit log entry
+#### `Exhs.Billing.MembershipDeactivator`
+- [x] Cron: daily at 03:00 UTC
+- [x] Iterates all foreninger, finds canceled/past_due subscriptions past period end
+- [x] Deactivates active memberships whose subscription lapsed
+- [x] Audit logged via AshEvents on deactivate action
 
 #### `Exhs.Events.WaitlistPromoter`
 - [x] Triggered on registration cancellation (after_action enqueues job)
