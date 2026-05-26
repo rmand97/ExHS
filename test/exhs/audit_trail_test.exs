@@ -1,50 +1,12 @@
 defmodule Exhs.AuditTrailTest do
   use Exhs.DataCase, async: true
 
-  alias Exhs.Accounts
+  import Exhs.Test.Builders
+
   alias Exhs.Audit.EventLog
   alias Exhs.Organizations
 
   require Ash.Query
-
-  defp unique_email, do: "user-#{System.unique_integer([:positive])}@example.com"
-
-  defp setup_forening do
-    Organizations.create_forening!(
-      %{
-        name: "Audit Forening",
-        slug: "audit-#{System.unique_integer([:positive])}",
-        subdomain: "audit#{System.unique_integer([:positive])}"
-      },
-      authorize?: false
-    )
-  end
-
-  defp setup_admin(forening) do
-    user =
-      Accounts.register_with_password!(unique_email(), "password123", "password123",
-        authorize?: false
-      )
-
-    Organizations.invite_member!(
-      user.id,
-      %{role: :admin},
-      tenant: forening.id,
-      authorize?: false
-    )
-
-    user
-  end
-
-  defp setup_member(forening) do
-    user =
-      Accounts.register_with_password!(unique_email(), "password123", "password123",
-        authorize?: false
-      )
-
-    Organizations.join_forening!(%{}, tenant: forening.id, actor: user)
-    user
-  end
 
   defp events_for(record_id) do
     EventLog
@@ -54,13 +16,11 @@ defmodule Exhs.AuditTrailTest do
 
   describe "event creation" do
     test "updating a membership creates an event" do
-      forening = setup_forening()
-      admin = setup_admin(forening)
-      member = setup_member(forening)
-
-      membership =
-        Organizations.list_memberships!(tenant: forening.id, authorize?: false)
-        |> Enum.find(&(&1.user_id == member.id))
+      forening = create_forening!()
+      admin = register_user!()
+      invite_member!(forening, admin, :admin)
+      member = register_user!()
+      membership = invite_member!(forening, member)
 
       Organizations.set_member_role!(membership, %{role: :board},
         tenant: forening.id,
@@ -75,8 +35,9 @@ defmodule Exhs.AuditTrailTest do
     end
 
     test "creating a group creates an event" do
-      forening = setup_forening()
-      admin = setup_admin(forening)
+      forening = create_forening!()
+      admin = register_user!()
+      invite_member!(forening, admin, :admin)
 
       group =
         Organizations.create_group!(%{name: "Versioned Group"},
@@ -92,8 +53,9 @@ defmodule Exhs.AuditTrailTest do
     end
 
     test "updating a forening creates an event" do
-      forening = setup_forening()
-      admin = setup_admin(forening)
+      forening = create_forening!()
+      admin = register_user!()
+      invite_member!(forening, admin, :admin)
 
       Organizations.update_forening!(forening, %{name: "New Name"},
         actor: admin,
@@ -108,8 +70,9 @@ defmodule Exhs.AuditTrailTest do
 
   describe "actor tracking" do
     test "event records the actor who made the change" do
-      forening = setup_forening()
-      admin = setup_admin(forening)
+      forening = create_forening!()
+      admin = register_user!()
+      invite_member!(forening, admin, :admin)
 
       group =
         Organizations.create_group!(%{name: "Actor Test"},
@@ -124,9 +87,10 @@ defmodule Exhs.AuditTrailTest do
 
   describe "data tracking" do
     test "event stores input data" do
-      forening = setup_forening()
-      admin = setup_admin(forening)
-      group = create_group(forening)
+      forening = create_forening!()
+      admin = register_user!()
+      invite_member!(forening, admin, :admin)
+      group = create_group!(forening)
 
       Organizations.update_group!(group, %{name: "Only Name Changed"},
         tenant: forening.id,
@@ -141,13 +105,11 @@ defmodule Exhs.AuditTrailTest do
 
   describe "tenant isolation" do
     test "events from different foreninger use distinct record IDs" do
-      forening_a = setup_forening()
-      forening_b = setup_forening()
-      setup_admin(forening_a)
-      setup_admin(forening_b)
+      forening_a = create_forening!()
+      forening_b = create_forening!()
 
-      group_a = create_group(forening_a)
-      group_b = create_group(forening_b)
+      group_a = create_group!(forening_a)
+      group_b = create_group!(forening_b)
 
       events_a = events_for(group_a.id)
       events_b = events_for(group_b.id)
@@ -161,13 +123,11 @@ defmodule Exhs.AuditTrailTest do
 
   describe "sensitive fields" do
     test "sensitive fields not stored in event data" do
-      forening = setup_forening()
-      admin = setup_admin(forening)
-      member = setup_member(forening)
-
-      membership =
-        Organizations.list_memberships!(tenant: forening.id, authorize?: false)
-        |> Enum.find(&(&1.user_id == member.id))
+      forening = create_forening!()
+      admin = register_user!()
+      invite_member!(forening, admin, :admin)
+      member = register_user!()
+      membership = invite_member!(forening, member)
 
       Organizations.set_member_role!(membership, %{role: :board},
         tenant: forening.id,
@@ -185,9 +145,10 @@ defmodule Exhs.AuditTrailTest do
 
   describe "destroy tracking" do
     test "destroying a group creates an event" do
-      forening = setup_forening()
-      admin = setup_admin(forening)
-      group = create_group(forening)
+      forening = create_forening!()
+      admin = register_user!()
+      invite_member!(forening, admin, :admin)
+      group = create_group!(forening)
 
       Organizations.destroy_group!(group, tenant: forening.id, actor: admin)
 
@@ -195,13 +156,5 @@ defmodule Exhs.AuditTrailTest do
       destroy_event = Enum.find(events, &(&1.action_type == :destroy))
       assert destroy_event != nil
     end
-  end
-
-  defp create_group(forening) do
-    Organizations.create_group!(
-      %{name: "Group #{System.unique_integer([:positive])}", color: "#aabbcc"},
-      tenant: forening.id,
-      authorize?: false
-    )
   end
 end

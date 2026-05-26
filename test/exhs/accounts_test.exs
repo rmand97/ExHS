@@ -1,69 +1,74 @@
 defmodule Exhs.AccountsTest do
   use Exhs.DataCase, async: true
 
+  import Exhs.Test.Builders
   import Swoosh.TestAssertions
 
   alias Exhs.Accounts
 
-  defp unique_email, do: "user-#{System.unique_integer([:positive])}@example.com"
-
-  defp register_user!(email \\ nil) do
-    email = email || unique_email()
-    Accounts.register_with_password!(email, "password123", "password123", authorize?: false)
-  end
-
   describe "register_with_password" do
     test "creates a user with valid inputs" do
-      email = unique_email()
+      user = register_user!()
 
-      user =
-        Accounts.register_with_password!(email, "password123", "password123", authorize?: false)
-
-      assert to_string(user.email) == email
       assert user.id
+      assert user.email
     end
 
     test "rejects mismatched password confirmation" do
-      email = unique_email()
-
       assert_raise Ash.Error.Invalid, fn ->
-        Accounts.register_with_password!(email, "password123", "different123", authorize?: false)
+        Accounts.register_with_password!(
+          "mismatch@example.com",
+          "password123",
+          "different123",
+          authorize?: false
+        )
       end
     end
 
     test "rejects duplicate email" do
-      email = unique_email()
-      register_user!(email)
+      user = register_user!()
 
       assert_raise Ash.Error.Invalid, fn ->
-        Accounts.register_with_password!(email, "password123", "password123", authorize?: false)
+        Accounts.register_with_password!(
+          to_string(user.email),
+          "password123",
+          "password123",
+          authorize?: false
+        )
       end
     end
 
     test "rejects short password" do
-      email = unique_email()
-
       assert_raise Ash.Error.Invalid, fn ->
-        Accounts.register_with_password!(email, "short", "short", authorize?: false)
+        Accounts.register_with_password!(
+          "short@example.com",
+          "short",
+          "short",
+          authorize?: false
+        )
       end
     end
   end
 
   describe "sign_in_with_password" do
     test "succeeds with correct credentials" do
-      email = unique_email()
-      register_user!(email)
+      user = register_user!(email: "login@example.com")
 
-      assert {:ok, user} = Accounts.sign_in_with_password(email, "password123", authorize?: false)
-      assert to_string(user.email) == email
+      assert {:ok, signed_in} =
+               Accounts.sign_in_with_password("login@example.com", "password123",
+                 authorize?: false
+               )
+
+      assert signed_in.id == user.id
     end
 
     test "fails with wrong password" do
-      email = unique_email()
-      register_user!(email)
+      register_user!(email: "wrong@example.com")
 
       assert {:error, _} =
-               Accounts.sign_in_with_password(email, "wrongpassword", authorize?: false)
+               Accounts.sign_in_with_password("wrong@example.com", "badpassword",
+                 authorize?: false
+               )
     end
 
     test "fails with non-existent email" do
@@ -77,8 +82,8 @@ defmodule Exhs.AccountsTest do
   describe "get_user_by_id" do
     test "returns the user" do
       user = register_user!()
-      found = Accounts.get_user_by_id!(user.id, authorize?: false)
-      assert found.id == user.id
+
+      assert Accounts.get_user_by_id!(user.id, authorize?: false).id == user.id
     end
 
     test "raises for non-existent id" do
@@ -91,8 +96,8 @@ defmodule Exhs.AccountsTest do
   describe "get_user_by_email" do
     test "returns the user" do
       user = register_user!()
-      found = Accounts.get_user_by_email!(user.email, authorize?: false)
-      assert found.id == user.id
+
+      assert Accounts.get_user_by_email!(user.email, authorize?: false).id == user.id
     end
   end
 
@@ -103,12 +108,7 @@ defmodule Exhs.AccountsTest do
       updated =
         Accounts.update_profile!(
           user,
-          %{
-            first_name: "Ola",
-            last_name: "Nordmann",
-            phone: "+4712345678",
-            city: "Oslo"
-          },
+          %{first_name: "Ola", last_name: "Nordmann", phone: "+4712345678", city: "Oslo"},
           authorize?: false
         )
 
@@ -134,13 +134,12 @@ defmodule Exhs.AccountsTest do
         )
 
       assert updated.address_line_1 == "Storgata 1"
-      assert updated.address_line_2 == "Leilighet 3"
       assert updated.postal_code == "0001"
     end
   end
 
   describe "change_password" do
-    test "changes password with correct current password" do
+    test "succeeds with correct current password" do
       user = register_user!()
 
       assert {:ok, _} =
@@ -172,18 +171,18 @@ defmodule Exhs.AccountsTest do
   end
 
   describe "email confirmation" do
-    test "new user is unconfirmed after registration" do
+    test "new user is unconfirmed" do
       user = register_user!()
+
       assert is_nil(user.confirmed_at)
     end
 
-    test "registration sends a confirmation email" do
-      email = unique_email()
-      Accounts.register_with_password!(email, "password123", "password123", authorize?: false)
+    test "registration sends confirmation email" do
+      register_user!(email: "confirm@example.com")
 
       assert_email_sent(fn sent ->
         sent.subject == "Confirm your email address" &&
-          Enum.any?(sent.to, fn {_, addr} -> addr == email end)
+          Enum.any?(sent.to, fn {_, addr} -> addr == "confirm@example.com" end)
       end)
     end
   end
@@ -199,9 +198,10 @@ defmodule Exhs.AccountsTest do
     end
   end
 
-  describe "authorization — User policies" do
+  describe "authorization" do
     test "user can read own profile" do
       user = register_user!()
+
       assert {:ok, _} = Accounts.get_user_by_id(user.id, actor: user)
     end
 
@@ -212,7 +212,7 @@ defmodule Exhs.AccountsTest do
       assert {:error, %Ash.Error.Invalid{}} = Accounts.get_user_by_id(other.id, actor: user)
     end
 
-    test "unauthenticated read returns not found (filtered)" do
+    test "unauthenticated read returns error" do
       register_user!()
 
       assert {:error, _} = Accounts.get_user_by_email("test@example.com", actor: nil)

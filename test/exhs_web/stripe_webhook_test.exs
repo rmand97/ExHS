@@ -1,54 +1,26 @@
 defmodule ExhsWeb.StripeWebhookTest do
   use ExhsWeb.ConnCase, async: false
 
-  alias Exhs.{Accounts, Billing, Organizations}
-  alias Exhs.Test.StripeSigning
+  import Exhs.Test.Builders
 
-  defp unique(prefix), do: "#{prefix}-#{System.unique_integer([:positive])}"
+  alias Exhs.Billing
+  alias Exhs.Test.StripeSigning
 
   defp secret, do: Application.get_env(:exhs, :stripe_webhook_signing_secret)
 
-  defp setup_context! do
+  defp setup_billing_member! do
     forening =
-      Organizations.create_forening!(
-        %{
-          name: "Forening #{System.unique_integer([:positive])}",
-          slug: unique("slug"),
-          subdomain: unique("sub"),
-          kontingent_stripe_price_id: "price_test_kontingent"
-        },
-        authorize?: false
-      )
+      create_forening!(%{kontingent_stripe_price_id: "price_test_kontingent"})
+      |> activate_stripe_connect!()
 
-    account_id = "acct_test_#{System.unique_integer([:positive])}"
-
-    forening =
-      Organizations.set_forening_stripe_account!(
-        forening,
-        %{stripe_account_id: account_id, stripe_account_status: :active},
-        authorize?: false
-      )
-
-    email = "user-#{System.unique_integer([:positive])}@example.com"
-
-    user =
-      Accounts.register_with_password!(email, "password123", "password123", authorize?: false)
-
-    membership = Organizations.invite_member!(user.id, tenant: forening.id, authorize?: false)
-
-    customer_id = "cus_test_#{System.unique_integer([:positive])}"
-
-    Organizations.set_membership_stripe_customer!(
-      membership,
-      %{stripe_customer_id: customer_id},
-      tenant: forening.id,
-      authorize?: false
-    )
+    user = register_user!()
+    membership = invite_member!(forening, user)
+    membership = set_stripe_customer!(forening, membership)
 
     %{
       forening: forening,
-      account_id: account_id,
-      customer_id: customer_id,
+      account_id: forening.stripe_account_id,
+      customer_id: membership.stripe_customer_id,
       membership: membership
     }
   end
@@ -75,7 +47,7 @@ defmodule ExhsWeb.StripeWebhookTest do
 
   describe "POST /webhook/stripe" do
     test "accepts a properly signed event and persists state", %{conn: conn} do
-      ctx = setup_context!()
+      ctx = setup_billing_member!()
       payload = event_payload("customer.subscription.created", ctx)
       sig = StripeSigning.signature_header(payload, secret())
 
@@ -92,7 +64,7 @@ defmodule ExhsWeb.StripeWebhookTest do
     end
 
     test "rejects an invalid signature", %{conn: conn} do
-      ctx = setup_context!()
+      ctx = setup_billing_member!()
       payload = event_payload("customer.subscription.created", ctx)
 
       conn =
@@ -108,7 +80,7 @@ defmodule ExhsWeb.StripeWebhookTest do
     end
 
     test "redelivery of the same event id applies state only once", %{conn: conn} do
-      ctx = setup_context!()
+      ctx = setup_billing_member!()
 
       payload =
         Jason.encode!(%{

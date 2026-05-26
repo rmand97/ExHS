@@ -1,54 +1,20 @@
 defmodule Exhs.BillingTest do
   use Exhs.DataCase, async: true
 
-  alias Exhs.{Accounts, Billing, Organizations}
+  import Exhs.Test.Builders
 
-  defp unique(prefix), do: "#{prefix}-#{System.unique_integer([:positive])}"
+  alias Exhs.{Billing, Organizations}
 
-  defp create_forening!(attrs \\ %{}) do
-    defaults = %{
-      name: "Forening #{System.unique_integer([:positive])}",
-      slug: unique("slug"),
-      subdomain: unique("sub"),
-      kontingent_stripe_price_id: "price_test_kontingent"
-    }
-
-    Organizations.create_forening!(Map.merge(defaults, attrs), authorize?: false)
-  end
-
-  defp activate_connect!(forening) do
-    Organizations.set_forening_stripe_account!(
-      forening,
-      %{
-        stripe_account_id: "acct_test_#{System.unique_integer([:positive])}",
-        stripe_account_status: :active
-      },
-      authorize?: false
-    )
-  end
-
-  defp create_user! do
-    email = "user-#{System.unique_integer([:positive])}@example.com"
-    Accounts.register_with_password!(email, "password123", "password123", authorize?: false)
-  end
-
-  defp invite_admin!(user, forening) do
-    Organizations.invite_member!(user.id, %{role: :admin},
-      tenant: forening.id,
-      authorize?: false
-    )
-  end
-
-  defp invite_member!(user, forening) do
-    Organizations.invite_member!(user.id, tenant: forening.id, authorize?: false)
+  defp billing_forening! do
+    create_forening!(%{kontingent_stripe_price_id: "price_test_kontingent"})
   end
 
   describe "start_onboarding/3" do
     test "creates connect account on first call and returns onboarding URL" do
-      forening = create_forening!()
-      admin = create_user!()
-      invite_admin!(admin, forening)
-      scope = %Exhs.Scope{actor: admin, tenant: forening.id}
+      forening = billing_forening!()
+      admin = register_user!()
+      invite_member!(forening, admin, :admin)
+      scope = scope(admin, forening)
 
       assert {:ok, url} =
                Billing.start_onboarding(forening, scope,
@@ -64,10 +30,10 @@ defmodule Exhs.BillingTest do
     end
 
     test "non-admin cannot trigger onboarding" do
-      forening = create_forening!()
-      member = create_user!()
-      invite_member!(member, forening)
-      scope = %Exhs.Scope{actor: member, tenant: forening.id}
+      forening = billing_forening!()
+      member = register_user!()
+      invite_member!(forening, member)
+      scope = scope(member, forening)
 
       assert {:error, :forbidden} =
                Billing.start_onboarding(forening, scope,
@@ -79,11 +45,10 @@ defmodule Exhs.BillingTest do
 
   describe "start_kontingent_subscription/3" do
     test "creates a Stripe customer and returns the checkout URL" do
-      forening = create_forening!()
-      forening = activate_connect!(forening)
-      user = create_user!()
-      membership = invite_member!(user, forening)
-      scope = %Exhs.Scope{actor: user, tenant: forening.id}
+      forening = billing_forening!() |> activate_stripe_connect!()
+      user = register_user!()
+      membership = invite_member!(forening, user)
+      scope = scope(user, forening)
 
       assert {:ok, url} =
                Billing.start_kontingent_subscription(membership, scope,
@@ -103,10 +68,10 @@ defmodule Exhs.BillingTest do
     end
 
     test "errors when forening connect status is not :active" do
-      forening = create_forening!()
-      user = create_user!()
-      membership = invite_member!(user, forening)
-      scope = %Exhs.Scope{actor: user, tenant: forening.id}
+      forening = billing_forening!()
+      user = register_user!()
+      membership = invite_member!(forening, user)
+      scope = scope(user, forening)
 
       assert {:error, :forening_billing_not_ready} =
                Billing.start_kontingent_subscription(membership, scope,
@@ -116,12 +81,11 @@ defmodule Exhs.BillingTest do
     end
 
     test "rejects an actor who is neither the membership owner nor an admin" do
-      forening = create_forening!()
-      forening = activate_connect!(forening)
-      owner = create_user!()
-      membership = invite_member!(owner, forening)
-      stranger = create_user!()
-      scope = %Exhs.Scope{actor: stranger, tenant: forening.id}
+      forening = billing_forening!() |> activate_stripe_connect!()
+      owner = register_user!()
+      membership = invite_member!(forening, owner)
+      stranger = register_user!()
+      scope = scope(stranger, forening)
 
       assert {:error, :forbidden} =
                Billing.start_kontingent_subscription(membership, scope,
