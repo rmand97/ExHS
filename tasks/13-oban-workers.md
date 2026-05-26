@@ -49,9 +49,9 @@ All recurring and async work happens via Oban with proper queue isolation, dashb
 - [ ] `ReminderSender` — event reminders 24h before start (needs email, optional)
 
 ### Observability
-- [ ] Mount Oban Web (dashboard) under `/admin/oban` for superadmin
+- [x] Mount Oban Web dashboard at `/dev/oban` (dev_routes; move behind superadmin auth in Task 17)
 - [ ] Telemetry events forwarded to observability stack (Task 20)
-- [ ] Failure alerting
+- [ ] Failure alerting (Task 20)
 
 ### Tests
 - [ ] Each worker has a unit test that exercises happy path + at least one failure mode

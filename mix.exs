@@ -76,6 +76,7 @@ defmodule Exhs.MixProject do
       {:ash_oban, "~> 0.4"},
       {:ash_ai, "~> 0.3"},
       {:oban, "~> 2.18"},
+      {:oban_web, "~> 2.12"},
       {:sourceror, "~> 1.8", only: [:dev, :test]},
       {:ash_phoenix, "~> 2.0"},
       {:ash, "~> 3.0"},
