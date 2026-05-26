@@ -15,6 +15,8 @@ require Logger
 alias Exhs.Accounts.User
 alias Exhs.Billing
 alias Exhs.Billing.{Payment, Subscription}
+alias Exhs.Events
+alias Exhs.Events.{Event, TicketType, Registration}
 alias Exhs.Organizations
 alias Exhs.Organizations.Forening
 alias Exhs.Organizations.Group
@@ -34,7 +36,7 @@ defmodule Exhs.Seeds do
     membership = upsert_membership(user, forening)
     upsert_groups(forening)
     upsert_sample_billing(forening, membership)
-    # _event = upsert_sample_event(forening)     # Task 9
+    upsert_sample_events(forening, membership)
     # _product = upsert_sample_product(forening) # Task 10
 
     Logger.info(
@@ -267,6 +269,97 @@ defmodule Exhs.Seeds do
 
         Logger.info("Created seed payment")
         p
+    end
+  end
+
+  defp upsert_sample_events(forening, membership) do
+    event = upsert_seed_event(forening, "Generalforsamling 2026", true)
+    open_event = upsert_seed_event(forening, "Åbent Hus", false)
+    upsert_seed_ticket_types(forening, event, open_event)
+    upsert_seed_registration(forening, event, membership)
+  end
+
+  defp upsert_seed_event(forening, title, membership_required) do
+    existing =
+      Event
+      |> Ash.Query.filter(title == ^title)
+      |> Ash.read_one!(tenant: forening.id, authorize?: false)
+
+    case existing do
+      %Event{} = e ->
+        Logger.info("Event already exists: #{e.title}")
+        e
+
+      nil ->
+        e =
+          Events.create_event!(
+            %{
+              title: title,
+              description: "Seed event — #{title}",
+              location: "Foreningshuset",
+              starts_at: DateTime.add(DateTime.utc_now(), 30, :day),
+              ends_at: DateTime.add(DateTime.utc_now(), 30 * 86_400 + 7200, :second),
+              membership_required: membership_required
+            },
+            tenant: forening.id,
+            authorize?: false
+          )
+
+        Events.publish_event!(e, authorize?: false)
+        |> tap(fn _ -> Logger.info("Created and published event: #{title}") end)
+    end
+  end
+
+  defp upsert_seed_ticket_types(forening, event, open_event) do
+    ensure_ticket_type(forening, event, "Medlem", 0, nil)
+    ensure_ticket_type(forening, event, "VIP", 15_000, 20)
+    ensure_ticket_type(forening, open_event, "Gratis", 0, nil)
+  end
+
+  defp ensure_ticket_type(forening, event, name, price, capacity) do
+    existing =
+      TicketType
+      |> Ash.Query.filter(event_id == ^event.id and name == ^name)
+      |> Ash.read_one!(tenant: forening.id, authorize?: false)
+
+    case existing do
+      %TicketType{} ->
+        Logger.info("Ticket type already exists: #{name}")
+
+      nil ->
+        Events.create_ticket_type!(
+          %{event_id: event.id, name: name, price_cents: price, capacity: capacity},
+          tenant: forening.id,
+          authorize?: false
+        )
+
+        Logger.info("Created ticket type: #{name} for #{event.title}")
+    end
+  end
+
+  defp upsert_seed_registration(forening, event, membership) do
+    ticket_type =
+      TicketType
+      |> Ash.Query.filter(event_id == ^event.id and name == "Medlem")
+      |> Ash.read_one!(tenant: forening.id, authorize?: false)
+
+    existing =
+      Registration
+      |> Ash.Query.filter(ticket_type_id == ^ticket_type.id and membership_id == ^membership.id)
+      |> Ash.read_one!(tenant: forening.id, authorize?: false)
+
+    case existing do
+      %Registration{} ->
+        Logger.info("Registration already exists")
+
+      nil ->
+        Events.register_for_event!(
+          %{ticket_type_id: ticket_type.id, membership_id: membership.id},
+          tenant: forening.id,
+          authorize?: false
+        )
+
+        Logger.info("Created seed registration for #{event.title}")
     end
   end
 end
