@@ -11,7 +11,11 @@ defmodule Exhs.Application do
       ExhsWeb.Telemetry,
       Exhs.Repo,
       {DNSCluster, query: Application.get_env(:exhs, :dns_cluster_query) || :ignore},
-      {Oban, Application.fetch_env!(:exhs, Oban)},
+      {Oban,
+       AshOban.config(
+         Application.fetch_env!(:exhs, :ash_domains),
+         Application.fetch_env!(:exhs, Oban)
+       )},
       {Phoenix.PubSub, name: Exhs.PubSub},
       ExhsWeb.Endpoint,
       {AshAuthentication.Supervisor, [otp_app: :exhs]}

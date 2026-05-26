@@ -4,18 +4,20 @@
 All recurring and async work happens via Oban with proper queue isolation, dashboards, and tenant-aware actor context.
 
 ## Prerequisites
-- Tasks 4, 8, 9, 11, 12 (the workers reference resources from these)
+- Tasks 4, 8, 9 (the workers reference resources from these)
+- Tasks 11, 12 deferred to nice-to-have — workers depending on them are deferred too
 
 ## Plan
 
 ### Oban configuration
-- [ ] Queues defined per workload: `default`, `mailers`, `webhooks`, `stripe`, `gdpr`, `maintenance`
-- [ ] Per-queue concurrency limits sized to provider rate limits
-- [ ] `Oban.Pro` features? **Decide — see open decisions**
+- [x] Queues defined per workload: `default`, `mailers`, `webhooks`, `stripe`, `gdpr`, `maintenance`
+- [x] Per-queue concurrency limits sized to provider rate limits
+- [x] Pruner plugin (7-day retention)
 
 ### AshOban integration
-- [ ] Wire `ash_oban` so actions can be triggered via Oban with proper scope/actor
-- [ ] Convention: workers build `Exhs.Scope` and pass to code-interface calls
+- [x] `AshOban.config/2` wrapping Oban config in `application.ex`
+- [ ] `AshOban` extension + triggers on resources that need background processing
+- [ ] `AshOban.Checks.AshObanInteraction` bypass in policies on triggered resources
 
 ### Workers
 
@@ -34,22 +36,16 @@ All recurring and async work happens via Oban with proper queue isolation, dashb
 - [ ] Fans out per-recipient sub-jobs respecting provider rate limits
 - [ ] Handles bounces, retries
 
-#### `Exhs.Workers.StripeWebhookProcessor`
-- [ ] Webhook controller enqueues job; controller returns 200 immediately
-- [ ] Idempotent on `stripe_event_id`
-- [ ] Dispatches by event type to appropriate sync function
+#### `Exhs.Billing.WebhookWorker` (done — Task 8)
+- [x] Webhook controller enqueues job; controller returns 200 immediately
+- [x] Idempotent on `stripe_event_id` (unique: period: :infinity)
+- [x] Dispatches by event type via `Exhs.Billing.Webhook.apply_event/1`
 
-#### `Exhs.Workers.GdprCleanup`
-- [ ] Cron: daily
-- [ ] Finds users meeting anonymization criteria (Task 18)
-- [ ] Anonymizes user record while preserving financial integrity
-
-#### `Exhs.Workers.OrphanedUploadSweeper`
-- [ ] Cron: weekly
-- [ ] Removes S3 objects no longer referenced by any resource
-
-#### `Exhs.Workers.ReminderSender` (optional)
-- [ ] Sends event reminders 24h before start to confirmed registrants
+#### Deferred workers (dependencies not ready)
+- [ ] `GdprCleanup` — daily cron, anonymize lapsed users (Task 18)
+- [ ] `OrphanedUploadSweeper` — weekly cron, remove unreferenced S3 objects (Task 12)
+- [ ] `NewsletterSender` — fan-out per-recipient (Task 11, nice-to-have)
+- [ ] `ReminderSender` — event reminders 24h before start (needs email, optional)
 
 ### Observability
 - [ ] Mount Oban Web (dashboard) under `/admin/oban` for superadmin
@@ -62,9 +58,12 @@ All recurring and async work happens via Oban with proper queue isolation, dashb
 - [ ] Cron expression validation
 
 ## Open decisions
-- [ ] **Oban Pro** — licensed features (unique jobs, batches, workflows) worth the cost? Recommendation: start free, upgrade if patterns demand it
-- [ ] **Worker actor model** — synthetic `:system` actor with `is_superadmin: true`? Or actor=nil + explicit `authorize?: false`?
-- [ ] **Cron storage** — `config.exs` static, or DB-stored via Oban Pro?
+(none remaining)
+
+## Decided
+- **Free Oban** — no Oban Pro. Unique jobs handled manually (`unique` option on workers). No batches/workflows needed.
+- **AshObanInteraction bypass** — resources with triggers get `bypass AshOban.Checks.AshObanInteraction do authorize_if always() end` in policies. No synthetic actor, no global `authorize?: false`.
+- **Static cron** — schedules in `config.exs` via `Oban.Plugins.Cron`. Redeploy for changes is acceptable; no admin-configurable schedules needed.
 
 ## Done when
 - Oban dashboard mounted and reachable
