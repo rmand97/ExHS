@@ -26,6 +26,8 @@ This file indexes all tasks. Each task is a self-contained chunk of work with it
 ### Business domains
 - [ ] [Task 8 — Billing & Stripe](./08-billing-stripe.md)
 - [ ] [Task 9 — Events](./09-events.md)
+
+### Nice-to-have (post-launch)
 - [ ] [Task 10 — Shop (mostly TBD)](./10-shop.md)
 - [ ] [Task 11 — Communications & newsletters](./11-communications.md)
 
