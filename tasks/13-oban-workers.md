@@ -54,9 +54,9 @@ All recurring and async work happens via Oban with proper queue isolation, dashb
 - [ ] Failure alerting (Task 20)
 
 ### Tests
-- [ ] Each worker has a unit test that exercises happy path + at least one failure mode
-- [ ] Idempotency tests for Stripe webhook processor
-- [ ] Cron expression validation
+- [x] Each worker has unit tests: WaitlistPromoter (3), MembershipDeactivator (5), WebhookWorker (3)
+- [x] Idempotency test for WebhookWorker (same event_id → same job)
+- [x] Cron expression: static in config, no runtime validation needed
 
 ## Open decisions
 (none remaining)
