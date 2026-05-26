@@ -29,6 +29,8 @@ Two cases that warrant more thoroughness:
 - **External dependencies (Stripe, S3, email providers, webhook senders, etc.)** — test the integration thoroughly. Cover success, failure, retries/timeouts, and webhook/callback handling. Use fakes or library-provided test adapters (`Swoosh.Adapters.Test`, `Stripe` mock, `ExAws` overrides) — never hit the real third-party service from a test. Verify both directions: what we send AND how we react to their responses.
 - **LiveViews** — test with `Phoenix.LiveViewTest` whenever a LiveView has interactive behavior (form submit, click handlers, real-time updates). At minimum: it mounts, the primary user action works, and authorization redirects fire when expected. Skip LiveView tests only for pages that are pure static render.
 
+The testing skill can be found at `.claude/skills/testing/SKILL.md`
+
 ## Tidewave
 
 Use Tidewave MCP tools — they let you interrogate the running application in various useful ways.

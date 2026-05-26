@@ -144,6 +144,95 @@ defmodule Exhs.Billing.WebhookTest do
     end
   end
 
+  describe "invoice.payment_failed" do
+    test "records a Payment row with :failed status" do
+      ctx = setup_billing_member!()
+
+      event = %{
+        "type" => "invoice.payment_failed",
+        "account" => ctx.account_id,
+        "data" => %{
+          "object" => %{
+            "id" => "in_fail_#{System.unique_integer([:positive])}",
+            "customer" => ctx.customer_id,
+            "payment_intent" => "pi_fail_1",
+            "charge" => "ch_fail_1",
+            "amount_paid" => 0,
+            "amount_due" => 50_000,
+            "currency" => "dkk",
+            "status_transitions" => %{"paid_at" => nil}
+          }
+        }
+      }
+
+      assert {:ok, payment} = Webhook.apply_event(event)
+      assert payment.status == :failed
+      assert payment.amount_cents == 0
+      assert payment.stripe_payment_intent_id == "pi_fail_1"
+    end
+  end
+
+  describe "account.updated" do
+    test "syncs forening stripe_account_status to :active" do
+      forening =
+        create_forening!(%{kontingent_stripe_price_id: "price_test_kontingent"})
+        |> activate_stripe_connect!()
+
+      event = %{
+        "type" => "account.updated",
+        "data" => %{
+          "object" => %{
+            "id" => forening.stripe_account_id,
+            "charges_enabled" => true,
+            "payouts_enabled" => true,
+            "details_submitted" => true
+          }
+        }
+      }
+
+      assert {:ok, updated} = Webhook.apply_event(event)
+      assert updated.stripe_account_status == :active
+    end
+
+    test "syncs forening stripe_account_status to :restricted" do
+      forening =
+        create_forening!(%{kontingent_stripe_price_id: "price_test_kontingent"})
+        |> activate_stripe_connect!()
+
+      event = %{
+        "type" => "account.updated",
+        "data" => %{
+          "object" => %{
+            "id" => forening.stripe_account_id,
+            "charges_enabled" => false,
+            "payouts_enabled" => false,
+            "details_submitted" => true
+          }
+        }
+      }
+
+      assert {:ok, updated} = Webhook.apply_event(event)
+      assert updated.stripe_account_status == :restricted
+    end
+  end
+
+  describe "checkout.session.completed" do
+    test "is handled without error" do
+      event = %{
+        "type" => "checkout.session.completed",
+        "data" => %{
+          "object" => %{
+            "id" => "cs_test_1",
+            "mode" => "subscription",
+            "subscription" => "sub_test_1"
+          }
+        }
+      }
+
+      assert :ok = Webhook.apply_event(event)
+    end
+  end
+
   describe "charge.refunded" do
     test "marks an existing payment refunded" do
       ctx = setup_billing_member!()

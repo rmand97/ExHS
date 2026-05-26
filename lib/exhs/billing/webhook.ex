@@ -13,6 +13,8 @@ defmodule Exhs.Billing.Webhook do
 
   def apply_event(%{"type" => type} = event), do: dispatch(type, event)
 
+  defp dispatch("checkout.session.completed", _event), do: :ok
+
   defp dispatch("account.updated", %{"data" => %{"object" => account}}) do
     sync_account_status(account)
   end
