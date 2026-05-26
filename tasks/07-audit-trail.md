@@ -8,26 +8,25 @@ Every meaningful change to data is recorded, queryable per-forening, and tamper-
 
 ## Plan
 
-### ash_paper_trail integration
-- [x] `ash_paper_trail` in deps (already was)
-- [x] `.formatter.exs` updated with `:ash_paper_trail` in `import_deps`
-- [x] `AshPaperTrail.Resource` extension added to: Forening, Membership, Group, MemberGroup
-- [x] `AshPaperTrail.Domain` extension added to Organizations domain with `include_versions? true`
-- [x] `change_tracking_mode :changes_only` — only store changed fields
-- [x] `store_action_name? true` — version records which action ran
-- [x] `sensitive_attributes :ignore` — sensitive fields excluded from version payload
-- [x] `only_when_changed? true` — skip versions when no actual changes occurred
-- [x] `reference_source? false` — no FK from version to source (supports hard deletes)
-- [x] `belongs_to_actor :user` — versions track which user made the change
-- [x] `attributes_as_attributes [:forening_id]` on tenant-scoped resources for multitenancy
+### AshEvents integration (migrated from AshPaperTrail)
+- [x] `ash_events` in deps
+- [x] `.formatter.exs` updated with `:ash_events` in `import_deps`
+- [x] `Exhs.Audit` domain created, registered in `ash_domains`
+- [x] `Exhs.Audit.EventLog` resource with `AshEvents.EventLog` extension — centralized event table (`audit_events`)
+- [x] `persist_actor_primary_key :user_id` — events track which user made the change
+- [x] `primary_key_type Ash.Type.UUIDv7` — time-ordered event IDs
+- [x] `AshEvents.Events` extension added to: Forening, Membership, Group, MemberGroup, Subscription, Payment
+- [x] All resources point `event_log` to `Exhs.Audit.EventLog`
+- [x] Sensitive fields excluded from event data by default (AshEvents behavior)
+- [x] Migration drops all PaperTrail `*_versions` tables, creates single `audit_events` table
 
 ### Actor capture
 - [x] Actor is set on actions in web layer via Ash.Scope
 - [ ] System-initiated actions (Oban workers — Task 13) use a synthetic system actor or actor=nil with marker
 
 ### Redaction
-- [x] `sensitive_attributes :ignore` on all paper_trail configs
-- [x] `hashed_password` never appears in version payloads (tested)
+- [x] Sensitive fields excluded by default in AshEvents (no `store_sensitive_attributes` configured)
+- [x] `hashed_password` never appears in event data or changed_attributes (tested)
 
 ### Admin UI hook
 - [ ] Per-resource "History" panel (built in Task 17 — Admin UI)
@@ -37,24 +36,30 @@ Every meaningful change to data is recorded, queryable per-forening, and tamper-
 - [ ] Decide retention window for audit logs (likely match 5-year financial retention)
 - [ ] When a user is anonymized, audit log retains action records but actor reference becomes "anonymized user"
 
-### Future tasks should add AshPaperTrail
-- [ ] Events (Task 9), Shop (Task 10), Communications (Task 11), Billing (Task 8)
+### Future tasks should add AshEvents.Events
+- [ ] Events (Task 9), Shop (Task 10), Communications (Task 11) — add `events do event_log Exhs.Audit.EventLog end`
 
-### Tests (7 tests)
-- [x] Updating a membership creates a version record with correct action name
-- [x] Creating a group creates a version record
-- [x] Updating a forening creates a version record
-- [x] Version records the actor who made the change
-- [x] changes_only mode only stores changed fields (not unchanged ones)
-- [x] Version records are scoped to forening (tenant isolation)
-- [x] Sensitive fields not stored in change payload
+### Event replay (future)
+- [ ] Implement `clear_records_for_replay` if event sourcing needed for Billing
+- [ ] Add `current_action_versions` and `replay_non_input_attribute_changes` as actions evolve
+
+### Tests (8 tests)
+- [x] Updating a membership creates an event with correct action name
+- [x] Creating a group creates an event
+- [x] Updating a forening creates an event
+- [x] Event records the actor who made the change
+- [x] Event stores input data
+- [x] Events from different foreninger use distinct record IDs (isolation)
+- [x] Sensitive fields not stored in event data or changed_attributes
+- [x] Destroying a group creates a destroy event
 
 ## Decided
-- **changes_only** — lighter storage, sufficient for "who changed what". No snapshots.
+- **AshEvents over AshPaperTrail** — centralized event log, future replay capability, better fit for event-sourced domains (Billing).
+- **Audit-only mode for v1** — no replay configured yet. Can add later without schema changes.
 - **No tamper-evidence for v1** — no hash-linked log or S3 export. Simple DB-backed audit.
-- **No cryptographic chaining** — overkill for v1.
+- **Single event table** — all domains share `audit_events`. Queryable by resource type, record_id, actor.
 
 ## Done when
-- Every audited resource has version history ✓
+- Every audited resource has event history ✓
 - Admin can answer "who changed this membership and when" in the UI (post Task 17)
 - Audit log retention policy is documented

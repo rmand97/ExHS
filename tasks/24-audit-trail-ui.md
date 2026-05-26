@@ -4,7 +4,7 @@
 A user-facing activity history view showing changes made to and by a user. Viewable by the user themselves, forening admins, and superadmins.
 
 ## Prerequisites
-- Task 7 (AshPaperTrail on Organizations resources)
+- Task 7 (AshEvents on all resources)
 - Task 14 (Design system — DaisyUI components)
 - Task 16 (Member self-service UI — provides layout/nav context)
 
@@ -12,8 +12,8 @@ A user-facing activity history view showing changes made to and by a user. Viewa
 
 ### Member view — "My activity"
 - [ ] LiveView at `/activity` (inside member live_session)
-- [ ] Shows version records where actor is the current user, scoped to current forening
-- [ ] Timeline/list layout: action name, resource type, changed fields, timestamp
+- [ ] Shows events from `Exhs.Audit.EventLog` where `user_id` is the current user
+- [ ] Timeline/list layout: action name, resource type, input data summary, timestamp
 - [ ] Pagination or infinite scroll
 - [ ] Filter by resource type (membership, group, etc.)
 
@@ -28,19 +28,18 @@ A user-facing activity history view showing changes made to and by a user. Viewa
 - [ ] Filter by forening, user, resource type, date range
 
 ### Shared components
-- [ ] `AuditTimeline` component — renders a list of version records as a timeline
-- [ ] `VersionDiff` component — renders changed fields (key → new value for changes_only mode)
+- [ ] `AuditTimeline` component — renders a list of events as a timeline
+- [ ] `EventDetail` component — renders event data and changed_attributes
 - [ ] Action name displayed as human-readable label (e.g., `:set_role` → "Changed role")
 
 ### Code interfaces
-- [ ] `Exhs.Organizations.list_versions_for_actor/2` — versions where user_id matches
-- [ ] `Exhs.Organizations.list_versions_for_resource/3` — versions for a specific resource instance
-- [ ] Both scoped to tenant
+- [ ] `Exhs.Audit` code interfaces for querying EventLog by actor, resource, record_id
+- [ ] Scoped reads with filters on `user_id`, `resource`, `record_id`
 
 ### Policies
-- [ ] User can read version records where they are the actor or the subject
-- [ ] Admin/board can read all version records in their forening
-- [ ] Superadmin can read all version records globally
+- [ ] User can read events where they are the actor or the subject
+- [ ] Admin/board can read all events in their forening (filter by resource records' tenant)
+- [ ] Superadmin can read all events globally
 
 ## Done when
 - A member can see their own activity history

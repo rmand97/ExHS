@@ -2,7 +2,10 @@ defmodule Exhs.AuditTrailTest do
   use Exhs.DataCase, async: true
 
   alias Exhs.Accounts
+  alias Exhs.Audit.EventLog
   alias Exhs.Organizations
+
+  require Ash.Query
 
   defp unique_email, do: "user-#{System.unique_integer([:positive])}@example.com"
 
@@ -43,8 +46,14 @@ defmodule Exhs.AuditTrailTest do
     user
   end
 
-  describe "version creation" do
-    test "updating a membership creates a version record" do
+  defp events_for(record_id) do
+    EventLog
+    |> Ash.Query.filter(record_id == ^record_id)
+    |> Ash.read!(authorize?: false)
+  end
+
+  describe "event creation" do
+    test "updating a membership creates an event" do
       forening = setup_forening()
       admin = setup_admin(forening)
       member = setup_member(forening)
@@ -58,19 +67,14 @@ defmodule Exhs.AuditTrailTest do
         actor: admin
       )
 
-      versions =
-        Ash.read!(Exhs.Organizations.Membership.Version,
-          tenant: forening.id,
-          authorize?: false
-        )
-
-      assert versions != []
-      latest = List.last(versions)
-      assert latest.version_action_name == :set_role
-      assert latest.version_source_id == membership.id
+      events = events_for(membership.id)
+      assert events != []
+      latest = List.last(events)
+      assert latest.action == :set_role
+      assert latest.record_id == membership.id
     end
 
-    test "creating a group creates a version record" do
+    test "creating a group creates an event" do
       forening = setup_forening()
       admin = setup_admin(forening)
 
@@ -80,19 +84,14 @@ defmodule Exhs.AuditTrailTest do
           actor: admin
         )
 
-      versions =
-        Ash.read!(Exhs.Organizations.Group.Version,
-          tenant: forening.id,
-          authorize?: false
-        )
-
-      assert length(versions) == 1
-      version = hd(versions)
-      assert version.version_action_name == :create
-      assert version.version_source_id == group.id
+      events = events_for(group.id)
+      assert length(events) == 1
+      event = hd(events)
+      assert event.action == :create
+      assert event.record_id == group.id
     end
 
-    test "updating a forening creates a version record" do
+    test "updating a forening creates an event" do
       forening = setup_forening()
       admin = setup_admin(forening)
 
@@ -101,38 +100,30 @@ defmodule Exhs.AuditTrailTest do
         tenant: forening.id
       )
 
-      versions =
-        Ash.read!(Exhs.Organizations.Forening.Version, authorize?: false)
-        |> Enum.filter(&(&1.version_source_id == forening.id))
-
-      assert versions != []
-      latest = List.last(versions)
-      assert latest.version_action_name == :update
+      events = events_for(forening.id)
+      update_events = Enum.filter(events, &(&1.action == :update))
+      assert update_events != []
     end
   end
 
   describe "actor tracking" do
-    test "version records the actor who made the change" do
+    test "event records the actor who made the change" do
       forening = setup_forening()
       admin = setup_admin(forening)
 
-      Organizations.create_group!(%{name: "Actor Test"},
-        tenant: forening.id,
-        actor: admin
-      )
-
-      versions =
-        Ash.read!(Exhs.Organizations.Group.Version,
+      group =
+        Organizations.create_group!(%{name: "Actor Test"},
           tenant: forening.id,
-          authorize?: false
+          actor: admin
         )
 
-      assert hd(versions).user_id == admin.id
+      events = events_for(group.id)
+      assert hd(events).user_id == admin.id
     end
   end
 
-  describe "changes_only mode" do
-    test "version only stores changed fields" do
+  describe "data tracking" do
+    test "event stores input data" do
       forening = setup_forening()
       admin = setup_admin(forening)
       group = create_group(forening)
@@ -142,50 +133,34 @@ defmodule Exhs.AuditTrailTest do
         actor: admin
       )
 
-      versions =
-        Ash.read!(Exhs.Organizations.Group.Version,
-          tenant: forening.id,
-          authorize?: false
-        )
-
-      update_version = Enum.find(versions, &(&1.version_action_name == :update))
-      assert Map.has_key?(update_version.changes, "name")
-      refute Map.has_key?(update_version.changes, "color")
-      refute Map.has_key?(update_version.changes, "description")
+      events = events_for(group.id)
+      update_event = Enum.find(events, &(&1.action == :update))
+      assert update_event.data["name"] == "Only Name Changed"
     end
   end
 
   describe "tenant isolation" do
-    test "version records are scoped to forening" do
+    test "events from different foreninger use distinct record IDs" do
       forening_a = setup_forening()
       forening_b = setup_forening()
       setup_admin(forening_a)
       setup_admin(forening_b)
 
-      create_group(forening_a)
-      create_group(forening_b)
+      group_a = create_group(forening_a)
+      group_b = create_group(forening_b)
 
-      versions_a =
-        Ash.read!(Exhs.Organizations.Group.Version,
-          tenant: forening_a.id,
-          authorize?: false
-        )
+      events_a = events_for(group_a.id)
+      events_b = events_for(group_b.id)
 
-      versions_b =
-        Ash.read!(Exhs.Organizations.Group.Version,
-          tenant: forening_b.id,
-          authorize?: false
-        )
-
-      assert Enum.all?(versions_a, &(&1.forening_id == forening_a.id))
-      assert Enum.all?(versions_b, &(&1.forening_id == forening_b.id))
-      assert versions_a != []
-      assert versions_b != []
+      assert events_a != []
+      assert events_b != []
+      assert Enum.all?(events_a, &(&1.record_id == group_a.id))
+      assert Enum.all?(events_b, &(&1.record_id == group_b.id))
     end
   end
 
   describe "sensitive fields" do
-    test "hashed_password is not stored in user version changes" do
+    test "sensitive fields not stored in event data" do
       forening = setup_forening()
       admin = setup_admin(forening)
       member = setup_member(forening)
@@ -199,15 +174,26 @@ defmodule Exhs.AuditTrailTest do
         actor: admin
       )
 
-      versions =
-        Ash.read!(Exhs.Organizations.Membership.Version,
-          tenant: forening.id,
-          authorize?: false
-        )
+      events = events_for(membership.id)
 
-      Enum.each(versions, fn v ->
-        refute Map.has_key?(v.changes, "hashed_password")
+      Enum.each(events, fn e ->
+        refute Map.has_key?(e.data, "hashed_password")
+        refute Map.has_key?(e.changed_attributes, "hashed_password")
       end)
+    end
+  end
+
+  describe "destroy tracking" do
+    test "destroying a group creates an event" do
+      forening = setup_forening()
+      admin = setup_admin(forening)
+      group = create_group(forening)
+
+      Organizations.destroy_group!(group, tenant: forening.id, actor: admin)
+
+      events = events_for(group.id)
+      destroy_event = Enum.find(events, &(&1.action_type == :destroy))
+      assert destroy_event != nil
     end
   end
 

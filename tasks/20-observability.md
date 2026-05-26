@@ -43,7 +43,7 @@ Know what the system is doing in production: structured logs, metrics, traces, e
 - [ ] Pages/notifications wired: Stripe webhook failure rate, Oban queue backlog, error spikes
 
 ### Audit ≠ logging
-- [ ] Reiterate: business audit goes through `ash_paper_trail` (Task 7); ops logs are technical only
+- [ ] Reiterate: business audit goes through `ash_events` (Task 7); ops logs are technical only
 
 ### Tests
 - [ ] Telemetry events emitted on key paths

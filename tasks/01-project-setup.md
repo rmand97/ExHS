@@ -18,7 +18,8 @@ Get a developer from `git clone` to a running app with all dependencies installe
 - [x] `ash` and `ash_postgres` already present
 - [x] `ash_phoenix` already present
 - [x] `ash_authentication` and `ash_authentication_phoenix` already present
-- [x] Add `ash_paper_trail` (used heavily in Task 7)
+- [x] Add `ash_paper_trail` (replaced by `ash_events` in Task 7)
+- [x] Add `ash_events` (centralized event log — Task 7)
 - [x] Add `ash_oban` + `oban`
 - [x] Add `stripity_stripe`
 - [x] Add `ex_aws`, `ex_aws_s3`, `sweet_xml`
