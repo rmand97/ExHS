@@ -38,6 +38,19 @@ defmodule Exhs.Events.Registration do
       accept []
       change set_attribute(:status, :cancelled)
       change set_attribute(:cancelled_at, &DateTime.utc_now/0)
+
+      change after_action(fn _changeset, registration, _context ->
+        %{ticket_type_id: registration.ticket_type_id, tenant: registration.forening_id}
+        |> Exhs.Events.WaitlistPromoter.new()
+        |> Oban.insert()
+
+        {:ok, registration}
+      end)
+    end
+
+    update :promote do
+      accept []
+      change set_attribute(:status, :confirmed)
     end
 
     read :get_by_id do
@@ -47,6 +60,10 @@ defmodule Exhs.Events.Registration do
 
   policies do
     bypass AshAuthentication.Checks.AshAuthenticationInteraction do
+      authorize_if always()
+    end
+
+    bypass AshOban.Checks.AshObanInteraction do
       authorize_if always()
     end
 

@@ -268,6 +268,110 @@ defmodule Exhs.EventsTest do
       assert cancelled.cancelled_at
     end
 
+    test "waitlist promoted on cancellation", ctx do
+      {:ok, limited_tt} =
+        Events.create_ticket_type(
+          %{event_id: ctx.event.id, name: "Solo", price_cents: 0, capacity: 1},
+          tenant: ctx.forening.id,
+          scope: ctx.admin_scope
+        )
+
+      user1 = register_user!()
+      m1 = invite_member!(ctx.forening, user1)
+
+      {:ok, reg1} =
+        Events.register_for_event(
+          %{ticket_type_id: limited_tt.id, membership_id: m1.id},
+          tenant: ctx.forening.id,
+          scope: scope(user1, ctx.forening)
+        )
+
+      assert reg1.status == :confirmed
+
+      user2 = register_user!()
+      m2 = invite_member!(ctx.forening, user2)
+
+      {:ok, reg2} =
+        Events.register_for_event(
+          %{ticket_type_id: limited_tt.id, membership_id: m2.id},
+          tenant: ctx.forening.id,
+          scope: scope(user2, ctx.forening)
+        )
+
+      assert reg2.status == :waitlisted
+
+      {:ok, _} = Events.cancel_registration(reg1, scope: scope(user1, ctx.forening))
+
+      promoted = Ash.get!(Exhs.Events.Registration, reg2.id, tenant: ctx.forening.id, authorize?: false)
+      assert promoted.status == :confirmed
+    end
+
+    test "waitlist promotion is FIFO — earliest waitlisted promoted first", ctx do
+      {:ok, limited_tt} =
+        Events.create_ticket_type(
+          %{event_id: ctx.event.id, name: "FIFO", price_cents: 0, capacity: 1},
+          tenant: ctx.forening.id,
+          scope: ctx.admin_scope
+        )
+
+      user1 = register_user!()
+      m1 = invite_member!(ctx.forening, user1)
+
+      {:ok, reg1} =
+        Events.register_for_event(
+          %{ticket_type_id: limited_tt.id, membership_id: m1.id},
+          tenant: ctx.forening.id,
+          scope: scope(user1, ctx.forening)
+        )
+
+      user2 = register_user!()
+      m2 = invite_member!(ctx.forening, user2)
+
+      {:ok, reg2} =
+        Events.register_for_event(
+          %{ticket_type_id: limited_tt.id, membership_id: m2.id},
+          tenant: ctx.forening.id,
+          scope: scope(user2, ctx.forening)
+        )
+
+      user3 = register_user!()
+      m3 = invite_member!(ctx.forening, user3)
+
+      {:ok, reg3} =
+        Events.register_for_event(
+          %{ticket_type_id: limited_tt.id, membership_id: m3.id},
+          tenant: ctx.forening.id,
+          scope: scope(user3, ctx.forening)
+        )
+
+      assert reg2.status == :waitlisted
+      assert reg3.status == :waitlisted
+
+      {:ok, _} = Events.cancel_registration(reg1, scope: scope(user1, ctx.forening))
+
+      promoted2 = Ash.get!(Exhs.Events.Registration, reg2.id, tenant: ctx.forening.id, authorize?: false)
+      still_waiting = Ash.get!(Exhs.Events.Registration, reg3.id, tenant: ctx.forening.id, authorize?: false)
+
+      assert promoted2.status == :confirmed
+      assert still_waiting.status == :waitlisted
+    end
+
+    test "no waitlisted registrations — cancellation still succeeds", ctx do
+      user = register_user!()
+      membership = invite_member!(ctx.forening, user)
+      scope = scope(user, ctx.forening)
+
+      {:ok, reg} =
+        Events.register_for_event(
+          %{ticket_type_id: ctx.ticket_type.id, membership_id: membership.id},
+          tenant: ctx.forening.id,
+          scope: scope
+        )
+
+      {:ok, cancelled} = Events.cancel_registration(reg, scope: scope)
+      assert cancelled.status == :cancelled
+    end
+
     test "duplicate registration rejected by identity", ctx do
       user = register_user!()
       membership = invite_member!(ctx.forening, user)

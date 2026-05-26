@@ -26,10 +26,10 @@ All recurring and async work happens via Oban with proper queue isolation, dashb
 - [ ] Finds memberships whose subscription lapsed past grace period → marks `:inactive`
 - [ ] Emits audit log entry
 
-#### `Exhs.Workers.WaitlistPromoter`
-- [ ] Triggered on registration cancellation
-- [ ] Promotes first waitlisted registration in FIFO order
-- [ ] Sends confirmation email
+#### `Exhs.Events.WaitlistPromoter`
+- [x] Triggered on registration cancellation (after_action enqueues job)
+- [x] Promotes first waitlisted registration in FIFO order
+- [ ] Sends confirmation email (needs Task 11)
 
 #### `Exhs.Workers.NewsletterSender`
 - [ ] Triggered when newsletter scheduled

@@ -42,7 +42,7 @@ Foreninger create events, members register, tickets can be free or paid, capacit
 ### Code interface
 - [x] `Exhs.Events.register_for_event` — free tickets get immediate confirm/waitlist
 - [x] `Exhs.Events.cancel_registration` — sets status + cancelled_at
-- [ ] Waitlist promotion worker on cancellation (Task 13)
+- [x] Waitlist promotion worker on cancellation (Task 13)
 - [x] `Exhs.Events.list_registrations` (admin)
 
 ### Policies
@@ -52,7 +52,7 @@ Foreninger create events, members register, tickets can be free or paid, capacit
 
 ### Capacity + waitlist
 - [x] Capacity enforced via count in before_action hook
-- [ ] Waitlist FIFO promotion handled by Oban worker on cancellations (Task 13)
+- [x] Waitlist FIFO promotion handled by Oban worker on cancellations (Task 13)
 
 ### Tests
 - [x] Cannot register without active membership (membership-required event)

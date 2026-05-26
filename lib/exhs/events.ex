@@ -28,6 +28,7 @@ defmodule Exhs.Events do
     resource Exhs.Events.Registration do
       define :register_for_event, action: :register
       define :cancel_registration, action: :cancel
+      define :promote_registration, action: :promote
       define :get_registration_by_id, action: :get_by_id, args: [:id], get?: true
       define :list_registrations, action: :read
     end
