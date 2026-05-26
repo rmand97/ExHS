@@ -36,6 +36,14 @@ services:
       timeout: 5s
       retries: 10
 
+  stripe-mock:
+    image: stripe/stripe-mock:latest
+    container_name: exhs-stripe-mock
+    restart: unless-stopped
+    ports:
+      - "12111:12111"
+      - "12112:12112"
+
   minio-init:
     image: minio/mc:latest
     container_name: exhs-minio-init

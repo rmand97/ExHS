@@ -5,7 +5,7 @@ defmodule Exhs.Organizations.MemberGroup do
     domain: Exhs.Organizations,
     data_layer: AshPostgres.DataLayer,
     authorizers: [Ash.Policy.Authorizer],
-    extensions: [AshPaperTrail.Resource]
+    extensions: [AshEvents.Events]
 
   postgres do
     table "member_groups"
@@ -18,16 +18,8 @@ defmodule Exhs.Organizations.MemberGroup do
     end
   end
 
-  paper_trail do
-    primary_key_type :uuid_v7
-    change_tracking_mode :changes_only
-    store_action_name? true
-    sensitive_attributes :ignore
-    only_when_changed? true
-    reference_source? false
-    ignore_attributes [:inserted_at]
-    attributes_as_attributes [:forening_id]
-    belongs_to_actor :user, Exhs.Accounts.User, domain: Exhs.Accounts
+  events do
+    event_log Exhs.Audit.EventLog
   end
 
   actions do

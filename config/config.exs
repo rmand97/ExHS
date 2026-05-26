@@ -55,7 +55,7 @@ config :spark,
 config :exhs,
   ecto_repos: [Exhs.Repo],
   generators: [timestamp_type: :utc_datetime],
-  ash_domains: [Exhs.Accounts, Exhs.Organizations],
+  ash_domains: [Exhs.Accounts, Exhs.Organizations, Exhs.Billing, Exhs.Audit],
   ash_authentication: [return_error_on_invalid_magic_link_token?: true]
 
 # Oban — background job processing. Queues are sized per workload; see tasks/13.

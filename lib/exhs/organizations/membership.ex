@@ -5,7 +5,7 @@ defmodule Exhs.Organizations.Membership do
     domain: Exhs.Organizations,
     data_layer: AshPostgres.DataLayer,
     authorizers: [Ash.Policy.Authorizer],
-    extensions: [AshPaperTrail.Resource]
+    extensions: [AshEvents.Events]
 
   postgres do
     table "memberships"
@@ -17,16 +17,8 @@ defmodule Exhs.Organizations.Membership do
     end
   end
 
-  paper_trail do
-    primary_key_type :uuid_v7
-    change_tracking_mode :changes_only
-    store_action_name? true
-    sensitive_attributes :ignore
-    only_when_changed? true
-    reference_source? false
-    ignore_attributes [:inserted_at, :updated_at]
-    attributes_as_attributes [:forening_id]
-    belongs_to_actor :user, Exhs.Accounts.User, domain: Exhs.Accounts
+  events do
+    event_log Exhs.Audit.EventLog
   end
 
   actions do
@@ -73,6 +65,10 @@ defmodule Exhs.Organizations.Membership do
       require_atomic? false
       validate Exhs.Organizations.Membership.Validations.NotLastAdminDestroy
     end
+
+    update :set_stripe_customer do
+      accept [:stripe_customer_id]
+    end
   end
 
   policies do
@@ -112,6 +108,10 @@ defmodule Exhs.Organizations.Membership do
     policy action(:leave) do
       authorize_if expr(user_id == ^actor(:id))
     end
+
+    policy action(:set_stripe_customer) do
+      forbid_if always()
+    end
   end
 
   multitenancy do
@@ -137,6 +137,8 @@ defmodule Exhs.Organizations.Membership do
     attribute :joined_at, :utc_datetime_usec, public?: true
     attribute :activated_at, :utc_datetime_usec, public?: true
     attribute :deactivated_at, :utc_datetime_usec, public?: true
+
+    attribute :stripe_customer_id, :string, public?: true
 
     create_timestamp :inserted_at
     update_timestamp :updated_at

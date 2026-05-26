@@ -4,6 +4,9 @@ Project-specific guidance for AI agents working on this codebase. Framework-leve
 
 ## General guidance
 
+### Ask if you don't know
+title says it all. If you are not sure how to do something, ask.
+
 ### Ash First
 Always use Ash concepts, almost never Ecto concepts directly. Think hard about the "Ash way" to do things. If you don't know, look in the `ash-framework` skill and the rules & docs of associated packages.
 

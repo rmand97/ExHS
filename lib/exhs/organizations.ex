@@ -1,13 +1,9 @@
 defmodule Exhs.Organizations do
   @moduledoc false
-  use Ash.Domain, otp_app: :exhs, extensions: [AshAdmin.Domain, AshPaperTrail.Domain]
+  use Ash.Domain, otp_app: :exhs, extensions: [AshAdmin.Domain]
 
   admin do
     show? true
-  end
-
-  paper_trail do
-    include_versions? true
   end
 
   resources do
@@ -15,6 +11,7 @@ defmodule Exhs.Organizations do
       define :create_forening, action: :create
       define :update_forening, action: :update
       define :archive_forening, action: :archive
+      define :set_forening_stripe_account, action: :set_stripe_account
       define :get_forening_by_id, action: :get_by_id, args: [:id], get?: true
       define :get_forening_by_slug, action: :get_by_slug, args: [:slug], get?: true
       define :get_forening_by_subdomain, action: :get_by_subdomain, args: [:subdomain], get?: true
@@ -28,6 +25,7 @@ defmodule Exhs.Organizations do
       define :deactivate_member, action: :deactivate
       define :set_member_role, action: :set_role
       define :leave_forening, action: :leave
+      define :set_membership_stripe_customer, action: :set_stripe_customer
       define :list_memberships, action: :read
     end
 

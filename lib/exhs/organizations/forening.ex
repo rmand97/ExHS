@@ -5,22 +5,15 @@ defmodule Exhs.Organizations.Forening do
     domain: Exhs.Organizations,
     data_layer: AshPostgres.DataLayer,
     authorizers: [Ash.Policy.Authorizer],
-    extensions: [AshPaperTrail.Resource]
+    extensions: [AshEvents.Events]
 
   postgres do
     table "foreninger"
     repo Exhs.Repo
   end
 
-  paper_trail do
-    primary_key_type :uuid_v7
-    change_tracking_mode :changes_only
-    store_action_name? true
-    sensitive_attributes :ignore
-    only_when_changed? true
-    reference_source? false
-    ignore_attributes [:inserted_at, :updated_at]
-    belongs_to_actor :user, Exhs.Accounts.User, domain: Exhs.Accounts
+  events do
+    event_log Exhs.Audit.EventLog
   end
 
   actions do
@@ -51,6 +44,10 @@ defmodule Exhs.Organizations.Forening do
     update :archive do
       accept []
       change set_attribute(:active, false)
+    end
+
+    update :set_stripe_account do
+      accept [:stripe_account_id, :stripe_account_status]
     end
 
     read :get_by_id do
@@ -90,6 +87,10 @@ defmodule Exhs.Organizations.Forening do
     policy action(:archive) do
       forbid_if always()
     end
+
+    policy action(:set_stripe_account) do
+      forbid_if always()
+    end
   end
 
   attributes do
@@ -118,6 +119,14 @@ defmodule Exhs.Organizations.Forening do
     attribute :kontingent_amount_cents, :integer, public?: true
     attribute :kontingent_currency, :string, public?: true, default: "DKK"
     attribute :kontingent_stripe_price_id, :string, public?: true
+
+    attribute :stripe_account_id, :string, public?: true
+
+    attribute :stripe_account_status, Exhs.Billing.Types.ConnectAccountStatus do
+      public? true
+      allow_nil? false
+      default :none
+    end
 
     attribute :active, :boolean do
       allow_nil? false

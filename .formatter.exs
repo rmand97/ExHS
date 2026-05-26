@@ -3,7 +3,7 @@
     :ash_admin,
     :ash_authentication_phoenix,
     :ash_authentication,
-    :ash_paper_trail,
+    :ash_events,
     :ash_postgres,
     :ash_phoenix,
     :ash,

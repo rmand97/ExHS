@@ -13,6 +13,8 @@ require Ash.Query
 require Logger
 
 alias Exhs.Accounts.User
+alias Exhs.Billing
+alias Exhs.Billing.{Payment, Subscription}
 alias Exhs.Organizations
 alias Exhs.Organizations.Forening
 alias Exhs.Organizations.Group
@@ -29,8 +31,9 @@ defmodule Exhs.Seeds do
 
     user = upsert_test_user()
     forening = upsert_default_forening()
-    upsert_membership(user, forening)
+    membership = upsert_membership(user, forening)
     upsert_groups(forening)
+    upsert_sample_billing(forening, membership)
     # _event = upsert_sample_event(forening)     # Task 9
     # _product = upsert_sample_product(forening) # Task 10
 
@@ -160,6 +163,111 @@ defmodule Exhs.Seeds do
         Logger.info("Created group: #{attrs.name}")
       end
     end)
+  end
+
+  # Seeds use placeholder Stripe IDs — no Stripe API calls happen here. They
+  # exist so a fresh clone shows what a member's billing state looks like.
+  @seed_stripe_account_id "acct_demo_seed"
+  @seed_subscription_id "sub_demo_seed"
+  @seed_payment_intent_id "pi_demo_seed"
+  @seed_customer_id "cus_demo_seed"
+
+  defp upsert_sample_billing(forening, membership) do
+    forening = ensure_seed_connect_account(forening)
+    _membership = ensure_seed_customer(membership, forening)
+    subscription = upsert_seed_subscription(forening, membership)
+    upsert_seed_payment(forening, membership, subscription)
+  end
+
+  defp ensure_seed_connect_account(%Forening{stripe_account_id: id} = f) when is_binary(id), do: f
+
+  defp ensure_seed_connect_account(forening) do
+    Organizations.set_forening_stripe_account!(
+      forening,
+      %{stripe_account_id: @seed_stripe_account_id, stripe_account_status: :active},
+      authorize?: false
+    )
+    |> tap(fn _ -> Logger.info("Seeded Connect account on #{forening.name}") end)
+  end
+
+  defp ensure_seed_customer(%Membership{stripe_customer_id: id} = m, _f) when is_binary(id), do: m
+
+  defp ensure_seed_customer(membership, forening) do
+    Organizations.set_membership_stripe_customer!(
+      membership,
+      %{stripe_customer_id: @seed_customer_id},
+      tenant: forening.id,
+      authorize?: false
+    )
+    |> tap(fn _ -> Logger.info("Seeded Stripe customer on test membership") end)
+  end
+
+  defp upsert_seed_subscription(forening, membership) do
+    existing =
+      Subscription
+      |> Ash.Query.filter(stripe_subscription_id == ^@seed_subscription_id)
+      |> Ash.read_one!(tenant: forening.id, authorize?: false)
+
+    case existing do
+      %Subscription{} = s ->
+        Logger.info("Subscription already exists")
+        s
+
+      nil ->
+        period_start = DateTime.utc_now()
+        period_end = DateTime.add(period_start, 365, :day)
+
+        s =
+          Billing.create_subscription!(
+            %{
+              membership_id: membership.id,
+              stripe_subscription_id: @seed_subscription_id,
+              stripe_customer_id: @seed_customer_id,
+              status: :active,
+              current_period_start: period_start,
+              current_period_end: period_end,
+              cancel_at_period_end: false
+            },
+            tenant: forening.id,
+            authorize?: false
+          )
+
+        Logger.info("Created seed subscription")
+        s
+    end
+  end
+
+  defp upsert_seed_payment(forening, membership, _subscription) do
+    existing =
+      Payment
+      |> Ash.Query.filter(stripe_payment_intent_id == ^@seed_payment_intent_id)
+      |> Ash.read_one!(tenant: forening.id, authorize?: false)
+
+    case existing do
+      %Payment{} = p ->
+        Logger.info("Payment already exists")
+        p
+
+      nil ->
+        p =
+          Billing.record_payment!(
+            %{
+              payable_type: :subscription,
+              payable_id: membership.id,
+              amount_cents: 30_000,
+              currency: "DKK",
+              status: :succeeded,
+              stripe_payment_intent_id: @seed_payment_intent_id,
+              description: "Kontingent — seed",
+              paid_at: DateTime.utc_now()
+            },
+            tenant: forening.id,
+            authorize?: false
+          )
+
+        Logger.info("Created seed payment")
+        p
+    end
   end
 end
 

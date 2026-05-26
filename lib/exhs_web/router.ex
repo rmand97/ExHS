@@ -36,6 +36,16 @@ defmodule ExhsWeb.Router do
       required?: false
   end
 
+  pipeline :stripe_webhook do
+    plug :accepts, ["json"]
+  end
+
+  scope "/webhook", ExhsWeb do
+    pipe_through :stripe_webhook
+
+    post "/stripe", StripeWebhookController, :create
+  end
+
   scope "/mcp" do
     pipe_through :mcp
 

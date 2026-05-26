@@ -6,6 +6,11 @@ config :ash, policies: [show_policy_breakdowns?: true], disable_async?: true
 # Run Oban jobs inline during tests
 config :exhs, Oban, testing: :inline
 
+# Tests use a stub instead of hitting Stripe. The stub returns canned data
+# and verifies signatures by checking against a known marker.
+config :exhs, :stripe_client, Exhs.Billing.StripeClient.Stub
+config :exhs, :stripe_webhook_signing_secret, "whsec_test_secret"
+
 # Local Minio for tests
 config :ex_aws,
   access_key_id: "minioadmin",

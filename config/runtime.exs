@@ -34,6 +34,8 @@ if config_env() in [:dev, :prod] do
   config :stripity_stripe,
     api_key: System.get_env("STRIPE_SECRET_KEY"),
     webhook_signing_secret: System.get_env("STRIPE_WEBHOOK_SIGNING_SECRET")
+
+  config :exhs, :stripe_webhook_signing_secret, System.get_env("STRIPE_WEBHOOK_SIGNING_SECRET")
 end
 
 if config_env() == :prod do
