@@ -40,9 +40,9 @@ Repeatable, automated deploys to staging and production with zero-downtime. CI r
 - [ ] On main: above + build & push image, deploy to staging
 - [ ] Manual workflow: promote staging image → production
 
-### Aspire (local only — settled in Task 1)
-- Aspire is the **local-infrastructure orchestrator** (Postgres + Minio); it is **not** used in production.
-- Prod uses hosting-provider primitives (chosen above). No carry-over of Aspire concepts.
+### Local infrastructure (settled in Task 1)
+- Docker Compose is the **local-infrastructure orchestrator** (Postgres + Minio); it is **not** used in production.
+- Prod uses hosting-provider primitives (chosen above).
 
 ### Tests
 - [ ] No ExUnit tests for deployment itself — CI runs the whole test suite on every PR, that's the gate

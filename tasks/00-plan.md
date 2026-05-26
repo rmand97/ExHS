@@ -63,4 +63,5 @@ These are unresolved cross-cutting questions. Each is also surfaced inside the r
 
 ## Decided
 
-- **Aspire** — used as the local-infrastructure orchestrator for Postgres + Minio (primary). `docker-compose.yml` kept as fallback for non-Aspire users and reference. Not used in production.
+- **Docker Compose** — local-infrastructure orchestrator for Postgres + Minio. Not used in production.
+- **No event sourcing** — AshEvents stays as audit log only. Full event sourcing (replay, projections) rejected: CRUD-heavy domain doesn't benefit, Stripe state is external and non-replayable, GDPR conflicts with immutable event logs, per-tenant replay unsupported upstream. Centralized audit table is the right tradeoff.

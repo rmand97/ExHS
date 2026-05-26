@@ -37,22 +37,11 @@ Get a developer from `git clone` to a running app with all dependencies installe
 
 ### Local infrastructure
 
-**Decision: .NET Aspire is the primary local orchestrator.** `docker-compose.yml` is kept as a fallback for non-Aspire users and as a reference for the same services.
-
-#### Aspire AppHost (primary)
-- [ ] Create Aspire AppHost project (location TBD — sibling `aspire/` directory? Decide path)
-- [ ] AppHost resources:
-  - [ ] Postgres 17 with persistent volume; exposed on `localhost:5432`; user/pass/db match `config/dev.exs`
-  - [ ] Minio with persistent volume; exposed on `localhost:9000` (API) and `localhost:9001` (console); creds `minioadmin/minioadmin`
-  - [ ] Minio bucket bootstrap: `exhs-dev`, `exhs-test`
-- [ ] Document `dotnet run --project aspire/...` in README, replacing the `docker compose up -d` step (compose stays as fallback)
-- [ ] CI still uses GH Actions postgres service container (Aspire is local-only)
-
-#### Docker compose (fallback)
+#### Docker Compose
 - [x] `docker-compose.yml` at repo root with:
   - [x] `postgres` service (17-alpine), volume-mounted data dir, healthcheck
   - [x] `minio` service exposing API + console ports, default bucket auto-created via `mc` init container (creates `exhs-dev` and `exhs-test`)
-- [x] Document `docker compose up -d` in README as the fallback path
+- [x] Document `docker compose up -d` in README
 - [x] `config/dev.exs` and `config/test.exs` already pointed at local Postgres (matches both)
 - [x] Wire S3 client config to Minio in dev/test (endpoint, access key, region)
 
@@ -81,11 +70,10 @@ Get a developer from `git clone` to a running app with all dependencies installe
 - [ ] `mix phx.server` smoke test (deferred — user setting up local Docker stack)
 
 ## Open decisions
-- [ ] **Aspire AppHost location** — sibling `aspire/` dir vs separate repo?
 - [ ] **Asset pipeline** — keep esbuild/tailwind defaults from Phoenix, or switch?
 
 ## Decided
-- **Aspire** is the primary local infrastructure orchestrator (Postgres + Minio). Docker compose kept as fallback. Not used in production (see Task 22).
+- **Docker Compose** is the local infrastructure orchestrator (Postgres + Minio). Not used in production (see Task 22).
 - **Toolchain**: Elixir 1.19.5 / OTP 28 / Node 22 via `mise`.
 - **Postgres**: 17.
 - **Env loading**: `dotenvy` in dev/test runtime config.
