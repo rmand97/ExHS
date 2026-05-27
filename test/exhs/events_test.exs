@@ -302,7 +302,9 @@ defmodule Exhs.EventsTest do
 
       {:ok, _} = Events.cancel_registration(reg1, scope: scope(user1, ctx.forening))
 
-      promoted = Ash.get!(Exhs.Events.Registration, reg2.id, tenant: ctx.forening.id, authorize?: false)
+      promoted =
+        Ash.get!(Exhs.Events.Registration, reg2.id, tenant: ctx.forening.id, authorize?: false)
+
       assert promoted.status == :confirmed
     end
 
@@ -349,8 +351,11 @@ defmodule Exhs.EventsTest do
 
       {:ok, _} = Events.cancel_registration(reg1, scope: scope(user1, ctx.forening))
 
-      promoted2 = Ash.get!(Exhs.Events.Registration, reg2.id, tenant: ctx.forening.id, authorize?: false)
-      still_waiting = Ash.get!(Exhs.Events.Registration, reg3.id, tenant: ctx.forening.id, authorize?: false)
+      promoted2 =
+        Ash.get!(Exhs.Events.Registration, reg2.id, tenant: ctx.forening.id, authorize?: false)
+
+      still_waiting =
+        Ash.get!(Exhs.Events.Registration, reg3.id, tenant: ctx.forening.id, authorize?: false)
 
       assert promoted2.status == :confirmed
       assert still_waiting.status == :waitlisted

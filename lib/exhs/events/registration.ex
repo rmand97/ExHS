@@ -40,12 +40,12 @@ defmodule Exhs.Events.Registration do
       change set_attribute(:cancelled_at, &DateTime.utc_now/0)
 
       change after_action(fn _changeset, registration, _context ->
-        %{ticket_type_id: registration.ticket_type_id, tenant: registration.forening_id}
-        |> Exhs.Events.WaitlistPromoter.new()
-        |> Oban.insert()
+               %{ticket_type_id: registration.ticket_type_id, tenant: registration.forening_id}
+               |> Exhs.Events.WaitlistPromoter.new()
+               |> Oban.insert()
 
-        {:ok, registration}
-      end)
+               {:ok, registration}
+             end)
     end
 
     update :promote do
