@@ -25,11 +25,36 @@ import {LiveSocket} from "phoenix_live_view"
 import {hooks as colocatedHooks} from "phoenix-colocated/exhs"
 import topbar from "../vendor/topbar"
 
+const Uploaders = {
+  S3(entries, onViewError) {
+    entries.forEach((entry) => {
+      const { url } = entry.meta
+      const xhr = new XMLHttpRequest()
+      onViewError(() => xhr.abort())
+      xhr.onload = () =>
+        xhr.status >= 200 && xhr.status < 300
+          ? entry.progress(100)
+          : entry.error()
+      xhr.onerror = () => entry.error()
+      xhr.upload.addEventListener("progress", (event) => {
+        if (event.lengthComputable) {
+          const percent = Math.round((event.loaded / event.total) * 100)
+          if (percent < 100) entry.progress(percent)
+        }
+      })
+      xhr.open("PUT", url, true)
+      xhr.setRequestHeader("content-type", entry.meta.content_type || entry.file.type)
+      xhr.send(entry.file)
+    })
+  },
+}
+
 const csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute("content")
 const liveSocket = new LiveSocket("/live", Socket, {
   longPollFallbackMs: 2500,
   params: {_csrf_token: csrfToken},
   hooks: {...colocatedHooks},
+  uploaders: Uploaders,
 })
 
 // Show progress bar on live navigation and form submits

@@ -152,4 +152,8 @@ if config_env() == :prod do
   end
 
   config :exhs, :s3_bucket, System.fetch_env!("S3_BUCKET")
+
+  if s3_public_base = System.get_env("S3_PUBLIC_BASE_URL") do
+    config :exhs, :s3_public_base_url, s3_public_base
+  end
 end

@@ -12,6 +12,7 @@ config :ex_aws, :s3,
   port: 9000
 
 config :exhs, :s3_bucket, "exhs-dev"
+config :exhs, :s3_public_base_url, "http://localhost:9000"
 
 # Configure your database
 config :exhs, Exhs.Repo,

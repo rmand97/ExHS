@@ -35,6 +35,8 @@ defmodule Exhs.Organizations.Forening do
       accept [
         :name,
         :branding,
+        :logo_url,
+        :banner_url,
         :kontingent_amount_cents,
         :kontingent_currency,
         :kontingent_stripe_price_id
@@ -115,6 +117,9 @@ defmodule Exhs.Organizations.Forening do
       public? true
       default %{}
     end
+
+    attribute :logo_url, :string, public?: true
+    attribute :banner_url, :string, public?: true
 
     attribute :kontingent_amount_cents, :integer, public?: true
     attribute :kontingent_currency, :string, public?: true, default: "DKK"

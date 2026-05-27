@@ -9,48 +9,54 @@ Uniform file upload pipeline backed by S3-compatible storage (Minio in dev, real
 ## Plan
 
 ### Storage adapter
-- [ ] Wrap `ex_aws_s3` in a thin internal module `Exhs.Storage`
-- [ ] Config-driven endpoint/bucket/region so dev=Minio, prod=real provider
-- [ ] Operations: `put`, `get_signed_url`, `delete`, `head`
+- [x] Wrap `ex_aws_s3` in a thin internal module `Exhs.Storage` (behaviour + delegator)
+- [x] Config-driven endpoint/bucket/region so dev=Minio, prod=real provider
+- [x] Operations: `put`, `presigned_put_url`, `delete`, `head`
+- [x] `Exhs.Storage.S3` live implementation
+- [x] `Exhs.Storage.Stub` test stub (Process dictionary, follows StripeClient.Stub pattern)
+- [x] `public_url/1` and `generate_key/4` helpers
 
 ### Upload flow (Phoenix LiveView)
-- [ ] Use LiveView's external upload with presigned PUT to S3/Minio
-- [ ] Client uploads directly to storage (no proxying through app server)
-- [ ] On success, store the object key on the resource
+- [x] `ExhsWeb.UploadHelpers` — shared presigner + consume logic
+- [x] S3 external uploader added to `assets/js/app.js`
+- [x] CORS configured on Minio via `MINIO_API_CORS_ALLOW_ORIGIN`
+- [ ] LiveView pages (deferred — SettingsLive, ForeningSettingsLive, EventFormLive)
 
 ### File model
-- [ ] Decide: store keys directly on owning resources (`avatar_url`, `cover_image_url`) OR introduce a generic `Exhs.Storage.Attachment` resource
-- [ ] Recommendation: store keys on owners for v1; add Attachment resource only if needed later
+- [x] **Decided: store keys on owners for v1** — no generic Attachment resource
+- [x] Added explicit `logo_url` and `banner_url` string attributes to Forening (migration: `add_forening_branding_urls`)
 
 ### Image transformations
-- [ ] Decide on resizing approach: on-the-fly via `imgproxy`/`imageflow`, or pre-generated variants on upload
-- [ ] Recommendation: on-the-fly via imgproxy sidecar (added to Docker compose in Task 1) — simpler and cacheable
+- [x] **Decided: defer imgproxy** — upload originals only; add transforms later
 
 ### Access control
-- [ ] Public-read for branding/event covers/product images (URLs can be CDN-cached)
+- [x] Public-read for branding/event covers/product images (Minio buckets have anonymous download policy)
 - [ ] Private + presigned URLs for any sensitive uploads (digital product downloads — Task 10)
 - [ ] Bucket policy / per-object ACL strategy documented
 
 ### Cleanup
-- [ ] When a resource is destroyed, delete the underlying object (after_action or Oban worker)
+- [x] `Exhs.Storage.CleanupWorker` — Oban worker for async S3 deletion
+- [x] `ExhsWeb.UploadHelpers.maybe_cleanup_old_key/2` — enqueues cleanup when key replaced
 - [ ] Orphan-sweeper Oban job (Task 13)
 
 ### Tests
 S3 is an external dep — test thoroughly against local Minio (the same protocol as prod S3).
 
-- [ ] Upload roundtrip against Minio in test env
-- [ ] Presigned URL works and expires
-- [ ] Deleting a resource removes its object
-- [ ] Failure paths: network error, 4xx (e.g. forbidden), 5xx — verify we don't leak orphans on the DB side
+- [x] Upload roundtrip against Minio in test env
+- [x] Presigned URL works
+- [x] Delete removes object, idempotent on nonexistent
+- [x] Stub roundtrip and override tests
+- [x] CleanupWorker perform + enqueue tests
+- [ ] Failure paths: network error, 4xx, 5xx — partial coverage via stub overrides
 - [ ] Orphan-sweeper job removes objects without a referencing resource and only those
 - [ ] File-size limit enforced before we hit the bucket
 
 ## Open decisions
 - [ ] **Prod S3 provider** — AWS S3, Cloudflare R2 (zero egress), Backblaze B2 (cheap), Hetzner Object Storage (EU)
 - [ ] **CDN** — Cloudflare in front of bucket? BunnyCDN?
-- [ ] **Image transformation** — imgproxy vs Phoenix-side via `image`/`vix`?
+- [x] **Image transformation** — deferred; upload originals only for now
 - [ ] **EU data residency** — GDPR pushes us toward EU-located buckets; R2/Hetzner/Scaleway?
-- [ ] **Max file sizes** — per upload type
+- [x] **Max file sizes** — 5MB avatars, 10MB covers/branding (configured in `allow_upload` when LiveViews added)
 
 ## Done when
 - Avatar upload works in dev against Minio

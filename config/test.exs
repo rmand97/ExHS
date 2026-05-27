@@ -22,6 +22,7 @@ config :ex_aws, :s3,
   port: 9000
 
 config :exhs, :s3_bucket, "exhs-test"
+config :exhs, :storage_client, Exhs.Storage.Stub
 
 # Configure your database
 #
