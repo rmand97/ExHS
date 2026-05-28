@@ -151,6 +151,7 @@ Maintain this syntax. Do not introduce `tailwind.config.js`.
 When relevant, lean on these skills:
 - `ash-framework` — Ash and ash_* usage rules
 - `phoenix-framework` — Phoenix and phoenix_* usage rules
+- `livefilter` — LiveFilter setup, filter types, pagination for list pages
 - `simplify` — review for reuse and quality after writing code
 - `review` — review a pull request
 - `security-review` — security pass on the current branch

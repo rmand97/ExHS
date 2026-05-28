@@ -3,6 +3,7 @@
 @source "../css";
 @source "../js";
 @source "../../lib/exhs_web";
+@source "../../deps/livefilter";
 
 @plugin "../vendor/heroicons";
 

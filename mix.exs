@@ -117,7 +117,8 @@ defmodule Exhs.MixProject do
       {:tidewave, "~> 0.5", only: [:dev]},
       {:credo, "~> 1.7", only: [:dev, :test], runtime: false},
       {:dialyxir, "~> 1.4", only: [:dev, :test], runtime: false},
-      {:canonical_tailwind, "~> 0.1", only: [:dev, :test], runtime: false}
+      {:canonical_tailwind, "~> 0.1", only: [:dev, :test], runtime: false},
+      {:livefilter, "~> 0.1.8"}
     ]
   end
 
