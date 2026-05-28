@@ -1,6 +1,6 @@
 defmodule Exhs.Accounts do
   @moduledoc false
-  use Ash.Domain, otp_app: :exhs, extensions: [AshAdmin.Domain]
+  use Ash.Domain, otp_app: :exhs, extensions: [AshAdmin.Domain, AshPhoenix]
 
   admin do
     show? true

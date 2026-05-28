@@ -25,6 +25,7 @@ defmodule Exhs.Billing do
         get?: true
 
       define :list_subscriptions, action: :read
+      define :list_my_subscriptions, action: :my_subscriptions
     end
 
     resource Exhs.Billing.Payment do
@@ -39,6 +40,7 @@ defmodule Exhs.Billing do
         get?: true
 
       define :list_payments, action: :read
+      define :list_my_payments, action: :my_payments, args: [:membership_ids]
     end
   end
 

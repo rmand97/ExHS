@@ -27,6 +27,7 @@ defmodule Exhs.Organizations do
       define :leave_forening, action: :leave
       define :set_membership_stripe_customer, action: :set_stripe_customer
       define :list_memberships, action: :read
+      define :list_my_memberships, action: :my_memberships
     end
 
     resource Exhs.Organizations.Group do

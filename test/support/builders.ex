@@ -111,6 +111,14 @@ defmodule Exhs.Test.Builders do
     )
   end
 
+  def register_for_event!(forening, membership, ticket_type) do
+    Exhs.Events.register_for_event!(
+      %{ticket_type_id: ticket_type.id, membership_id: membership.id},
+      tenant: forening.id,
+      authorize?: false
+    )
+  end
+
   def scope(user, forening) do
     %Exhs.Scope{actor: user, tenant: forening.id}
   end

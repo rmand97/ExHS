@@ -46,6 +46,17 @@ defmodule Exhs.Billing.Payment do
       get_by :id
     end
 
+    read :my_payments do
+      multitenancy :bypass_all
+
+      argument :membership_ids, {:array, :uuid} do
+        allow_nil? false
+      end
+
+      filter expr(payable_id in ^arg(:membership_ids))
+      prepare build(sort: [paid_at: :desc])
+    end
+
     read :get_by_payment_intent do
       argument :stripe_payment_intent_id, :string, allow_nil?: false
       filter expr(stripe_payment_intent_id == ^arg(:stripe_payment_intent_id))
@@ -60,6 +71,10 @@ defmodule Exhs.Billing.Payment do
 
     bypass Exhs.Checks.Superadmin do
       authorize_if always()
+    end
+
+    bypass action(:my_payments) do
+      authorize_if actor_present()
     end
 
     policy action_type(:read) do

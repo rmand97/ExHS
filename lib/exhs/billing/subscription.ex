@@ -54,6 +54,12 @@ defmodule Exhs.Billing.Subscription do
       get_by :id
     end
 
+    read :my_subscriptions do
+      multitenancy :bypass_all
+      filter expr(membership.user_id == ^actor(:id))
+      prepare build(sort: [inserted_at: :desc], load: [membership: [:forening]])
+    end
+
     read :get_by_stripe_id do
       argument :stripe_subscription_id, :string, allow_nil?: false
       filter expr(stripe_subscription_id == ^arg(:stripe_subscription_id))
@@ -68,6 +74,10 @@ defmodule Exhs.Billing.Subscription do
 
     bypass Exhs.Checks.Superadmin do
       authorize_if always()
+    end
+
+    policy action(:my_subscriptions) do
+      authorize_if actor_present()
     end
 
     policy action_type(:read) do

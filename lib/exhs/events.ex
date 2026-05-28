@@ -34,6 +34,7 @@ defmodule Exhs.Events do
       define :promote_registration, action: :promote
       define :get_registration_by_id, action: :get_by_id, args: [:id], get?: true
       define :list_registrations, action: :read
+      define :list_my_registrations, action: :my_registrations
     end
   end
 end

@@ -33,14 +33,20 @@ defmodule Exhs.Seeds do
 
     user = upsert_test_user()
     forening = upsert_default_forening()
-    membership = upsert_membership(user, forening)
+    membership = upsert_membership(user, forening, :admin)
     upsert_groups(forening)
     upsert_sample_billing(forening, membership)
     upsert_sample_events(forening, membership)
-    # _product = upsert_sample_product(forening) # Task 10
+
+    second = upsert_second_forening()
+    second_membership = upsert_membership(user, second, :member)
+    upsert_sport_events(second, second_membership)
 
     Logger.info(
-      "Seed complete. Sign in with #{user.email} / #{@test_password} — forening at #{forening.subdomain}.lvh.me"
+      "Seed complete. Sign in with #{user.email} / #{@test_password}\n" <>
+        "  Demo:   #{forening.subdomain}.lvh.me\n" <>
+        "  Sport:  #{second.subdomain}.lvh.me\n" <>
+        "  Dashboard: lvh.me:4000/dashboard"
     )
   end
 
@@ -146,7 +152,41 @@ defmodule Exhs.Seeds do
     |> tap(fn _ -> Logger.info("Added branding to #{forening.name}") end)
   end
 
-  defp upsert_membership(user, forening) do
+  defp upsert_second_forening do
+    existing =
+      Forening
+      |> Ash.Query.filter(slug == "sport")
+      |> Ash.read_one!(authorize?: false)
+
+    case existing do
+      %Forening{} = f ->
+        Logger.info("Second forening already exists: #{f.name}")
+        f
+
+      nil ->
+        f =
+          Organizations.create_forening!(
+            %{
+              name: "Sportsklubben",
+              slug: "sport",
+              subdomain: "sport",
+              kontingent_amount_cents: 50_000,
+              kontingent_currency: "DKK",
+              branding: %{
+                "tagline" => "Motion og fællesskab",
+                "about" =>
+                  "Sportsklubben samler alle, der elsker motion — fra løb og fodbold til yoga og badminton."
+              }
+            },
+            authorize?: false
+          )
+
+        Logger.info("Created second forening: #{f.name}")
+        f
+    end
+  end
+
+  defp upsert_membership(user, forening, role \\ :admin) do
     existing =
       Membership
       |> Ash.Query.filter(user_id == ^user.id)
@@ -159,12 +199,12 @@ defmodule Exhs.Seeds do
 
       nil ->
         m =
-          Organizations.invite_member!(user.id, %{role: :admin},
+          Organizations.invite_member!(user.id, %{role: role},
             tenant: forening.id,
             authorize?: false
           )
 
-        Logger.info("Created admin membership for #{user.email} in #{forening.name}")
+        Logger.info("Created #{role} membership for #{user.email} in #{forening.name}")
         m
     end
   end
@@ -300,7 +340,7 @@ defmodule Exhs.Seeds do
     event = upsert_seed_event(forening, "Generalforsamling 2026", true)
     open_event = upsert_seed_event(forening, "Åbent Hus", false)
     upsert_seed_ticket_types(forening, event, open_event)
-    upsert_seed_registration(forening, event, membership)
+    if membership, do: upsert_seed_registration(forening, event, membership)
   end
 
   defp upsert_seed_event(forening, title, membership_required) do
@@ -385,6 +425,14 @@ defmodule Exhs.Seeds do
 
         Logger.info("Created seed registration for #{event.title}")
     end
+  end
+
+  defp upsert_sport_events(forening, membership) do
+    event = upsert_seed_event(forening, "Fodboldturnering 2026", false)
+    yoga = upsert_seed_event(forening, "Yoga i Parken", false)
+    ensure_ticket_type(forening, event, "Deltager", 5_000, 40)
+    ensure_ticket_type(forening, yoga, "Gratis", 0, nil)
+    if membership, do: upsert_seed_registration(forening, event, membership)
   end
 end
 

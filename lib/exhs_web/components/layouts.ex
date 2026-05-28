@@ -47,14 +47,61 @@ defmodule ExhsWeb.Layouts do
     """
   end
 
+  attr :flash, :map, required: true
+  attr :current_user, :map, required: true
+  slot :inner_block, required: true
+
+  def member(assigns) do
+    ~H"""
+    <div class="bg-base-200 min-h-screen">
+      <nav class="bg-base-100/80 border-base-content/5 navbar sticky top-0 z-50 border-b px-4 backdrop-blur-xl sm:px-6">
+        <div class="flex-1 gap-4">
+          <.link navigate="/dashboard" class="flex items-center gap-2.5">
+            <div class="from-primary text-primary-content to-secondary flex size-8 items-center justify-center rounded-lg bg-linear-to-br text-sm font-bold">
+              E
+            </div>
+            <span class="text-base-content hidden font-semibold tracking-tight sm:inline">
+              Exhs
+            </span>
+          </.link>
+          <div class="hidden items-center gap-1 md:flex">
+            <.nav_link href="/dashboard" label="Dashboard" />
+            <.nav_link href="/registrations" label="Mine events" />
+            <.nav_link href="/payments" label="Betalinger" />
+            <.nav_link href="/profile" label="Profil" />
+          </div>
+        </div>
+        <div class="flex flex-none items-center gap-3">
+          <.theme_toggle />
+          <.avatar initials={user_initials(@current_user)} size="sm" />
+        </div>
+      </nav>
+
+      <div class="border-base-content/5 flex items-center gap-1 border-b px-4 py-2 sm:hidden">
+        <.nav_link href="/dashboard" label="Dashboard" />
+        <.nav_link href="/registrations" label="Mine events" />
+        <.nav_link href="/profile" label="Profil" />
+      </div>
+
+      <main class="px-4 py-6 sm:px-6 lg:px-8">
+        <div class="mx-auto max-w-7xl">
+          {render_slot(@inner_block)}
+        </div>
+      </main>
+
+      <.flash_group flash={@flash} />
+    </div>
+    """
+  end
+
   defp nav_link(assigns) do
     ~H"""
-    <a
-      href={@href}
+    <.link
+      navigate={@href}
       class="hover:bg-base-content/5 hover:text-base-content/80 text-base-content/50 rounded-lg px-3 py-1.5 text-sm font-medium transition"
     >
       {@label}
-    </a>
+    </.link>
     """
   end
 
@@ -65,7 +112,7 @@ defmodule ExhsWeb.Layouts do
     last = (user.last_name || "") |> String.first() || ""
 
     case String.upcase(first <> last) do
-      "" -> String.first(user.email || "?") |> String.upcase()
+      "" -> user.email |> to_string() |> String.first() |> String.upcase()
       initials -> initials
     end
   end
@@ -170,12 +217,12 @@ defmodule ExhsWeb.Layouts do
 
   defp public_nav_link(assigns) do
     ~H"""
-    <a
-      href={@href}
+    <.link
+      navigate={@href}
       class="hover:bg-base-content/5 hover:text-base-content/80 text-base-content/50 rounded-lg px-3 py-1.5 text-sm font-medium transition"
     >
       {@label}
-    </a>
+    </.link>
     """
   end
 

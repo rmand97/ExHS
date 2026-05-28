@@ -69,6 +69,12 @@ defmodule Exhs.Organizations.Membership do
     update :set_stripe_customer do
       accept [:stripe_customer_id]
     end
+
+    read :my_memberships do
+      multitenancy :allow_global
+      filter expr(user_id == ^actor(:id))
+      prepare build(sort: [joined_at: :desc], load: [:forening])
+    end
   end
 
   policies do
@@ -78,6 +84,10 @@ defmodule Exhs.Organizations.Membership do
 
     bypass Exhs.Checks.Superadmin do
       authorize_if always()
+    end
+
+    policy action(:my_memberships) do
+      authorize_if actor_present()
     end
 
     policy action(:join) do

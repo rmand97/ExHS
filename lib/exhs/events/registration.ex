@@ -56,6 +56,16 @@ defmodule Exhs.Events.Registration do
     read :get_by_id do
       get_by :id
     end
+
+    read :my_registrations do
+      multitenancy :bypass_all
+      filter expr(membership.user_id == ^actor(:id))
+
+      prepare build(
+                sort: [registered_at: :desc],
+                load: [ticket_type: [:event], membership: [:forening]]
+              )
+    end
   end
 
   policies do
@@ -69,6 +79,10 @@ defmodule Exhs.Events.Registration do
 
     bypass Exhs.Checks.Superadmin do
       authorize_if always()
+    end
+
+    policy action(:my_registrations) do
+      authorize_if actor_present()
     end
 
     policy action(:register) do
