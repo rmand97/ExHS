@@ -125,6 +125,14 @@ Both plugins and all their checks are explicitly listed in `.credo.exs` under `c
 - Use the imported `<.input>` from `core_components.ex` for form inputs.
 - If you encounter a missing `current_scope` assign error, move routes into the proper `live_session` and pass `current_scope` to `<Layouts.app>`.
 
+## Mobile first & responsive design
+
+Design and build mobile first. Every page and component must work well on small screens before scaling up. Use Tailwind's responsive prefixes (`sm:`, `md:`, `lg:`) to layer on wider-screen layouts — base styles target mobile. Test at narrow viewport widths first. If a layout doesn't work on a phone, it isn't done.
+
+## Component extraction
+
+Extract repeated or complex markup into small private function components within the same LiveView module (`defp card(assigns)`, `defp event_row(assigns)`, etc.). This keeps templates readable and eliminates duplication. If a component is reused across multiple LiveViews, promote it to a shared component module under `ExhsWeb.Components`.
+
 ## Tailwind v4 in this codebase
 
 Tailwind v4 — no `tailwind.config.js`. CSS uses this import syntax in `assets/css/app.css`:
