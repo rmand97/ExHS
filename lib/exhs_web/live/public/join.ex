@@ -6,16 +6,41 @@ defmodule ExhsWeb.PublicLive.Join do
   def mount(_params, _session, socket) do
     if socket.assigns[:current_forening] do
       forening = socket.assigns.current_forening
+      already_member? = already_member?(socket)
 
       {:ok,
        assign(socket,
          page_title: "Bliv medlem af #{forening.name}",
          page_description:
            "Bliv medlem af #{forening.name} og få adgang til events, fællesskab og meget mere.",
-         kontingent_amount: format_kontingent(forening)
+         kontingent_amount: format_kontingent(forening),
+         already_member?: already_member?
        )}
     else
       {:ok, redirect(socket, to: "/")}
+    end
+  end
+
+  @impl true
+  def handle_event("join", _params, socket) do
+    scope = socket.assigns.current_scope
+
+    case Exhs.Organizations.join_forening(%{}, scope: scope) do
+      {:ok, _membership} ->
+        {:noreply,
+         socket
+         |> put_flash(:info, "Velkommen som medlem af #{socket.assigns.current_forening.name}!")
+         |> assign(already_member?: true)}
+
+      {:error, %Ash.Error.Invalid{} = error} ->
+        if identity_error?(error) do
+          {:noreply,
+           socket
+           |> put_flash(:info, "Du er allerede medlem!")
+           |> assign(already_member?: true)}
+        else
+          {:noreply, put_flash(socket, :error, "Noget gik galt. Prøv igen.")}
+        end
     end
   end
 
@@ -54,9 +79,18 @@ defmodule ExhsWeb.PublicLive.Join do
               <a :if={!@current_user} href="/register" class="btn btn-block btn-lg btn-primary">
                 Opret konto
               </a>
-              <a :if={@current_user} href="/" class="btn btn-block btn-lg btn-primary">
+              <button
+                :if={@current_user && !@already_member?}
+                phx-click="join"
+                class="btn btn-block btn-lg btn-primary"
+              >
                 Bliv medlem
-              </a>
+              </button>
+              <div :if={@already_member?} class="text-center">
+                <p class="text-success flex items-center justify-center gap-2 font-medium">
+                  <.icon name="hero-check-circle" class="size-5" /> Du er allerede medlem!
+                </p>
+              </div>
               <p :if={!@current_user} class="text-base-content/50 mt-3 text-center text-sm">
                 Har du allerede en konto?
                 <a href="/sign-in" class="text-primary hover:underline">Log ind</a>
@@ -85,5 +119,22 @@ defmodule ExhsWeb.PublicLive.Join do
 
   defp format_kontingent(%{kontingent_amount_cents: cents, kontingent_currency: currency}) do
     "#{div(cents, 100)} #{currency || "DKK"}/år"
+  end
+
+  defp already_member?(%{assigns: %{current_user: nil}}), do: false
+
+  defp already_member?(%{assigns: %{current_scope: scope}}) do
+    case Exhs.Organizations.list_memberships(scope: scope) do
+      {:ok, memberships} -> Enum.any?(memberships, &(&1.user_id == scope.actor.id))
+      _ -> false
+    end
+  end
+
+  defp identity_error?(%Ash.Error.Invalid{errors: errors}) do
+    Enum.any?(errors, fn
+      %Ash.Error.Changes.InvalidChanges{message: msg} -> msg =~ "unique"
+      %Ash.Error.Invalid.InvalidPrimaryKey{} -> true
+      _ -> false
+    end)
   end
 end

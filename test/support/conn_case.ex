@@ -21,4 +21,12 @@ defmodule ExhsWeb.ConnCase do
     Exhs.DataCase.setup_sandbox(tags)
     {:ok, conn: Phoenix.ConnTest.build_conn()}
   end
+
+  alias AshAuthentication.Plug.Helpers, as: AuthHelpers
+
+  def log_in_user(conn, user) do
+    conn
+    |> Phoenix.ConnTest.init_test_session(%{})
+    |> AuthHelpers.store_in_session(user)
+  end
 end

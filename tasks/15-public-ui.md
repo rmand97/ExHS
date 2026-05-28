@@ -27,7 +27,7 @@ Each forening has a public-facing site at `forening.exhs.dk` with branding, info
 
 ### Join CTA
 - [x] Public "Bliv medlem" page — explains kontingent, lists benefits, links to sign-up
-- [ ] Sign-up flow: register user → join forening → checkout kontingent (handoff to Task 8 flow)
+- [x] Sign-up flow: register user → join forening → checkout kontingent (handoff to Task 8 flow)
 
 ### SEO / metadata
 - [x] Per-page OG tags (title, description, image via assigns in root layout)
@@ -44,9 +44,9 @@ LiveView tests via `Phoenix.LiveViewTest` — focus on mount + primary interacti
 - [x] Public pages mount and render without authentication (13 tests)
 - [x] Tenant isolation: cross-tenant event visibility, cross-tenant event access, bidirectional isolation (4 tests)
 - [x] Redirects without subdomain
-- [ ] Branding loads correctly (forening colour/logo show up on the right subdomain)
+- [x] Branding loads correctly (forening colour/logo show up on the right subdomain)
 - [x] Visiting wrong subdomain shows branded 404
-- [ ] Sign-up / contact form (if any) submits and produces the expected effect
+- [x] Sign-up / contact form (if any) submits and produces the expected effect
 
 ### Decided
 - Routes in English (`/events`, `/join`), UI text in Danish

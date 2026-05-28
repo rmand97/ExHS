@@ -166,6 +166,99 @@ defmodule ExhsWeb.PublicLive.PublicPagesTest do
     end
   end
 
+  describe "branding" do
+    test "renders forening CSS custom properties from branding", %{conn: conn} do
+      forening =
+        create_forening!(%{
+          name: "Branded Forening",
+          subdomain: "branded",
+          branding: %{
+            "primary_color" => "oklch(0.6 0.2 250)",
+            "accent_color" => "oklch(0.7 0.15 150)",
+            "tagline" => "Vi har farver"
+          }
+        })
+
+      {:ok, _view, html} =
+        conn
+        |> forening_conn(forening)
+        |> live("/")
+
+      assert html =~ "--color-primary: oklch(0.6 0.2 250)"
+      assert html =~ "--color-accent: oklch(0.7 0.15 150)"
+    end
+
+    test "renders forening logo when logo_url is set", %{conn: conn} do
+      forening =
+        create_forening!(%{name: "Logo Forening", subdomain: "logof"})
+        |> Exhs.Organizations.update_forening!(%{logo_url: "https://example.com/logo.png"},
+          authorize?: false
+        )
+
+      {:ok, _view, html} =
+        conn
+        |> forening_conn(forening)
+        |> live("/")
+
+      assert html =~ "https://example.com/logo.png"
+    end
+
+    test "renders initial fallback when no logo_url", %{conn: conn, forening: forening} do
+      {:ok, _view, html} =
+        conn
+        |> forening_conn(forening)
+        |> live("/")
+
+      assert html =~ String.first(forening.name)
+    end
+  end
+
+  describe "join flow" do
+    test "authenticated user can join forening", %{conn: conn, forening: forening} do
+      user = register_user!()
+
+      {:ok, view, html} =
+        conn
+        |> log_in_user(user)
+        |> forening_conn(forening)
+        |> live("/join")
+
+      assert html =~ "Bliv medlem"
+      refute html =~ "Du er allerede medlem"
+
+      html = view |> element("button", "Bliv medlem") |> render_click()
+
+      assert html =~ "Du er allerede medlem"
+
+      membership = membership_for!(forening, user)
+      assert membership.role == :member
+      assert membership.status == :active
+    end
+
+    test "already-member user sees member state", %{conn: conn, forening: forening} do
+      user = register_user!()
+      join_forening!(forening, user)
+
+      {:ok, _view, html} =
+        conn
+        |> log_in_user(user)
+        |> forening_conn(forening)
+        |> live("/join")
+
+      assert html =~ "Du er allerede medlem"
+    end
+
+    test "unauthenticated user sees registration CTA", %{conn: conn, forening: forening} do
+      {:ok, _view, html} =
+        conn
+        |> forening_conn(forening)
+        |> live("/join")
+
+      assert html =~ "Opret konto"
+      assert html =~ "/register"
+    end
+  end
+
   describe "unknown subdomain" do
     test "returns 404 for nonexistent forening subdomain", %{conn: conn} do
       conn =
