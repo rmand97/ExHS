@@ -86,6 +86,22 @@ defmodule ExhsWeb do
       import Phoenix.HTML
       # Core UI components
       import ExhsWeb.CoreComponents
+      import ExhsWeb.Components.Icon
+      import ExhsWeb.Components.Flash
+      import ExhsWeb.Components.Button
+      import ExhsWeb.Components.Input
+      import ExhsWeb.Components.Header
+      import ExhsWeb.Components.Table
+      import ExhsWeb.Components.List
+      import ExhsWeb.Components.Card
+      import ExhsWeb.Components.Badge
+      import ExhsWeb.Components.Avatar
+      import ExhsWeb.Components.StatCard
+      import ExhsWeb.Components.Tabs
+      import ExhsWeb.Components.Modal
+      import ExhsWeb.Components.EmptyState
+      import ExhsWeb.Components.Skeleton
+      import ExhsWeb.Components.Dropdown
 
       # Common modules used in templates
       alias ExhsWeb.Layouts

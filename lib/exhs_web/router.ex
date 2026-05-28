@@ -129,6 +129,7 @@ defmodule ExhsWeb.Router do
       live_dashboard "/dashboard", metrics: ExhsWeb.Telemetry
       forward "/mailbox", Plug.Swoosh.MailboxPreview
       oban_dashboard("/oban")
+      live "/components", ExhsWeb.Dev.ComponentShowcaseLive
     end
   end
 

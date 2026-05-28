@@ -1,5 +1,5 @@
 import Config
-config :exhs, token_signing_secret: "CE11p10HNjaR+TROWM+NfRWaXsx9tpeH"
+config :exhs, token_signing_secret: "CE11p10HNjaR+TROWM+NfRWaXsx9tpeH", dev_routes: true
 config :bcrypt_elixir, log_rounds: 1
 config :ash, policies: [show_policy_breakdowns?: true], disable_async?: true
 

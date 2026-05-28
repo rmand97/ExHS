@@ -39,9 +39,31 @@ Use Tidewave MCP tools — they let you interrogate the running application in v
 - Use the `project_eval` tool to execute code in the running instance. Eval `h Module.fun` to get documentation for a module or function.
 - Always use `search_package_docs` to find relevant documentation before beginning work.
 
+**Tools are deferred** — use `ToolSearch` to load schemas before calling. Available tools:
+
+| Tool | Purpose |
+|------|---------|
+| `mcp__tidewave__project_eval` | Evaluate Elixir code in the running app |
+| `mcp__tidewave__search_package_docs` | Search Hex docs for project dependencies |
+| `mcp__tidewave__get_docs` | Get docs for a module or function |
+| `mcp__tidewave__get_logs` | Get application log output |
+| `mcp__tidewave__get_source_location` | Find source file for a module/function |
+| `mcp__tidewave__get_ash_resources` | List Ash domains and resources |
+| `mcp__tidewave__get_ecto_schemas` | List Ecto schema modules |
+| `mcp__tidewave__execute_sql_query` | Run SQL against Ecto repo |
+
 ## AshAI
 
-- Use `list_generators` to list available generators.
+AshAI MCP tools provide code generation and resource introspection.
+
+**Tools are deferred** — use `ToolSearch` to load schemas before calling. Available tools:
+
+| Tool | Purpose |
+|------|---------|
+| `mcp__ash_ai__list_generators` | List available generators and docs |
+| `mcp__ash_ai__list_ash_resources` | List Ash resources and their domains |
+| `mcp__ash_ai__get_usage_rules` | Get usage rules for packages |
+
 - Always prefer generators as a basis for code generation, then modify afterwards.
 - If you have to run generator tasks, pass `--yes`.
 

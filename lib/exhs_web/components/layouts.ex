@@ -2,82 +2,76 @@ defmodule ExhsWeb.Layouts do
   @moduledoc false
   use ExhsWeb, :html
 
-  # Embed all files in layouts/* within this module.
-  # The default root.html.heex file contains the HTML
-  # skeleton of your application, namely HTML headers
-  # and other static content.
   embed_templates "layouts/*"
 
-  @doc """
-  Renders your app layout.
-
-  This function is typically invoked from every template,
-  and it often contains your application menu, sidebar,
-  or similar.
-
-  ## Examples
-
-      <Layouts.app flash={@flash}>
-        <h1>Content</h1>
-      </Layouts.app>
-
-  """
-  attr :flash, :map, required: true, doc: "the map of flash messages"
-
-  attr :current_scope, :map,
-    default: nil,
-    doc: "the current [scope](https://hexdocs.pm/phoenix/scopes.html)"
-
+  attr :flash, :map, required: true
+  attr :current_scope, :map, default: nil
   slot :inner_block, required: true
 
   def app(assigns) do
     ~H"""
-    <header class="navbar px-4 sm:px-6 lg:px-8">
-      <div class="flex-1">
-        <a href="/" class="flex w-fit flex-1 items-center gap-2">
-          <img src={~p"/images/logo.svg"} width="36" />
-          <span class="text-sm font-semibold">v{Application.spec(:phoenix, :vsn)}</span>
-        </a>
-      </div>
-      <div class="flex-none">
-        <ul class="flex-column flex items-center space-x-4 px-1">
-          <li>
-            <a href="https://phoenixframework.org/" class="btn btn-ghost">Website</a>
-          </li>
-          <li>
-            <a href="https://github.com/phoenixframework/phoenix" class="btn btn-ghost">GitHub</a>
-          </li>
-          <li>
-            <.theme_toggle />
-          </li>
-          <li>
-            <a href="https://hexdocs.pm/phoenix/overview.html" class="btn btn-primary">
-              Get Started <span aria-hidden="true">&rarr;</span>
-            </a>
-          </li>
-        </ul>
-      </div>
-    </header>
+    <div class="bg-base-200 min-h-screen">
+      <nav class="bg-base-100/80 border-base-content/5 navbar sticky top-0 z-50 border-b px-4 backdrop-blur-xl sm:px-6">
+        <div class="flex-1 gap-4">
+          <a href="/" class="flex items-center gap-2.5">
+            <div class="from-primary text-primary-content to-secondary flex size-8 items-center justify-center rounded-lg bg-linear-to-br text-sm font-bold">
+              E
+            </div>
+            <span class="text-base-content hidden font-semibold tracking-tight sm:inline">
+              Exhs
+            </span>
+          </a>
+          <div :if={@current_scope} class="hidden items-center gap-1 md:flex">
+            <.nav_link href="/" label="Oversigt" />
+            <.nav_link href="#" label="Medlemmer" />
+            <.nav_link href="#" label="Events" />
+            <.nav_link href="#" label="Kontingent" />
+          </div>
+        </div>
+        <div class="flex flex-none items-center gap-3">
+          <.theme_toggle />
+          <div :if={@current_scope} class="flex items-center gap-3">
+            <.avatar initials={user_initials(@current_scope.actor)} size="sm" />
+          </div>
+        </div>
+      </nav>
 
-    <main class="px-4 py-20 sm:px-6 lg:px-8">
-      <div class="mx-auto max-w-2xl space-y-4">
-        {render_slot(@inner_block)}
-      </div>
-    </main>
+      <main class="px-4 py-6 sm:px-6 lg:px-8">
+        <div class="mx-auto max-w-7xl">
+          {render_slot(@inner_block)}
+        </div>
+      </main>
 
-    <.flash_group flash={@flash} />
+      <.flash_group flash={@flash} />
+    </div>
     """
   end
 
-  @doc """
-  Shows the flash group with standard titles and content.
+  defp nav_link(assigns) do
+    ~H"""
+    <a
+      href={@href}
+      class="hover:bg-base-content/5 hover:text-base-content/80 text-base-content/50 rounded-lg px-3 py-1.5 text-sm font-medium transition"
+    >
+      {@label}
+    </a>
+    """
+  end
 
-  ## Examples
+  defp user_initials(nil), do: "?"
 
-      <.flash_group flash={@flash} />
-  """
-  attr :flash, :map, required: true, doc: "the map of flash messages"
-  attr :id, :string, default: "flash-group", doc: "the optional id of flash container"
+  defp user_initials(user) do
+    first = (user.first_name || "") |> String.first() || ""
+    last = (user.last_name || "") |> String.first() || ""
+
+    case String.upcase(first <> last) do
+      "" -> String.first(user.email || "?") |> String.upcase()
+      initials -> initials
+    end
+  end
+
+  attr :flash, :map, required: true
+  attr :id, :string, default: "flash-group"
 
   def flash_group(assigns) do
     ~H"""
@@ -112,11 +106,6 @@ defmodule ExhsWeb.Layouts do
     """
   end
 
-  @doc """
-  Provides dark vs light theme toggle based on themes defined in app.css.
-
-  See <head> in root.html.heex which applies the theme before page load.
-  """
   def theme_toggle(assigns) do
     ~H"""
     <div class="bg-base-300 border-base-300 card relative flex flex-row items-center rounded-full border-2">
