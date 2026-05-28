@@ -24,10 +24,11 @@ Every new feature extends the seed. When you add a domain or resource that a dev
 ### Testing
 Every feature ships with tests. Keep them simple and follow standard Elixir/ExUnit conventions — one happy-path test plus the obvious failure cases. Don't over-engineer: skip elaborate factories, custom DSLs, or speculative edge cases. Prefer testing through code interfaces (the same entry point real callers use) over poking at internals.
 
-Two cases that warrant more thoroughness:
+Three cases that warrant more thoroughness:
 
 - **External dependencies (Stripe, S3, email providers, webhook senders, etc.)** — test the integration thoroughly. Cover success, failure, retries/timeouts, and webhook/callback handling. Use fakes or library-provided test adapters (`Swoosh.Adapters.Test`, `Stripe` mock, `ExAws` overrides) — never hit the real third-party service from a test. Verify both directions: what we send AND how we react to their responses.
 - **LiveViews** — test with `Phoenix.LiveViewTest` whenever a LiveView has interactive behavior (form submit, click handlers, real-time updates). At minimum: it mounts, the primary user action works, and authorization redirects fire when expected. Skip LiveView tests only for pages that are pure static render.
+- **Tenant isolation** — every feature that reads or writes tenant-scoped data must include cross-tenant tests. Create two foreninger, put data in both, assert each only sees its own. Test list pages, show pages (reject cross-tenant IDs), and mutations. Single-tenant tests cannot catch multitenancy filter bugs.
 
 The testing skill can be found at `.claude/skills/testing/SKILL.md`
 

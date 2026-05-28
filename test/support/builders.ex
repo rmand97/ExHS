@@ -77,6 +77,40 @@ defmodule Exhs.Test.Builders do
     )
   end
 
+  def create_event!(forening, attrs \\ %{}) do
+    defaults = %{
+      title: "Event #{unique("ev")}",
+      starts_at: DateTime.add(DateTime.utc_now(), 7, :day),
+      location: "Test Location"
+    }
+
+    Exhs.Events.create_event!(Map.merge(defaults, attrs),
+      tenant: forening.id,
+      authorize?: false
+    )
+  end
+
+  def publish_event!(event) do
+    Exhs.Events.publish_event!(event, authorize?: false)
+  end
+
+  def create_published_event!(forening, attrs \\ %{}) do
+    forening |> create_event!(attrs) |> publish_event!()
+  end
+
+  def create_ticket_type!(forening, event, attrs \\ %{}) do
+    defaults = %{
+      event_id: event.id,
+      name: "Ticket #{unique("tt")}",
+      price_cents: 0
+    }
+
+    Exhs.Events.create_ticket_type!(Map.merge(defaults, attrs),
+      tenant: forening.id,
+      authorize?: false
+    )
+  end
+
   def scope(user, forening) do
     %Exhs.Scope{actor: user, tenant: forening.id}
   end

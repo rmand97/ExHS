@@ -35,6 +35,11 @@ defmodule Exhs.Events.TicketType do
     read :get_by_id do
       get_by :id
     end
+
+    read :list_for_event do
+      argument :event_id, :uuid, allow_nil?: false
+      filter expr(event_id == ^arg(:event_id))
+    end
   end
 
   policies do
@@ -43,6 +48,10 @@ defmodule Exhs.Events.TicketType do
     end
 
     bypass Exhs.Checks.Superadmin do
+      authorize_if always()
+    end
+
+    bypass action(:list_for_event) do
       authorize_if always()
     end
 

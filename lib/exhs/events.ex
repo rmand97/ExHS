@@ -15,6 +15,8 @@ defmodule Exhs.Events do
       define :get_event_by_id, action: :get_by_id, args: [:id], get?: true
       define :list_upcoming_events, action: :list_upcoming
       define :list_events, action: :read
+      define :list_public_events, action: :list_public
+      define :get_public_event, action: :get_public, args: [:id], get?: true
     end
 
     resource Exhs.Events.TicketType do
@@ -23,6 +25,7 @@ defmodule Exhs.Events do
       define :destroy_ticket_type, action: :destroy
       define :get_ticket_type_by_id, action: :get_by_id, args: [:id], get?: true
       define :list_ticket_types, action: :read
+      define :list_ticket_types_for_event, action: :list_for_event, args: [:event_id]
     end
 
     resource Exhs.Events.Registration do

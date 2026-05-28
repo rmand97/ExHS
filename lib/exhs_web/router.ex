@@ -80,7 +80,18 @@ defmodule ExhsWeb.Router do
   scope "/", ExhsWeb do
     pipe_through :browser
 
-    get "/", PageController, :home
+    get "/robots.txt", SeoController, :robots
+    get "/sitemap.xml", SeoController, :sitemap
+
+    ash_authentication_live_session :public_pages,
+      session: {__MODULE__, :public_session, []},
+      on_mount: [{ExhsWeb.LiveForeningAuth, :optional_forening}] do
+      live "/", PublicLive.Home
+      live "/events", PublicLive.Events.Index
+      live "/events/:id", PublicLive.Events.Show
+      live "/join", PublicLive.Join
+    end
+
     auth_routes AuthController, Exhs.Accounts.User, path: "/auth"
     sign_out_route AuthController
 
@@ -111,6 +122,16 @@ defmodule ExhsWeb.Router do
       auth_routes_prefix: "/auth",
       overrides: [ExhsWeb.AuthOverrides, Elixir.AshAuthentication.Phoenix.Overrides.DaisyUI]
     )
+  end
+
+  def public_session(conn) do
+    forening = conn.assigns[:current_forening]
+
+    if forening do
+      %{"current_forening_id" => forening.id}
+    else
+      %{}
+    end
   end
 
   # Other scopes may use custom stacks.

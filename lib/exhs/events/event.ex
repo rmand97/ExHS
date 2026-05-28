@@ -69,6 +69,16 @@ defmodule Exhs.Events.Event do
       prepare build(filter: [published: true], sort: [starts_at: :asc])
       filter expr(starts_at > now())
     end
+
+    read :list_public do
+      prepare build(filter: [published: true], sort: [starts_at: :asc])
+      filter expr(starts_at > now())
+    end
+
+    read :get_public do
+      get_by :id
+      filter expr(published == true)
+    end
   end
 
   policies do
@@ -82,6 +92,10 @@ defmodule Exhs.Events.Event do
 
     policy action(:list_upcoming) do
       authorize_if actor_present()
+    end
+
+    bypass action([:list_public, :get_public]) do
+      authorize_if always()
     end
 
     policy action_type(:read) do

@@ -23,8 +23,9 @@ import "phoenix_html"
 import {Socket} from "phoenix"
 import {LiveSocket} from "phoenix_live_view"
 import {hooks as colocatedHooks} from "phoenix-colocated/exhs"
-import {hooks as liveFilterHooks} from "live_filter"
+import {hooks as liveFilterHooks} from "../../deps/livefilter/priv/static/live_filter"
 import topbar from "../vendor/topbar"
+import {initCookieConsent} from "./cookie-consent"
 
 const Uploaders = {
   S3(entries, onViewError) {
@@ -71,6 +72,8 @@ liveSocket.connect()
 // >> liveSocket.enableLatencySim(1000)  // enabled for duration of browser session
 // >> liveSocket.disableLatencySim()
 window.liveSocket = liveSocket
+
+initCookieConsent()
 
 // The lines below enable quality of life phoenix_live_reload
 // development features:

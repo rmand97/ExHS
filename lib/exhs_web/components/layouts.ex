@@ -106,6 +106,111 @@ defmodule ExhsWeb.Layouts do
     """
   end
 
+  attr :flash, :map, required: true
+  attr :current_forening, :map, required: true
+  attr :current_user, :map, default: nil
+  slot :inner_block, required: true
+
+  def public(assigns) do
+    ~H"""
+    <div
+      class="bg-base-200 min-h-screen"
+      style={forening_css_vars(@current_forening)}
+    >
+      <nav class="bg-base-100/80 border-base-content/5 sticky top-0 z-50 border-b backdrop-blur-xl">
+        <div class="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6">
+          <div class="flex items-center gap-3">
+            <a href="/" class="flex items-center gap-2.5">
+              <.forening_logo forening={@current_forening} />
+              <span class="text-base-content text-lg font-semibold tracking-tight">
+                {@current_forening.name}
+              </span>
+            </a>
+            <div class="hidden items-center gap-1 sm:flex">
+              <.public_nav_link href="/" label="Hjem" />
+              <.public_nav_link href="/events" label="Events" />
+              <.public_nav_link href="/join" label="Bliv medlem" />
+            </div>
+          </div>
+          <div class="flex items-center gap-3">
+            <.theme_toggle />
+            <a :if={!@current_user} href="/sign-in" class="btn btn-ghost btn-sm">Log ind</a>
+            <a :if={@current_user} href="/" class="btn btn-ghost btn-sm">
+              <.icon name="hero-squares-2x2" class="size-4" /> Dashboard
+            </a>
+          </div>
+        </div>
+
+        <div class="border-base-content/5 flex items-center gap-1 border-t px-4 py-2 sm:hidden">
+          <.public_nav_link href="/" label="Hjem" />
+          <.public_nav_link href="/events" label="Events" />
+          <.public_nav_link href="/join" label="Bliv medlem" />
+        </div>
+      </nav>
+
+      <main>
+        {render_slot(@inner_block)}
+      </main>
+
+      <footer class="border-base-content/5 border-t px-4 py-8 sm:px-6">
+        <div class="mx-auto max-w-7xl text-center">
+          <p class="text-base-content/40 text-sm">
+            &copy; {DateTime.utc_now().year} {@current_forening.name}
+          </p>
+          <p class="text-base-content/30 mt-1 text-xs">
+            Drevet af Exhs
+          </p>
+        </div>
+      </footer>
+
+      <.flash_group flash={@flash} />
+    </div>
+    """
+  end
+
+  defp public_nav_link(assigns) do
+    ~H"""
+    <a
+      href={@href}
+      class="hover:bg-base-content/5 hover:text-base-content/80 text-base-content/50 rounded-lg px-3 py-1.5 text-sm font-medium transition"
+    >
+      {@label}
+    </a>
+    """
+  end
+
+  defp forening_logo(assigns) do
+    ~H"""
+    <div :if={@forening.logo_url} class="size-9 overflow-hidden rounded-xl">
+      <img src={@forening.logo_url} alt={@forening.name} class="size-full object-cover" />
+    </div>
+    <div
+      :if={!@forening.logo_url}
+      class="from-primary text-primary-content to-secondary flex size-9 items-center justify-center rounded-xl bg-linear-to-br text-sm font-bold"
+    >
+      {String.first(@forening.name)}
+    </div>
+    """
+  end
+
+  defp forening_css_vars(forening) do
+    branding = forening.branding || %{}
+    primary = branding["primary_color"]
+    accent = branding["accent_color"]
+
+    vars =
+      [
+        primary && "--color-primary: #{primary}",
+        accent && "--color-accent: #{accent}"
+      ]
+      |> Enum.reject(&is_nil/1)
+
+    case vars do
+      [] -> nil
+      list -> Enum.join(list, "; ")
+    end
+  end
+
   def theme_toggle(assigns) do
     ~H"""
     <div class="bg-base-300 border-base-300 card relative flex flex-row items-center rounded-full border-2">

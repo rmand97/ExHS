@@ -8,5 +8,8 @@
       "type": "sse",
       "url": "http://localhost:4000/ash_ai/mcp"
     }
+  },
+  "enabledPlugins": {
+    "frontend-design@claude-plugins-official": true
   }
 }

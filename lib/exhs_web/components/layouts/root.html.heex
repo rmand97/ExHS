@@ -6,9 +6,14 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="csrf-token" content={get_csrf_token()} />
-    <.live_title default="Exhs" suffix=" · Phoenix Framework" phx-no-format>{assigns[:page_title]}</.live_title>
+    <.live_title default="Exhs" suffix=" · Exhs" phx-no-format>{assigns[:page_title]}</.live_title>
+    <meta :if={assigns[:page_description]} name="description" content={@page_description} />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={assigns[:page_title] || "Exhs"} />
+    <meta :if={assigns[:page_description]} property="og:description" content={@page_description} />
+    <meta :if={assigns[:page_image]} property="og:image" content={@page_image} />
     <link phx-track-static rel="stylesheet" href={~p"/assets/css/app.css"} />
-    <script defer phx-track-static type="text/javascript" src={~p"/assets/js/app.js"}>
+    <script defer phx-track-static type="text/javascript" src={~p"/assets/app.js"}>
     </script>
     <script>
       (() => {
@@ -32,5 +37,25 @@
   </head>
   <body>
     {@inner_content}
+
+    <div
+      id="cookie-consent"
+      hidden
+      class="fixed inset-x-0 bottom-0 z-100 p-4"
+    >
+      <div class="bg-base-100 border-base-content/10 mx-auto flex max-w-3xl flex-col items-center gap-4 rounded-2xl border p-4 shadow-lg sm:flex-row sm:gap-6 sm:p-5">
+        <p class="text-base-content/70 text-sm">
+          Vi bruger cookies til at forbedre din oplevelse. Du kan vælge hvilke cookies du accepterer.
+        </p>
+        <div class="flex shrink-0 gap-2">
+          <button data-consent-reject class="btn btn-ghost btn-sm">
+            Kun nødvendige
+          </button>
+          <button data-consent-accept class="btn btn-primary btn-sm">
+            Acceptér alle
+          </button>
+        </div>
+      </div>
+    </div>
   </body>
 </html>

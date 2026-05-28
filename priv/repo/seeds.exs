@@ -102,7 +102,7 @@ defmodule Exhs.Seeds do
     case existing do
       %Forening{} = f ->
         Logger.info("Forening already exists: #{f.name}")
-        f
+        ensure_forening_branding(f)
 
       nil ->
         f =
@@ -112,7 +112,12 @@ defmodule Exhs.Seeds do
               slug: "demo",
               subdomain: "demo",
               kontingent_amount_cents: 30_000,
-              kontingent_currency: "DKK"
+              kontingent_currency: "DKK",
+              branding: %{
+                "tagline" => "Et aktivt fællesskab for alle",
+                "about" =>
+                  "Demo Forening er en forening for alle, der brænder for fællesskab, events og sjove aktiviteter. Vi holder møder, sociale arrangementer og meget mere."
+              }
             },
             authorize?: false
           )
@@ -120,6 +125,25 @@ defmodule Exhs.Seeds do
         Logger.info("Created forening: #{f.name}")
         f
     end
+  end
+
+  defp ensure_forening_branding(%Forening{branding: branding} = f)
+       when is_map(branding) and map_size(branding) > 0,
+       do: f
+
+  defp ensure_forening_branding(forening) do
+    Organizations.update_forening!(
+      forening,
+      %{
+        branding: %{
+          "tagline" => "Et aktivt fællesskab for alle",
+          "about" =>
+            "Demo Forening er en forening for alle, der brænder for fællesskab, events og sjove aktiviteter."
+        }
+      },
+      authorize?: false
+    )
+    |> tap(fn _ -> Logger.info("Added branding to #{forening.name}") end)
   end
 
   defp upsert_membership(user, forening) do

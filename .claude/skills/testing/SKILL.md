@@ -48,7 +48,11 @@ Available builders:
 
 - **External dependencies** (Stripe, email, webhooks): cover success, failure, idempotency. Use fakes/stubs, never hit real services.
 - **LiveViews**: mount, primary action, auth redirects. Skip for pure static render.
-- **Policies/authorization**: test each role boundary. Cross-tenant isolation tests are important.
+- **Policies/authorization**: test each role boundary.
+- **Tenant isolation**: every feature that reads tenant-scoped data must have cross-tenant tests. Create two foreninger, put data in both, verify each only sees its own. This catches multitenancy filter bugs that are invisible in single-tenant tests. Specifically test:
+  - List pages don't show other tenant's records
+  - Show/detail pages reject IDs belonging to another tenant
+  - Actions (create, update) can't reference cross-tenant resources
 
 ## Patterns
 
