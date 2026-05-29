@@ -39,7 +39,7 @@ defmodule ExhsWeb.MemberLive.Dashboard do
   @impl true
   def render(assigns) do
     ~H"""
-    <Layouts.member flash={@flash} current_user={@current_user}>
+    <Layouts.member flash={@flash} current_user={@current_user} current_path={@current_path}>
       <.header>
         Dashboard
         <:subtitle>Dine foreninger og medlemskaber</:subtitle>
@@ -140,9 +140,15 @@ defmodule ExhsWeb.MemberLive.Dashboard do
 
   defp filter_config do
     [
-      LiveFilter.text(:search, label: "Søg forening", always_on: true),
-      LiveFilter.select(:role, label: "Rolle", options: ~w(admin board member)),
-      LiveFilter.select(:status, label: "Status", options: ~w(active inactive))
+      LiveFilter.text(:search, label: "Søg forening", always_on: true, placeholder: "Søg..."),
+      LiveFilter.select(:role,
+        label: "Rolle",
+        options: [{"Admin", "admin"}, {"Bestyrelse", "board"}, {"Medlem", "member"}]
+      ),
+      LiveFilter.select(:status,
+        label: "Status",
+        options: [{"Aktiv", "active"}, {"Inaktiv", "inactive"}]
+      )
     ]
   end
 
@@ -226,7 +232,6 @@ defmodule ExhsWeb.MemberLive.Dashboard do
   end
 
   defp forening_url(forening) do
-    base = Application.get_env(:exhs, :base_host, "exhs.dk")
-    "//#{forening.subdomain}.#{base}/"
+    ~p"/go/forening/#{forening.subdomain}"
   end
 end

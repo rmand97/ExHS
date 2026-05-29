@@ -30,7 +30,7 @@ defmodule ExhsWeb.MemberLive.MembershipShow do
     membership = socket.assigns.membership
 
     case Exhs.Organizations.leave_forening(membership,
-           tenant: membership.forening_id,
+           tenant: membership.forening.id,
            actor: socket.assigns.current_user
          ) do
       :ok ->
@@ -48,7 +48,7 @@ defmodule ExhsWeb.MemberLive.MembershipShow do
   @impl true
   def render(assigns) do
     ~H"""
-    <Layouts.member flash={@flash} current_user={@current_user}>
+    <Layouts.member flash={@flash} current_user={@current_user} current_path={@current_path}>
       <.header>
         {@membership.forening.name}
         <:subtitle>Medlemskab og kontingent</:subtitle>
@@ -79,7 +79,7 @@ defmodule ExhsWeb.MemberLive.MembershipShow do
           <div class="border-base-content/5 mt-6 border-t pt-4">
             <button
               phx-click="leave"
-              data-confirm="Er du sikker på, at du vil forlade #{@membership.forening.name}?"
+              data-confirm={"Er du sikker på, at du vil forlade #{@membership.forening.name}?"}
               class="btn btn-ghost btn-sm text-error"
             >
               <.icon name="hero-arrow-right-start-on-rectangle" class="size-4" /> Forlad forening
@@ -90,9 +90,23 @@ defmodule ExhsWeb.MemberLive.MembershipShow do
         <.card class="p-6">
           <h2 class="text-base-content mb-4 font-semibold">Kontingent</h2>
 
-          <div :if={@subscription}>
+          <.list>
+            <:item title="Type">
+              <.badge variant={kontingent_type_variant(@membership.forening)}>
+                {kontingent_type_label(@membership.forening)}
+              </.badge>
+            </:item>
+            <:item
+              :if={(@membership.forening.kontingent_amount_cents || 0) > 0}
+              title="Beløb"
+            >
+              {format_kontingent(@membership.forening)}
+            </:item>
+          </.list>
+
+          <div :if={@subscription} class="mt-4">
             <.list>
-              <:item title="Status">
+              <:item title="Abonnement">
                 <.badge variant={sub_status_variant(@subscription.status)}>
                   {sub_status_label(@subscription.status)}
                 </.badge>
@@ -108,9 +122,9 @@ defmodule ExhsWeb.MemberLive.MembershipShow do
             </.list>
           </div>
 
-          <div :if={!@subscription}>
+          <div :if={!@subscription && (@membership.forening.kontingent_stripe_price_id != nil)} class="mt-4">
             <p class="text-base-content/50 text-sm">
-              Ingen aktiv kontingentabonnement.
+              Intet aktivt abonnement.
             </p>
           </div>
         </.card>
@@ -121,8 +135,20 @@ defmodule ExhsWeb.MemberLive.MembershipShow do
 
   defp find_membership(user, id) do
     case Exhs.Organizations.list_my_memberships(actor: user) do
-      {:ok, memberships} -> Enum.find(memberships, &(&1.id == id))
-      _ -> nil
+      {:ok, memberships} ->
+        case Enum.find(memberships, &(&1.id == id)) do
+          nil ->
+            nil
+
+          membership ->
+            %{
+              membership
+              | __metadata__: Map.put(membership.__metadata__, :tenant, membership.forening.id)
+            }
+        end
+
+      _ ->
+        nil
     end
   end
 
@@ -132,6 +158,30 @@ defmodule ExhsWeb.MemberLive.MembershipShow do
       _ -> nil
     end
   end
+
+  defp kontingent_type_label(%{kontingent_stripe_price_id: id}) when is_binary(id) and id != "",
+    do: "Løbende abonnement"
+
+  defp kontingent_type_label(%{kontingent_amount_cents: cents})
+       when is_integer(cents) and cents > 0,
+       do: "Enkeltbetaling"
+
+  defp kontingent_type_label(_), do: "Gratis"
+
+  defp kontingent_type_variant(%{kontingent_stripe_price_id: id}) when is_binary(id) and id != "",
+    do: "primary"
+
+  defp kontingent_type_variant(%{kontingent_amount_cents: cents})
+       when is_integer(cents) and cents > 0,
+       do: "warning"
+
+  defp kontingent_type_variant(_), do: "success"
+
+  defp format_kontingent(%{kontingent_amount_cents: nil}), do: "Gratis"
+  defp format_kontingent(%{kontingent_amount_cents: 0}), do: "Gratis"
+
+  defp format_kontingent(%{kontingent_amount_cents: cents, kontingent_currency: currency}),
+    do: "#{div(cents, 100)} #{currency}"
 
   defp role_variant(:admin), do: "error"
   defp role_variant(:board), do: "warning"
@@ -163,7 +213,6 @@ defmodule ExhsWeb.MemberLive.MembershipShow do
   defp format_date(dt), do: Calendar.strftime(dt, "%d. %b %Y")
 
   defp forening_url(forening) do
-    base = Application.get_env(:exhs, :base_host, "exhs.dk")
-    "//#{forening.subdomain}.#{base}/"
+    ~p"/go/forening/#{forening.subdomain}"
   end
 end

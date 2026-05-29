@@ -14,6 +14,7 @@ Logged-in members manage their profile, see payment history, register for events
 
 - [x] Member scope on main domain, requires authenticated user
 - [ ] If user has no Membership in that forening → redirect to "Join" page
+- [ ] When routing between frontpage and a forening subdomain, dont log users out. Remember to test this.
 
 ### LiveViews
 
@@ -21,7 +22,7 @@ Logged-in members manage their profile, see payment history, register for events
 - [x] `MemberLive.Profile` — edit name, address, phone (AshPhoenix.Form)
 - [x] `MemberLive.MembershipShow` — membership detail with kontingent/subscription status, leave forening
 - [x] `MemberLive.Payments` — cross-forening payment history with LiveFilter (search, status, type filters)
-- [ ] `MemberLive.Events.Index` — events I can register for
+- [x] `MemberLive.Events.Index` — events I can register for (at `/upcoming`, cross-forening)
 - [x] `MemberLive.Registrations` — my registrations across foreninger with LiveFilter
 - [ ] `MemberLive.Shop.MyOrders` — deferred (Task 10)
 
@@ -35,6 +36,8 @@ Logged-in members manage their profile, see payment history, register for events
 - [x] Show subscription status, period dates, cancel_at_period_end flag
 - [ ] Cancel button → confirms → calls Stripe `cancel_kontingent_subscription` (needs live Stripe)
 - [ ] Restart button (for inactive members) → checkout session (needs live Stripe)
+- [x] When a event is joined, dont show tilmeld button (show "Du er tilmeldt" instead)
+- [x] Show which kind of membership(kontingent) for each forening on membership show: Løbende abonnement / Enkeltbetaling / Gratis
 
 ### Multi-forening UX
 
@@ -62,13 +65,15 @@ LiveView tests via `Phoenix.LiveViewTest` — at least mount + the main interact
 - [x] Ash action tests: memberships, registrations, subscriptions, payments (12 tests)
 - [ ] Notification-preferences toggles save and reload correctly — deferred
 - [ ] Anything triggering a real-time update (LV `assign`/`stream` after PubSub) is exercised — deferred
-- [ ] We need a test for logging in on frontpage, then navigating to dashboard then navigating to forening site and pressing dashbord button
-      again. Also you can still press the "bliv medlem" even if you have an active membership
-- [ ] LiveFilter actually filters — dashboard with 3 memberships (admin, board, member), apply the role filter, assert only the matching one shows
-- [ ] Leave forening via LiveView — click the "Forlad forening" button on membership show, verify redirect + membership gone
-- [ ] Profile validation errors — submit with invalid data (e.g., too-long phone), verify error renders
-- [ ] Subscription cancellation state — membership show renders "Opsagt — udløber ved periodens slut" when cancel_at_period_end is true
-- [ ] Payments filtered by type — user has a subscription payment and a registration payment, filter by type shows only one
+- [x] Test: login → dashboard → forening site → "Din side" button visible, session preserved; "Bliv medlem" accessible with active membership
+- [x] LiveFilter actually filters — dashboard with 3 memberships (admin, board, member), apply the role filter, assert only the matching one shows
+- [x] Leave forening via LiveView — click the "Forlad forening" button on membership show, verify redirect + membership gone
+- [x] Profile validation errors — submit with invalid data (too-long phone, max_length: 20), verify error renders
+- [x] Subscription cancellation state — membership show renders "Opsagt — udløber ved periodens slut" when cancel_at_period_end is true
+- [x] Payments filtered by type — user has a subscription payment and a registration payment, filter by type shows only one
+
+## extra stuff
+- [x] Rename public nav button from "Dashboard" to "Din side".
 
 ## Open decisions
 

@@ -64,8 +64,9 @@ defmodule ExhsWeb.Router do
     pipe_through :browser
 
     ash_authentication_live_session :authenticated_routes,
-      on_mount: [{ExhsWeb.LiveUserAuth, :live_user_required}] do
+      on_mount: [{ExhsWeb.LiveCurrentPath, :default}, {ExhsWeb.LiveUserAuth, :live_user_required}] do
       live "/dashboard", MemberLive.Dashboard
+      live "/upcoming", MemberLive.Events
       live "/profile", MemberLive.Profile
       live "/registrations", MemberLive.Registrations
       live "/memberships/:id", MemberLive.MembershipShow
@@ -81,12 +82,15 @@ defmodule ExhsWeb.Router do
 
     ash_authentication_live_session :public_pages,
       session: {__MODULE__, :public_session, []},
-      on_mount: [{ExhsWeb.LiveForeningAuth, :optional_forening}] do
+      on_mount: [{ExhsWeb.LiveCurrentPath, :default}, {ExhsWeb.LiveForeningAuth, :optional_forening}] do
       live "/", PublicLive.Home
       live "/events", PublicLive.Events.Index
       live "/events/:id", PublicLive.Events.Show
       live "/join", PublicLive.Join
     end
+
+    get "/go/forening/:subdomain", ForeningRedirectController, :go
+    get "/auth/handoff", HandoffController, :create
 
     auth_routes AuthController, Exhs.Accounts.User, path: "/auth"
     sign_out_route AuthController

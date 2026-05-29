@@ -8,7 +8,8 @@ defmodule ExhsWeb.Endpoint do
     store: :cookie,
     key: "_exhs_key",
     signing_salt: "DJRDCZzz",
-    same_site: "Lax"
+    same_site: "Lax",
+    domain: Application.compile_env(:exhs, :session_cookie_domain, nil)
   ]
 
   socket "/live", Phoenix.LiveView.Socket,

@@ -39,7 +39,7 @@ defmodule ExhsWeb.MemberLive.Payments do
   @impl true
   def render(assigns) do
     ~H"""
-    <Layouts.member flash={@flash} current_user={@current_user}>
+    <Layouts.member flash={@flash} current_user={@current_user} current_path={@current_path}>
       <.header>
         Betalinger
         <:subtitle>Din betalingshistorik på tværs af foreninger</:subtitle>
@@ -82,14 +82,23 @@ defmodule ExhsWeb.MemberLive.Payments do
 
   defp filter_config do
     [
-      LiveFilter.text(:search, label: "Søg", always_on: true),
+      LiveFilter.text(:search, label: "Søg", always_on: true, placeholder: "Søg..."),
       LiveFilter.select(:status,
         label: "Status",
-        options: ~w(succeeded pending failed refunded)
+        options: [
+          {"Gennemført", "succeeded"},
+          {"Afventer", "pending"},
+          {"Fejlet", "failed"},
+          {"Refunderet", "refunded"}
+        ]
       ),
       LiveFilter.select(:payable_type,
         label: "Type",
-        options: ~w(subscription registration order)
+        options: [
+          {"Abonnement", "subscription"},
+          {"Tilmelding", "registration"},
+          {"Ordre", "order"}
+        ]
       )
     ]
   end

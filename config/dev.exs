@@ -31,6 +31,7 @@ config :exhs, Exhs.Repo,
 # watchers to your application. For example, we can use it
 # to bundle .js and .css sources.
 config :exhs, ExhsWeb.Endpoint,
+  url: [host: "localhost", port: 4000],
   # Binding to loopback ipv4 address prevents access from other machines.
   # Change to `ip: {0, 0, 0, 0}` to allow access from other machines.
   http: [ip: {127, 0, 0, 1}],
@@ -102,8 +103,8 @@ config :phoenix_live_view,
   # Enable helpful, but potentially expensive runtime checks
   enable_expensive_runtime_checks: true
 
-# Subdomain resolution: use lvh.me in dev (resolves to 127.0.0.1)
-config :exhs, :base_host, "lvh.me"
+# Subdomain resolution: foo.localhost resolves to 127.0.0.1 in modern browsers
+config :exhs, :base_host, "localhost"
 
 # Disable swoosh api client as it is only required for production adapters.
 config :swoosh, :api_client, false

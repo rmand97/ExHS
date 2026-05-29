@@ -35,7 +35,7 @@ defmodule ExhsWeb.MemberLive.Profile do
   @impl true
   def render(assigns) do
     ~H"""
-    <Layouts.member flash={@flash} current_user={@current_user}>
+    <Layouts.member flash={@flash} current_user={@current_user} current_path={@current_path}>
       <.header>
         Profil
         <:subtitle>Opdater dine personlige oplysninger</:subtitle>

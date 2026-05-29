@@ -334,7 +334,12 @@ defmodule Exhs.Accounts.User do
 
     attribute :first_name, :string, public?: true
     attribute :last_name, :string, public?: true
-    attribute :phone, :string, public?: true
+
+    attribute :phone, :string do
+      public? true
+      constraints max_length: 20
+    end
+
     attribute :address_line_1, :string, public?: true
     attribute :address_line_2, :string, public?: true
     attribute :postal_code, :string, public?: true

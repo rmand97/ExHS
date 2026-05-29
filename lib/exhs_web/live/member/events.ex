@@ -1,0 +1,155 @@
+defmodule ExhsWeb.MemberLive.Events do
+  @moduledoc false
+  use ExhsWeb, :live_view
+
+  alias LiveFilter.Params.Serializer
+
+  @impl true
+  def mount(_params, _session, socket) do
+    {:ok, socket}
+  end
+
+  @impl true
+  def handle_params(params, _uri, socket) do
+    memberships = load_memberships(socket.assigns.current_user)
+    config = filter_config(memberships)
+    {filters, remaining} = LiveFilter.from_params(params, config)
+    {pagination, remaining} = LiveFilter.pagination_from_params(remaining, default_limit: 20)
+
+    socket =
+      socket
+      |> LiveFilter.init(config, filters)
+      |> assign(:remaining_params, remaining)
+      |> load_events(filters, pagination, memberships)
+
+    {:noreply, socket}
+  end
+
+  @impl true
+  def handle_info({:livefilter, :updated, params}, socket) do
+    all_params = Map.merge(socket.assigns.remaining_params, params)
+    {:noreply, push_patch(socket, to: Serializer.to_path("/upcoming", all_params))}
+  end
+
+  def handle_info({:livefilter, :page_changed, pagination_params}, socket) do
+    filter_params = Serializer.to_params(socket.assigns.livefilter.filters)
+    all_params = Map.merge(filter_params, pagination_params)
+    {:noreply, push_patch(socket, to: Serializer.to_path("/upcoming", all_params))}
+  end
+
+  @impl true
+  def render(assigns) do
+    ~H"""
+    <Layouts.member flash={@flash} current_user={@current_user} current_path={@current_path}>
+      <.header>
+        Kommende events
+        <:subtitle>Events fra dine foreninger</:subtitle>
+      </.header>
+
+      <div class="mt-6">
+        <LiveFilter.bar filter={@livefilter} />
+      </div>
+
+      <div :if={@events == []} class="mt-8">
+        <.empty_state icon="hero-calendar-days" title="Ingen kommende events">
+          Der er ingen kommende events fra dine foreninger.
+        </.empty_state>
+      </div>
+
+      <div :if={@events != []} class="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <.event_card :for={entry <- @events} entry={entry} />
+      </div>
+
+      <div :if={@events != []} class="mt-6">
+        <LiveFilter.paginator pagination={@pagination} />
+      </div>
+    </Layouts.member>
+    """
+  end
+
+  defp event_card(assigns) do
+    ~H"""
+    <a href={event_url(@entry)} class="group">
+      <.card class="overflow-hidden p-4 transition hover:scale-[1.02]">
+        <p class="text-primary mb-1 text-xs font-semibold uppercase">
+          {format_date(@entry.event.starts_at)}
+        </p>
+        <h3 class="text-base-content font-semibold">{@entry.event.title}</h3>
+        <p class="text-base-content/50 mt-0.5 text-xs">{@entry.forening.name}</p>
+        <p
+          :if={@entry.event.location}
+          class="text-base-content/50 mt-2 flex items-center gap-1 text-sm"
+        >
+          <.icon name="hero-map-pin-micro" class="size-3.5" /> {@entry.event.location}
+        </p>
+      </.card>
+    </a>
+    """
+  end
+
+  defp filter_config(memberships) do
+    forening_options = Enum.map(memberships, & &1.forening.name)
+
+    [
+      LiveFilter.text(:search, label: "Søg event", always_on: true, placeholder: "Søg..."),
+      LiveFilter.select(:forening, label: "Forening", options: forening_options)
+    ]
+  end
+
+  defp load_memberships(user) do
+    case Exhs.Organizations.list_my_memberships(actor: user) do
+      {:ok, memberships} -> memberships
+      _ -> []
+    end
+  end
+
+  defp load_events(socket, filters, pagination, memberships) do
+    all_events =
+      memberships
+      |> Enum.flat_map(fn membership ->
+        case Exhs.Events.list_public_events(tenant: membership.forening_id) do
+          {:ok, events} -> Enum.map(events, &%{event: &1, forening: membership.forening})
+          _ -> []
+        end
+      end)
+      |> Enum.uniq_by(& &1.event.id)
+      |> Enum.sort_by(& &1.event.starts_at, {:asc, DateTime})
+
+    filtered = apply_filters(all_events, filters)
+    total = length(filtered)
+    page = Enum.slice(filtered, pagination.offset, pagination.limit)
+    pagination = LiveFilter.Pagination.with_total(pagination, total)
+
+    socket
+    |> assign(:events, page)
+    |> assign(:pagination, pagination)
+    |> assign(:page_title, "Kommende events")
+  end
+
+  defp apply_filters(events, filters) do
+    Enum.reduce(filters, events, fn filter, acc ->
+      apply_filter(acc, filter)
+    end)
+  end
+
+  defp apply_filter(events, %{field: :search, value: value})
+       when is_binary(value) and value != "" do
+    term = String.downcase(value)
+    Enum.filter(events, &String.contains?(String.downcase(&1.event.title), term))
+  end
+
+  defp apply_filter(events, %{field: :forening, value: value})
+       when is_binary(value) and value != "" do
+    Enum.filter(events, &(&1.forening.name == value))
+  end
+
+  defp apply_filter(events, _filter), do: events
+
+  defp event_url(%{event: event, forening: forening}) do
+    ~p"/go/forening/#{forening.subdomain}?#{%{return_to: "/events/#{event.id}"}}"
+  end
+
+  defp format_date(datetime) do
+    Calendar.strftime(datetime, "%d. %b %Y, kl. %H:%M")
+  end
+end

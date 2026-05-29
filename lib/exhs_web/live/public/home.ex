@@ -27,7 +27,11 @@ defmodule ExhsWeb.PublicLive.Home do
   @impl true
   def render(%{current_forening: nil} = assigns) do
     ~H"""
-    <.marketing_home flash={@flash} current_user={@current_user} />
+    <Layouts.marketing flash={@flash} current_user={@current_user}>
+      <.marketing_hero />
+      <.marketing_features />
+      <.marketing_cta />
+    </Layouts.marketing>
     """
   end
 
@@ -40,6 +44,7 @@ defmodule ExhsWeb.PublicLive.Home do
       flash={@flash}
       current_forening={@current_forening}
       current_user={@current_user}
+      current_path={@current_path}
     >
       <.hero forening={@current_forening} />
 
@@ -160,120 +165,103 @@ defmodule ExhsWeb.PublicLive.Home do
     """
   end
 
-  defp marketing_home(assigns) do
+  defp marketing_hero(assigns) do
     ~H"""
-    <div class="bg-base-200 min-h-screen">
-      <nav class="bg-base-100/80 border-base-content/5 sticky top-0 z-50 border-b backdrop-blur-xl">
-        <div class="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6">
-          <a href="/" class="flex items-center gap-2.5">
-            <div class="from-primary text-primary-content to-secondary flex size-9 items-center justify-center rounded-xl bg-linear-to-br text-sm font-bold">
-              E
-            </div>
-            <span class="text-base-content text-lg font-semibold tracking-tight">Exhs</span>
+    <section class="relative overflow-hidden px-4 pt-20 pb-24 sm:px-6 lg:pt-32 lg:pb-36">
+      <div class="from-primary/10 via-secondary/5 pointer-events-none absolute inset-0 bg-linear-to-br to-transparent" />
+      <div class="from-primary/20 pointer-events-none absolute -top-40 -right-40 size-96 rounded-full bg-radial-[at_30%_40%] to-transparent blur-3xl" />
+      <div class="from-secondary/15 pointer-events-none absolute -bottom-20 -left-20 size-80 rounded-full bg-radial-[at_70%_60%] to-transparent blur-3xl" />
+
+      <div class="relative mx-auto max-w-4xl text-center">
+        <h1 class="text-base-content text-4xl font-bold tracking-tight sm:text-5xl lg:text-6xl">
+          Alt du behøver til din <span class="text-gradient">forening</span>
+        </h1>
+        <p class="text-base-content/60 mx-auto mt-6 max-w-2xl text-lg/relaxed sm:text-xl">
+          Medlemmer, events, kontingent og kommunikation — alt i én moderne platform
+          bygget til foreninger.
+        </p>
+        <div class="mt-10 flex flex-wrap items-center justify-center gap-4">
+          <a href="/register" class="btn btn-lg btn-primary gap-2">
+            <.icon name="hero-rocket-launch" class="size-5" /> Kom i gang gratis
           </a>
-          <div class="flex items-center gap-3">
-            <Layouts.theme_toggle />
-            <a :if={!@current_user} href="/sign-in" class="btn btn-ghost btn-sm">Log ind</a>
-            <a :if={!@current_user} href="/register" class="btn btn-primary btn-sm">Opret konto</a>
-            <a :if={@current_user} href="/" class="btn btn-ghost btn-sm">Dashboard</a>
-          </div>
         </div>
-      </nav>
+      </div>
+    </section>
+    """
+  end
 
-      <section class="relative overflow-hidden px-4 pt-20 pb-24 sm:px-6 lg:pt-32 lg:pb-36">
-        <div class="from-primary/10 via-secondary/5 pointer-events-none absolute inset-0 bg-linear-to-br to-transparent" />
-        <div class="from-primary/20 pointer-events-none absolute -top-40 -right-40 size-96 rounded-full bg-radial-[at_30%_40%] to-transparent blur-3xl" />
-        <div class="from-secondary/15 pointer-events-none absolute -bottom-20 -left-20 size-80 rounded-full bg-radial-[at_70%_60%] to-transparent blur-3xl" />
-
-        <div class="relative mx-auto max-w-4xl text-center">
-          <h1 class="text-base-content text-4xl font-bold tracking-tight sm:text-5xl lg:text-6xl">
-            Alt du behøver til din <span class="text-gradient">forening</span>
-          </h1>
-          <p class="text-base-content/60 mx-auto mt-6 max-w-2xl text-lg/relaxed sm:text-xl">
-            Medlemmer, events, kontingent og kommunikation — alt i én moderne platform
-            bygget til foreninger.
-          </p>
-          <div class="mt-10 flex flex-wrap items-center justify-center gap-4">
-            <a href="/register" class="btn btn-lg btn-primary gap-2">
-              <.icon name="hero-rocket-launch" class="size-5" /> Kom i gang gratis
-            </a>
-          </div>
-        </div>
-      </section>
-
-      <section id="features" class="px-4 py-20 sm:px-6">
-        <div class="mx-auto max-w-7xl">
-          <div class="mb-16 text-center">
-            <h2 class="text-base-content text-3xl font-bold tracking-tight sm:text-4xl">
-              Alt samlet ét sted
-            </h2>
-            <p class="text-base-content/60 mt-4 text-lg">
-              Værktøjerne din forening har brug for — uden kompleksiteten.
-            </p>
-          </div>
-
-          <div class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-            <.feature_card
-              icon="hero-users"
-              color="primary"
-              title="Medlemshåndtering"
-              text="Overblik over alle medlemmer, roller og kontaktoplysninger."
-            />
-            <.feature_card
-              icon="hero-calendar-days"
-              color="secondary"
-              title="Events & tilmelding"
-              text="Opret events med tilmelding, ventelister og automatiske påmindelser."
-            />
-            <.feature_card
-              icon="hero-banknotes"
-              color="accent"
-              title="Kontingent & betaling"
-              text="Automatisk opkrævning via Stripe. Hold styr på hvem der har betalt."
-            />
-            <.feature_card
-              icon="hero-chart-bar"
-              color="warning"
-              title="Dashboard & statistik"
-              text="Se din forenings nøgletal med ét blik."
-            />
-            <.feature_card
-              icon="hero-paint-brush"
-              color="info"
-              title="Dit eget brand"
-              text="Eget logo, farver og subdomæne. Medlemmer ser jeres forening."
-            />
-            <.feature_card
-              icon="hero-shield-check"
-              color="error"
-              title="GDPR & sikkerhed"
-              text="Europæisk hosting, krypteret data og fuld GDPR-overholdelse."
-            />
-          </div>
-        </div>
-      </section>
-
-      <section class="px-4 py-20 sm:px-6">
-        <div class="glass-surface mx-auto max-w-4xl rounded-3xl px-8 py-16 text-center">
-          <h2 class="text-base-content text-3xl font-bold tracking-tight">
-            Klar til at komme i gang?
+  defp marketing_features(assigns) do
+    ~H"""
+    <section id="features" class="px-4 py-20 sm:px-6">
+      <div class="mx-auto max-w-7xl">
+        <div class="mb-16 text-center">
+          <h2 class="text-base-content text-3xl font-bold tracking-tight sm:text-4xl">
+            Alt samlet ét sted
           </h2>
-          <p class="text-base-content/60 mx-auto mt-4 max-w-xl text-lg">
-            Opret din forening på under 5 minutter. Gratis at prøve.
+          <p class="text-base-content/60 mt-4 text-lg">
+            Værktøjerne din forening har brug for — uden kompleksiteten.
           </p>
-          <div class="mt-8 flex flex-wrap items-center justify-center gap-4">
-            <a href="/register" class="btn btn-lg btn-primary">Opret gratis konto</a>
-            <a href="/sign-in" class="btn btn-ghost btn-lg">Har du allerede en konto</a>
-          </div>
         </div>
-      </section>
 
-      <footer class="border-base-content/5 border-t px-4 py-8 sm:px-6">
-        <div class="text-base-content/40 mx-auto max-w-7xl text-center text-sm">
-          <p>&copy; {DateTime.utc_now().year} Exhs</p>
+        <div class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+          <.feature_card
+            icon="hero-users"
+            color="primary"
+            title="Medlemshåndtering"
+            text="Overblik over alle medlemmer, roller og kontaktoplysninger."
+          />
+          <.feature_card
+            icon="hero-calendar-days"
+            color="secondary"
+            title="Events & tilmelding"
+            text="Opret events med tilmelding, ventelister og automatiske påmindelser."
+          />
+          <.feature_card
+            icon="hero-banknotes"
+            color="accent"
+            title="Kontingent & betaling"
+            text="Automatisk opkrævning via Stripe. Hold styr på hvem der har betalt."
+          />
+          <.feature_card
+            icon="hero-chart-bar"
+            color="warning"
+            title="Dashboard & statistik"
+            text="Se din forenings nøgletal med ét blik."
+          />
+          <.feature_card
+            icon="hero-paint-brush"
+            color="info"
+            title="Dit eget brand"
+            text="Eget logo, farver og subdomæne. Medlemmer ser jeres forening."
+          />
+          <.feature_card
+            icon="hero-shield-check"
+            color="error"
+            title="GDPR & sikkerhed"
+            text="Europæisk hosting, krypteret data og fuld GDPR-overholdelse."
+          />
         </div>
-      </footer>
-    </div>
+      </div>
+    </section>
+    """
+  end
+
+  defp marketing_cta(assigns) do
+    ~H"""
+    <section class="px-4 py-20 sm:px-6">
+      <div class="glass-surface mx-auto max-w-4xl rounded-3xl px-8 py-16 text-center">
+        <h2 class="text-base-content text-3xl font-bold tracking-tight">
+          Klar til at komme i gang?
+        </h2>
+        <p class="text-base-content/60 mx-auto mt-4 max-w-xl text-lg">
+          Opret din forening på under 5 minutter. Gratis at prøve.
+        </p>
+        <div class="mt-8 flex flex-wrap items-center justify-center gap-4">
+          <a href="/register" class="btn btn-lg btn-primary">Opret gratis konto</a>
+          <a href="/sign-in" class="btn btn-ghost btn-lg">Har du allerede en konto</a>
+        </div>
+      </div>
+    </section>
     """
   end
 

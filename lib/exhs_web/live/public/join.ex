@@ -51,6 +51,7 @@ defmodule ExhsWeb.PublicLive.Join do
       flash={@flash}
       current_forening={@current_forening}
       current_user={@current_user}
+      current_path={@current_path}
     >
       <div class="px-4 py-16 sm:px-6">
         <div class="mx-auto max-w-2xl text-center">

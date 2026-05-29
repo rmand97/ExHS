@@ -4,6 +4,190 @@ defmodule ExhsWeb.Layouts do
 
   embed_templates "layouts/*"
 
+  # ──────────────────────────────────────────────
+  # Marketing layout (main domain, no forening)
+  # ──────────────────────────────────────────────
+
+  attr :flash, :map, required: true
+  attr :current_user, :map, default: nil
+  slot :inner_block, required: true
+
+  def marketing(assigns) do
+    ~H"""
+    <div class="bg-base-200 min-h-screen">
+      <nav class="bg-base-100/80 border-base-content/5 sticky top-0 z-50 border-b backdrop-blur-xl">
+        <div class="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6">
+          <a href="/" class="flex items-center gap-2.5">
+            <.exhs_logo />
+            <span class="text-base-content text-lg font-semibold tracking-tight">Exhs</span>
+          </a>
+          <div class="flex items-center gap-3">
+            <.theme_toggle />
+            <a :if={!@current_user} href="/sign-in" class="btn btn-ghost btn-sm">Log ind</a>
+            <a :if={!@current_user} href="/register" class="btn btn-primary btn-sm">Opret konto</a>
+            <a :if={@current_user} href="/dashboard" class="btn btn-ghost btn-sm">Din side</a>
+          </div>
+        </div>
+      </nav>
+
+      <main>
+        {render_slot(@inner_block)}
+      </main>
+
+      <footer class="border-base-content/5 border-t px-4 py-8 sm:px-6">
+        <div class="text-base-content/40 mx-auto max-w-7xl text-center text-sm">
+          <p>&copy; {DateTime.utc_now().year} Exhs</p>
+        </div>
+      </footer>
+
+      <.flash_group flash={@flash} />
+    </div>
+    """
+  end
+
+  # ──────────────────────────────────────────────
+  # Public forening layout
+  # ──────────────────────────────────────────────
+
+  attr :flash, :map, required: true
+  attr :current_forening, :map, required: true
+  attr :current_user, :map, default: nil
+  attr :current_path, :string, default: nil
+  slot :inner_block, required: true
+
+  def public(assigns) do
+    ~H"""
+    <div class="bg-base-200 min-h-screen" style={forening_css_vars(@current_forening)}>
+      <nav class="bg-base-100/80 border-base-content/5 sticky top-0 z-50 border-b backdrop-blur-xl">
+        <div class="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6">
+          <div class="flex items-center gap-3">
+            <a href="/" class="flex items-center gap-2.5">
+              <.forening_logo forening={@current_forening} />
+              <span class="text-base-content hidden text-lg font-semibold tracking-tight sm:inline">
+                {@current_forening.name}
+              </span>
+            </a>
+            <div class="hidden items-center gap-1 sm:flex">
+              <.nav_link href="/" label="Hjem" current_path={@current_path} />
+              <.nav_link href="/events" label="Events" current_path={@current_path} />
+              <.nav_link href="/join" label="Bliv medlem" current_path={@current_path} />
+            </div>
+          </div>
+          <div class="flex items-center gap-3">
+            <.theme_toggle />
+            <a :if={!@current_user} href="/sign-in" class="btn btn-ghost btn-sm">Log ind</a>
+            <a :if={@current_user} href="/dashboard" class="btn btn-ghost btn-sm">
+              <.icon name="hero-squares-2x2" class="size-4" /> Din side
+            </a>
+          </div>
+        </div>
+        <div class="border-base-content/5 flex items-center gap-1 border-t px-4 py-2 sm:hidden">
+          <.nav_link href="/" label="Hjem" current_path={@current_path} />
+          <.nav_link href="/events" label="Events" current_path={@current_path} />
+          <.nav_link href="/join" label="Bliv medlem" current_path={@current_path} />
+        </div>
+      </nav>
+
+      <main>
+        {render_slot(@inner_block)}
+      </main>
+
+      <footer class="border-base-content/5 border-t px-4 py-8 sm:px-6">
+        <div class="mx-auto max-w-7xl text-center">
+          <p class="text-base-content/40 text-sm">
+            &copy; {DateTime.utc_now().year} {@current_forening.name}
+          </p>
+          <p class="text-base-content/30 mt-1 text-xs">Drevet af Exhs</p>
+        </div>
+      </footer>
+
+      <.flash_group flash={@flash} />
+    </div>
+    """
+  end
+
+  # ──────────────────────────────────────────────
+  # Member layout (authenticated pages)
+  # ──────────────────────────────────────────────
+
+  attr :flash, :map, required: true
+  attr :current_user, :map, required: true
+  attr :current_path, :string, default: nil
+  slot :inner_block, required: true
+
+  def member(assigns) do
+    ~H"""
+    <div class="bg-base-200 min-h-screen">
+      <nav class="bg-base-100/80 border-base-content/5 sticky top-0 z-50 border-b backdrop-blur-xl">
+        <div class="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6">
+          <div class="flex items-center gap-4">
+            <.link navigate="/dashboard" class="flex items-center gap-2.5">
+              <.exhs_logo />
+              <span class="text-base-content hidden font-semibold tracking-tight sm:inline">Exhs</span>
+            </.link>
+            <div class="hidden items-center gap-1 md:flex">
+              <.nav_link href="/dashboard" label="Dashboard" current_path={@current_path} />
+              <.nav_link href="/upcoming" label="Kommende events" current_path={@current_path} />
+              <.nav_link href="/registrations" label="Mine events" current_path={@current_path} />
+              <.nav_link href="/payments" label="Betalinger" current_path={@current_path} />
+            </div>
+          </div>
+          <div class="flex items-center gap-3">
+            <.theme_toggle />
+            <div class="dropdown dropdown-end">
+              <div tabindex="0" role="button">
+                <.avatar initials={user_initials(@current_user)} size="sm" class="cursor-pointer" />
+              </div>
+              <ul
+                tabindex="0"
+                class="dropdown-content bg-base-100 border-base-content/10 z-50 mt-2 w-48 rounded-xl border p-1 shadow-lg"
+              >
+                <li>
+                  <.link
+                    navigate="/profile"
+                    class="hover:bg-base-content/5 text-base-content/70 hover:text-base-content flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm"
+                  >
+                    <.icon name="hero-user" class="size-4" /> Profil
+                  </.link>
+                </li>
+                <li>
+                  <.link
+                    href="/sign-out"
+                    method="delete"
+                    class="hover:bg-base-content/5 text-base-content/70 hover:text-base-content flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm"
+                  >
+                    <.icon name="hero-arrow-right-start-on-rectangle" class="size-4" /> Log ud
+                  </.link>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </nav>
+
+      <div class="border-base-content/5 flex items-center gap-1 overflow-x-auto border-b px-4 py-2 md:hidden">
+        <.nav_link href="/dashboard" label="Dashboard" current_path={@current_path} />
+        <.nav_link href="/upcoming" label="Events" current_path={@current_path} />
+        <.nav_link href="/registrations" label="Mine events" current_path={@current_path} />
+        <.nav_link href="/payments" label="Betalinger" current_path={@current_path} />
+        <.nav_link href="/profile" label="Profil" current_path={@current_path} />
+      </div>
+
+      <main class="px-4 py-6 sm:px-6 lg:px-8">
+        <div class="mx-auto max-w-7xl">
+          {render_slot(@inner_block)}
+        </div>
+      </main>
+
+      <.flash_group flash={@flash} />
+    </div>
+    """
+  end
+
+  # ──────────────────────────────────────────────
+  # Dev-only app layout (component showcase)
+  # ──────────────────────────────────────────────
+
   attr :flash, :map, required: true
   attr :current_scope, :map, default: nil
   slot :inner_block, required: true
@@ -14,19 +198,9 @@ defmodule ExhsWeb.Layouts do
       <nav class="bg-base-100/80 border-base-content/5 navbar sticky top-0 z-50 border-b px-4 backdrop-blur-xl sm:px-6">
         <div class="flex-1 gap-4">
           <a href="/" class="flex items-center gap-2.5">
-            <div class="from-primary text-primary-content to-secondary flex size-8 items-center justify-center rounded-lg bg-linear-to-br text-sm font-bold">
-              E
-            </div>
-            <span class="text-base-content hidden font-semibold tracking-tight sm:inline">
-              Exhs
-            </span>
+            <.exhs_logo />
+            <span class="text-base-content hidden font-semibold tracking-tight sm:inline">Exhs</span>
           </a>
-          <div :if={@current_scope} class="hidden items-center gap-1 md:flex">
-            <.nav_link href="/" label="Oversigt" />
-            <.nav_link href="#" label="Medlemmer" />
-            <.nav_link href="#" label="Events" />
-            <.nav_link href="#" label="Kontingent" />
-          </div>
         </div>
         <div class="flex flex-none items-center gap-3">
           <.theme_toggle />
@@ -47,61 +221,64 @@ defmodule ExhsWeb.Layouts do
     """
   end
 
-  attr :flash, :map, required: true
-  attr :current_user, :map, required: true
-  slot :inner_block, required: true
+  # ──────────────────────────────────────────────
+  # Shared nav link (active-state aware)
+  # ──────────────────────────────────────────────
 
-  def member(assigns) do
+  attr :href, :string, required: true
+  attr :label, :string, required: true
+  attr :current_path, :string, default: nil
+
+  defp nav_link(assigns) do
+    active =
+      case {assigns.current_path, assigns.href} do
+        {nil, _} -> false
+        {"/", "/"} -> true
+        {_path, "/"} -> false
+        {path, href} -> String.starts_with?(path, href)
+      end
+
+    assigns = assign(assigns, :active, active)
+
     ~H"""
-    <div class="bg-base-200 min-h-screen">
-      <nav class="bg-base-100/80 border-base-content/5 navbar sticky top-0 z-50 border-b px-4 backdrop-blur-xl sm:px-6">
-        <div class="flex-1 gap-4">
-          <.link navigate="/dashboard" class="flex items-center gap-2.5">
-            <div class="from-primary text-primary-content to-secondary flex size-8 items-center justify-center rounded-lg bg-linear-to-br text-sm font-bold">
-              E
-            </div>
-            <span class="text-base-content hidden font-semibold tracking-tight sm:inline">
-              Exhs
-            </span>
-          </.link>
-          <div class="hidden items-center gap-1 md:flex">
-            <.nav_link href="/dashboard" label="Dashboard" />
-            <.nav_link href="/registrations" label="Mine events" />
-            <.nav_link href="/payments" label="Betalinger" />
-            <.nav_link href="/profile" label="Profil" />
-          </div>
-        </div>
-        <div class="flex flex-none items-center gap-3">
-          <.theme_toggle />
-          <.avatar initials={user_initials(@current_user)} size="sm" />
-        </div>
-      </nav>
+    <.link
+      navigate={@href}
+      class={[
+        "rounded-lg px-3 py-1.5 text-sm font-medium transition whitespace-nowrap",
+        if(@active,
+          do: "bg-base-content/8 text-base-content",
+          else: "text-base-content/50 hover:bg-base-content/5 hover:text-base-content/80"
+        )
+      ]}
+    >
+      {@label}
+    </.link>
+    """
+  end
 
-      <div class="border-base-content/5 flex items-center gap-1 border-b px-4 py-2 sm:hidden">
-        <.nav_link href="/dashboard" label="Dashboard" />
-        <.nav_link href="/registrations" label="Mine events" />
-        <.nav_link href="/profile" label="Profil" />
-      </div>
+  # ──────────────────────────────────────────────
+  # Private components
+  # ──────────────────────────────────────────────
 
-      <main class="px-4 py-6 sm:px-6 lg:px-8">
-        <div class="mx-auto max-w-7xl">
-          {render_slot(@inner_block)}
-        </div>
-      </main>
-
-      <.flash_group flash={@flash} />
+  defp exhs_logo(assigns) do
+    ~H"""
+    <div class="from-primary text-primary-content to-secondary flex size-9 items-center justify-center rounded-xl bg-linear-to-br text-sm font-bold">
+      E
     </div>
     """
   end
 
-  defp nav_link(assigns) do
+  defp forening_logo(assigns) do
     ~H"""
-    <.link
-      navigate={@href}
-      class="hover:bg-base-content/5 hover:text-base-content/80 text-base-content/50 rounded-lg px-3 py-1.5 text-sm font-medium transition"
+    <div :if={@forening.logo_url} class="size-9 overflow-hidden rounded-xl">
+      <img src={@forening.logo_url} alt={@forening.name} class="size-full object-cover" />
+    </div>
+    <div
+      :if={!@forening.logo_url}
+      class="from-primary text-primary-content to-secondary flex size-9 items-center justify-center rounded-xl bg-linear-to-br text-sm font-bold"
     >
-      {@label}
-    </.link>
+      {String.first(@forening.name)}
+    </div>
     """
   end
 
@@ -114,6 +291,24 @@ defmodule ExhsWeb.Layouts do
     case String.upcase(first <> last) do
       "" -> user.email |> to_string() |> String.first() |> String.upcase()
       initials -> initials
+    end
+  end
+
+  defp forening_css_vars(forening) do
+    branding = forening.branding || %{}
+    primary = branding["primary_color"]
+    accent = branding["accent_color"]
+
+    vars =
+      [
+        primary && "--color-primary: #{primary}",
+        accent && "--color-accent: #{accent}"
+      ]
+      |> Enum.reject(&is_nil/1)
+
+    case vars do
+      [] -> nil
+      list -> Enum.join(list, "; ")
     end
   end
 
@@ -151,111 +346,6 @@ defmodule ExhsWeb.Layouts do
       </.flash>
     </div>
     """
-  end
-
-  attr :flash, :map, required: true
-  attr :current_forening, :map, required: true
-  attr :current_user, :map, default: nil
-  slot :inner_block, required: true
-
-  def public(assigns) do
-    ~H"""
-    <div
-      class="bg-base-200 min-h-screen"
-      style={forening_css_vars(@current_forening)}
-    >
-      <nav class="bg-base-100/80 border-base-content/5 sticky top-0 z-50 border-b backdrop-blur-xl">
-        <div class="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6">
-          <div class="flex items-center gap-3">
-            <a href="/" class="flex items-center gap-2.5">
-              <.forening_logo forening={@current_forening} />
-              <span class="text-base-content text-lg font-semibold tracking-tight">
-                {@current_forening.name}
-              </span>
-            </a>
-            <div class="hidden items-center gap-1 sm:flex">
-              <.public_nav_link href="/" label="Hjem" />
-              <.public_nav_link href="/events" label="Events" />
-              <.public_nav_link href="/join" label="Bliv medlem" />
-            </div>
-          </div>
-          <div class="flex items-center gap-3">
-            <.theme_toggle />
-            <a :if={!@current_user} href="/sign-in" class="btn btn-ghost btn-sm">Log ind</a>
-            <a :if={@current_user} href="/" class="btn btn-ghost btn-sm">
-              <.icon name="hero-squares-2x2" class="size-4" /> Dashboard
-            </a>
-          </div>
-        </div>
-
-        <div class="border-base-content/5 flex items-center gap-1 border-t px-4 py-2 sm:hidden">
-          <.public_nav_link href="/" label="Hjem" />
-          <.public_nav_link href="/events" label="Events" />
-          <.public_nav_link href="/join" label="Bliv medlem" />
-        </div>
-      </nav>
-
-      <main>
-        {render_slot(@inner_block)}
-      </main>
-
-      <footer class="border-base-content/5 border-t px-4 py-8 sm:px-6">
-        <div class="mx-auto max-w-7xl text-center">
-          <p class="text-base-content/40 text-sm">
-            &copy; {DateTime.utc_now().year} {@current_forening.name}
-          </p>
-          <p class="text-base-content/30 mt-1 text-xs">
-            Drevet af Exhs
-          </p>
-        </div>
-      </footer>
-
-      <.flash_group flash={@flash} />
-    </div>
-    """
-  end
-
-  defp public_nav_link(assigns) do
-    ~H"""
-    <.link
-      navigate={@href}
-      class="hover:bg-base-content/5 hover:text-base-content/80 text-base-content/50 rounded-lg px-3 py-1.5 text-sm font-medium transition"
-    >
-      {@label}
-    </.link>
-    """
-  end
-
-  defp forening_logo(assigns) do
-    ~H"""
-    <div :if={@forening.logo_url} class="size-9 overflow-hidden rounded-xl">
-      <img src={@forening.logo_url} alt={@forening.name} class="size-full object-cover" />
-    </div>
-    <div
-      :if={!@forening.logo_url}
-      class="from-primary text-primary-content to-secondary flex size-9 items-center justify-center rounded-xl bg-linear-to-br text-sm font-bold"
-    >
-      {String.first(@forening.name)}
-    </div>
-    """
-  end
-
-  defp forening_css_vars(forening) do
-    branding = forening.branding || %{}
-    primary = branding["primary_color"]
-    accent = branding["accent_color"]
-
-    vars =
-      [
-        primary && "--color-primary: #{primary}",
-        accent && "--color-accent: #{accent}"
-      ]
-      |> Enum.reject(&is_nil/1)
-
-    case vars do
-      [] -> nil
-      list -> Enum.join(list, "; ")
-    end
   end
 
   def theme_toggle(assigns) do

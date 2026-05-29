@@ -10,11 +10,13 @@ defmodule ExhsWeb.PublicLive.Events.Show do
       case Exhs.Events.get_public_event(id, tenant: tenant_id) do
         {:ok, event} ->
           ticket_types = load_ticket_types(event.id, tenant_id)
+          already_registered? = registered_for_event?(socket.assigns[:current_user], event.id)
 
           {:ok,
            assign(socket,
              event: event,
              ticket_types: ticket_types,
+             already_registered?: already_registered?,
              page_title: event.title,
              page_description: event.description,
              page_image: event.cover_image_url
@@ -35,6 +37,7 @@ defmodule ExhsWeb.PublicLive.Events.Show do
       flash={@flash}
       current_forening={@current_forening}
       current_user={@current_user}
+      current_path={@current_path}
     >
       <div class="px-4 py-8 sm:px-6">
         <div class="mx-auto max-w-4xl">
@@ -71,6 +74,7 @@ defmodule ExhsWeb.PublicLive.Events.Show do
                 ticket_types={@ticket_types}
                 event={@event}
                 current_user={@current_user}
+                already_registered?={@already_registered?}
               />
             </div>
           </div>
@@ -121,6 +125,18 @@ defmodule ExhsWeb.PublicLive.Events.Show do
     """
   end
 
+  defp registered_for_event?(nil, _event_id), do: false
+
+  defp registered_for_event?(user, event_id) do
+    case Exhs.Events.list_my_registrations(actor: user) do
+      {:ok, registrations} ->
+        Enum.any?(registrations, &(&1.ticket_type.event.id == event_id))
+
+      _ ->
+        false
+    end
+  end
+
   defp ticket_types_card(assigns) do
     ~H"""
     <.card class="p-5">
@@ -146,7 +162,17 @@ defmodule ExhsWeb.PublicLive.Events.Show do
       </div>
 
       <div class="mt-4">
-        <a :if={@current_user} href="#" class="btn btn-block btn-primary">
+        <div
+          :if={@current_user && @already_registered?}
+          class="flex items-center justify-center gap-2 rounded-lg bg-success/10 px-4 py-3 text-sm font-medium text-success"
+        >
+          <.icon name="hero-check-circle" class="size-5" /> Du er tilmeldt
+        </div>
+        <a
+          :if={@current_user && !@already_registered?}
+          href="#"
+          class="btn btn-block btn-primary"
+        >
           Tilmeld
         </a>
         <a :if={!@current_user} href="/sign-in" class="btn btn-block btn-primary">

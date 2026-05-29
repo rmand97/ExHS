@@ -44,7 +44,7 @@ defmodule ExhsWeb.Plugs.Subdomain do
   defp find_suffix(host) do
     base = Application.get_env(:exhs, :base_host, "exhs.dk")
 
-    [base, "lvh.me"]
+    [base]
     |> Enum.map(&("." <> &1))
     |> Enum.find(&String.ends_with?(host, &1))
   end

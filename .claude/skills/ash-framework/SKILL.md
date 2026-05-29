@@ -53,7 +53,7 @@ metadata:
 ## Searching Documentation
 
 ```sh
-mix usage_rules.search_docs "search term" -p ash -p ash_admin -p ash_ai -p ash_authentication -p ash_authentication_phoenix -p ash_events -p ash_oban -p ash_paper_trail -p ash_phoenix -p ash_postgres
+mix usage_rules.search_docs "search term" -p ash -p ash_admin -p ash_ai -p ash_authentication -p ash_authentication_phoenix -p ash_events -p ash_oban -p ash_phoenix -p ash_postgres
 ```
 
 ## Available Mix Tasks

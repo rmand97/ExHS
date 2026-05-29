@@ -39,7 +39,7 @@ defmodule ExhsWeb.MemberLive.Registrations do
   @impl true
   def render(assigns) do
     ~H"""
-    <Layouts.member flash={@flash} current_user={@current_user}>
+    <Layouts.member flash={@flash} current_user={@current_user} current_path={@current_path}>
       <.header>
         Mine events
         <:subtitle>Dine tilmeldinger på tværs af foreninger</:subtitle>
@@ -86,10 +86,15 @@ defmodule ExhsWeb.MemberLive.Registrations do
 
   defp filter_config do
     [
-      LiveFilter.text(:search, label: "Søg", always_on: true),
+      LiveFilter.text(:search, label: "Søg", always_on: true, placeholder: "Søg..."),
       LiveFilter.select(:status,
         label: "Status",
-        options: ~w(confirmed waitlisted cancelled pending_payment)
+        options: [
+          {"Bekræftet", "confirmed"},
+          {"Venteliste", "waitlisted"},
+          {"Annulleret", "cancelled"},
+          {"Afventer betaling", "pending_payment"}
+        ]
       )
     ]
   end
@@ -156,8 +161,6 @@ defmodule ExhsWeb.MemberLive.Registrations do
   defp format_date(dt), do: Calendar.strftime(dt, "%d. %b %Y")
 
   defp event_url(reg) do
-    base = Application.get_env(:exhs, :base_host, "exhs.dk")
-    subdomain = reg.membership.forening.subdomain
-    "//#{subdomain}.#{base}/events/#{reg.ticket_type.event.id}"
+    ~p"/go/forening/#{reg.membership.forening.subdomain}?#{%{return_to: "/events/#{reg.ticket_type.event.id}"}}"
   end
 end

@@ -259,6 +259,75 @@ defmodule ExhsWeb.PublicLive.PublicPagesTest do
     end
   end
 
+  describe "PublicLive.Events.Show - tilmeld button" do
+    test "shows tilmeld button when not registered", %{conn: conn, forening: forening, event: event} do
+      user = register_user!()
+      join_forening!(forening, user)
+
+      {:ok, _view, html} =
+        conn
+        |> log_in_user(user)
+        |> forening_conn(forening)
+        |> live("/events/#{event.id}")
+
+      assert html =~ "Tilmeld"
+      refute html =~ "Du er tilmeldt"
+    end
+
+    test "hides tilmeld button and shows tilmeldt when already registered", %{
+      conn: conn,
+      forening: forening,
+      event: event
+    } do
+      user = register_user!()
+      membership = join_forening!(forening, user)
+      ticket_type = create_ticket_type!(forening, event)
+      register_for_event!(forening, membership, ticket_type)
+
+      {:ok, _view, html} =
+        conn
+        |> log_in_user(user)
+        |> forening_conn(forening)
+        |> live("/events/#{event.id}")
+
+      assert html =~ "Du er tilmeldt"
+      refute html =~ ~s(btn btn-block btn-primary">Tilmeld)
+    end
+  end
+
+  describe "logged-in member navigation" do
+    test "member on forening site sees Din side link without being logged out", %{
+      conn: conn,
+      forening: forening
+    } do
+      user = register_user!()
+      join_forening!(forening, user)
+      authed = log_in_user(conn, user)
+
+      {:ok, _view, html} = live(authed, "/dashboard")
+      assert html =~ "Dashboard"
+
+      {:ok, _view, html} = authed |> forening_conn(forening) |> live("/")
+      assert html =~ "Din side"
+      assert html =~ forening.name
+    end
+
+    test "bliv_member link and join page accessible even with active membership", %{
+      conn: conn,
+      forening: forening
+    } do
+      user = register_user!()
+      join_forening!(forening, user)
+      authed = conn |> log_in_user(user) |> forening_conn(forening)
+
+      {:ok, _view, html} = live(authed, "/")
+      assert html =~ "Bliv medlem"
+
+      {:ok, _view, html} = live(authed, "/join")
+      assert html =~ "Du er allerede medlem"
+    end
+  end
+
   describe "unknown subdomain" do
     test "returns 404 for nonexistent forening subdomain", %{conn: conn} do
       conn =
@@ -268,6 +337,45 @@ defmodule ExhsWeb.PublicLive.PublicPagesTest do
 
       assert conn.status == 404
       assert conn.resp_body =~ "Siden blev ikke fundet"
+    end
+  end
+
+  describe "reserved subdomains" do
+    for reserved <- ~w(www app admin api) do
+      test "#{reserved}.lvh.me passes through as main domain", %{conn: conn} do
+        {:ok, _view, html} =
+          conn
+          |> Map.put(:host, "#{unquote(reserved)}.lvh.me")
+          |> live("/")
+
+        assert html =~ "Exhs"
+        refute html =~ "Siden blev ikke fundet"
+      end
+    end
+  end
+
+  describe "unpublished events" do
+    test "unpublished event absent from events index", %{conn: conn, forening: forening} do
+      create_event!(forening, %{title: "Internt Møde"})
+
+      {:ok, _view, html} =
+        conn
+        |> forening_conn(forening)
+        |> live("/events")
+
+      assert html =~ "Fodboldturnering"
+      refute html =~ "Internt Møde"
+    end
+
+    test "unpublished event absent from forening home", %{conn: conn, forening: forening} do
+      create_event!(forening, %{title: "Intern Begivenhed"})
+
+      {:ok, _view, html} =
+        conn
+        |> forening_conn(forening)
+        |> live("/")
+
+      refute html =~ "Intern Begivenhed"
     end
   end
 end
