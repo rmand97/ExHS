@@ -78,6 +78,21 @@ defmodule ExhsWeb.Router do
       live "/payments", MemberLive.Payments
       live "/activity", MemberLive.Activity
     end
+
+    ash_authentication_live_session :admin_routes,
+      session: {__MODULE__, :public_session, []},
+      on_mount: [
+        {ExhsWeb.LiveCurrentPath, :default},
+        {ExhsWeb.LiveUserAuth, :live_user_required},
+        {ExhsWeb.LiveForeningAuth, :require_admin}
+      ] do
+      live "/admin", AdminLive.Dashboard
+      live "/admin/members", AdminLive.Members.Index
+      live "/admin/members/:id", AdminLive.Members.Show
+      live "/admin/groups", AdminLive.Groups.Index
+    end
+
+    get "/admin/export/members.csv", AdminExportController, :members
   end
 
   scope "/", ExhsWeb do

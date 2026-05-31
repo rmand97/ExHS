@@ -31,6 +31,12 @@ defmodule Exhs.Audit.EventLog do
 
       prepare build(sort: [occurred_at: :desc])
     end
+
+    read :for_record do
+      argument :record_id, :uuid, allow_nil?: false
+      filter expr(record_id == ^arg(:record_id))
+      prepare build(sort: [occurred_at: :desc])
+    end
   end
 
   policies do

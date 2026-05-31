@@ -192,6 +192,18 @@ defmodule Exhs.Accounts.User do
       end
     end
 
+    create :create_invited do
+      description "Create (or fetch) a passwordless user record for an admin invitation."
+
+      argument :email, :ci_string, allow_nil?: false
+
+      upsert? true
+      upsert_identity :unique_email
+      upsert_fields []
+
+      change set_attribute(:email, arg(:email))
+    end
+
     create :register_with_password do
       description "Register a new user with a email and password."
 

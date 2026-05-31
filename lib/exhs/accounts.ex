@@ -13,6 +13,7 @@ defmodule Exhs.Accounts do
     resource Exhs.Accounts.User do
       define :register_with_password, args: [:email, :password, :password_confirmation]
       define :sign_in_with_password, args: [:email, :password]
+      define :create_invited_user, action: :create_invited, args: [:email]
       define :get_user_by_id, action: :get_by_id, args: [:id], get?: true
       define :get_user_by_email, action: :get_by_email, args: [:email], get?: true
       define :update_profile

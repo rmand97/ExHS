@@ -2,6 +2,8 @@ defmodule ExhsWeb.MemberLive.Dashboard do
   @moduledoc false
   use ExhsWeb, :live_view
 
+  import ExhsWeb.Labels
+
   alias LiveFilter.Params.Serializer
 
   @impl true
@@ -223,5 +225,9 @@ defmodule ExhsWeb.MemberLive.Dashboard do
       active: Enum.count(memberships, &(&1.status == :active)),
       foreninger: memberships |> Enum.map(& &1.forening.id) |> Enum.uniq() |> length()
     }
+  end
+
+  defp forening_url(forening) do
+    ~p"/go/forening/#{forening.subdomain}"
   end
 end

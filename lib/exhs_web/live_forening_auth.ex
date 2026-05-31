@@ -3,11 +3,14 @@ defmodule ExhsWeb.LiveForeningAuth do
   import Phoenix.Component
   import Phoenix.LiveView
 
+  alias Exhs.Checks.Helpers
+  alias Exhs.Organizations.Forening
+
   def on_mount(:require_forening, _params, session, socket) do
     socket = maybe_load_forening(socket, session)
 
     case socket.assigns do
-      %{current_forening: %Exhs.Organizations.Forening{}} ->
+      %{current_forening: %Forening{}} ->
         {:cont, assign_scope(socket)}
 
       _ ->
@@ -25,8 +28,29 @@ defmodule ExhsWeb.LiveForeningAuth do
     end
   end
 
+  @admin_roles [:admin, :board]
+
+  def on_mount(:require_admin, _params, session, socket) do
+    socket = maybe_load_forening(socket, session)
+
+    with %Forening{} = forening <- socket.assigns[:current_forening],
+         %{} = user <- socket.assigns[:current_user],
+         {:ok, %{role: role}} when role in @admin_roles <-
+           Helpers.lookup_membership(user.id, forening.id) do
+      socket =
+        socket
+        |> assign_scope()
+        |> assign(:current_role, role)
+        |> assign(:can_write?, role == :admin)
+
+      {:cont, socket}
+    else
+      _ -> {:halt, redirect(socket, to: "/dashboard")}
+    end
+  end
+
   defp maybe_load_forening(
-         %{assigns: %{current_forening: %Exhs.Organizations.Forening{}}} = socket,
+         %{assigns: %{current_forening: %Forening{}}} = socket,
          _session
        ) do
     socket

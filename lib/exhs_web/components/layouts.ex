@@ -189,6 +189,226 @@ defmodule ExhsWeb.Layouts do
   end
 
   # ──────────────────────────────────────────────
+  # Admin layout (forening command center)
+  # ──────────────────────────────────────────────
+
+  @admin_nav [
+    {"Dashboard", "/admin", "hero-squares-2x2", true},
+    {"Medlemmer", "/admin/members", "hero-users", true},
+    {"Grupper", "/admin/groups", "hero-tag", true},
+    {"Events", "/admin/events", "hero-calendar-days", false},
+    {"Shop", "/admin/shop", "hero-shopping-bag", false},
+    {"Nyhedsbreve", "/admin/newsletters", "hero-envelope", false},
+    {"Økonomi", "/admin/economy", "hero-banknotes", false},
+    {"Audit", "/admin/audit", "hero-clipboard-document-list", false},
+    {"Indstillinger", "/admin/settings", "hero-cog-6-tooth", false}
+  ]
+
+  attr :flash, :map, required: true
+  attr :current_forening, :map, required: true
+  attr :current_user, :map, required: true
+  attr :current_role, :atom, default: :admin
+  attr :current_path, :string, default: nil
+  slot :inner_block, required: true
+
+  def admin(assigns) do
+    assigns = assign(assigns, :nav, @admin_nav)
+
+    ~H"""
+    <div class="bg-base-200 min-h-screen lg:grid lg:grid-cols-[16rem_1fr]">
+      <%!-- Sidebar (desktop) --%>
+      <aside class="bg-base-100 border-base-content/5 sticky top-0 hidden h-screen flex-col border-r lg:flex">
+        <.admin_brand current_forening={@current_forening} />
+        <nav class="flex-1 space-y-1 overflow-y-auto px-3 py-4">
+          <.admin_nav_link
+            :for={{label, href, icon, built} <- @nav}
+            label={label}
+            href={href}
+            icon={icon}
+            built={built}
+            current_path={@current_path}
+          />
+        </nav>
+        <.admin_role_badge current_role={@current_role} />
+      </aside>
+
+      <div class="flex min-h-screen flex-col">
+        <%!-- Topbar --%>
+        <header class="bg-base-100/80 border-base-content/5 sticky top-0 z-40 border-b backdrop-blur-xl">
+          <div class="flex items-center justify-between gap-3 px-4 py-3 sm:px-6">
+            <button
+              class="btn btn-ghost btn-sm btn-square lg:hidden"
+              phx-click={show_mobile_sidebar()}
+              aria-label="Åbn menu"
+            >
+              <.icon name="hero-bars-3" class="size-5" />
+            </button>
+            <span class="text-base-content truncate font-semibold tracking-tight lg:hidden">
+              {@current_forening.name}
+            </span>
+            <div class="hidden lg:block"></div>
+            <div class="flex items-center gap-3">
+              <.theme_toggle />
+              <div class="dropdown dropdown-end">
+                <div tabindex="0" role="button">
+                  <.avatar initials={user_initials(@current_user)} size="sm" class="cursor-pointer" />
+                </div>
+                <ul
+                  tabindex="0"
+                  class="bg-base-100 border-base-content/10 dropdown-content z-50 mt-2 w-52 rounded-xl border p-1 shadow-lg"
+                >
+                  <li class="border-base-content/5 mb-1 border-b px-3 py-2">
+                    <p class="text-base-content/40 text-xs">Logget ind som</p>
+                    <p class="text-base-content truncate text-sm font-medium">
+                      {@current_user.email}
+                    </p>
+                  </li>
+                  <li>
+                    <.link
+                      navigate="/dashboard"
+                      class="hover:bg-base-content/5 hover:text-base-content text-base-content/70 flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm"
+                    >
+                      <.icon name="hero-arrow-left-on-rectangle" class="size-4" />
+                      Tilbage til Din side
+                    </.link>
+                  </li>
+                  <li>
+                    <.link
+                      href="/sign-out"
+                      method="delete"
+                      class="hover:bg-base-content/5 hover:text-base-content text-base-content/70 flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm"
+                    >
+                      <.icon name="hero-arrow-right-start-on-rectangle" class="size-4" /> Log ud
+                    </.link>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </header>
+
+        <main class="flex-1 px-4 py-6 sm:px-6 lg:px-8">
+          <div class="mx-auto max-w-7xl">
+            {render_slot(@inner_block)}
+          </div>
+        </main>
+      </div>
+
+      <%!-- Mobile sidebar (slide-over) --%>
+      <div id="mobile-sidebar" class="relative z-50 hidden lg:hidden" role="dialog" aria-modal="true">
+        <div
+          class="bg-base-content/40 fixed inset-0 backdrop-blur-sm"
+          phx-click={hide_mobile_sidebar()}
+        >
+        </div>
+        <aside class="bg-base-100 fixed inset-y-0 left-0 flex w-64 flex-col shadow-xl">
+          <.admin_brand current_forening={@current_forening} />
+          <nav class="flex-1 space-y-1 overflow-y-auto px-3 py-4">
+            <.admin_nav_link
+              :for={{label, href, icon, built} <- @nav}
+              label={label}
+              href={href}
+              icon={icon}
+              built={built}
+              current_path={@current_path}
+            />
+          </nav>
+          <.admin_role_badge current_role={@current_role} />
+        </aside>
+      </div>
+
+      <.flash_group flash={@flash} />
+    </div>
+    """
+  end
+
+  defp show_mobile_sidebar(js \\ %JS{}) do
+    JS.show(js, to: "#mobile-sidebar")
+  end
+
+  defp hide_mobile_sidebar(js \\ %JS{}) do
+    JS.hide(js, to: "#mobile-sidebar")
+  end
+
+  attr :current_forening, :map, required: true
+
+  defp admin_brand(assigns) do
+    ~H"""
+    <div class="border-base-content/5 flex h-16 shrink-0 items-center gap-2.5 border-b px-5">
+      <.forening_logo forening={@current_forening} />
+      <div class="min-w-0">
+        <p class="text-base-content truncate text-sm font-semibold">{@current_forening.name}</p>
+        <p class="text-base-content/40 text-xs">Administration</p>
+      </div>
+    </div>
+    """
+  end
+
+  attr :current_role, :atom, required: true
+
+  defp admin_role_badge(assigns) do
+    ~H"""
+    <div class="border-base-content/5 border-t px-5 py-3">
+      <span class="text-base-content/40 text-xs">
+        Rolle: <span class="text-base-content/70 font-medium">{role_label(@current_role)}</span>
+        <span :if={@current_role == :board}>(skrivebeskyttet)</span>
+      </span>
+    </div>
+    """
+  end
+
+  attr :href, :string, required: true
+  attr :label, :string, required: true
+  attr :icon, :string, required: true
+  attr :built, :boolean, default: true
+  attr :current_path, :string, default: nil
+
+  defp admin_nav_link(%{built: false} = assigns) do
+    ~H"""
+    <span class="text-base-content/25 flex cursor-not-allowed items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium">
+      <.icon name={@icon} class="size-5" />
+      {@label}
+      <span class="bg-base-content/5 text-base-content/40 ml-auto rounded px-1.5 py-0.5 text-[10px]">
+        snart
+      </span>
+    </span>
+    """
+  end
+
+  defp admin_nav_link(assigns) do
+    active =
+      case {assigns.current_path, assigns.href} do
+        {nil, _} -> false
+        {"/admin", "/admin"} -> true
+        {_path, "/admin"} -> false
+        {path, href} -> String.starts_with?(path, href)
+      end
+
+    assigns = assign(assigns, :active, active)
+
+    ~H"""
+    <.link
+      navigate={@href}
+      class={[
+        "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition",
+        if(@active,
+          do: "bg-primary/10 text-primary",
+          else: "hover:bg-base-content/5 hover:text-base-content text-base-content/60"
+        )
+      ]}
+    >
+      <.icon name={@icon} class="size-5" />
+      {@label}
+    </.link>
+    """
+  end
+
+  defp role_label(:admin), do: "Admin"
+  defp role_label(:board), do: "Bestyrelse"
+  defp role_label(:member), do: "Medlem"
+  defp role_label(_), do: "—"
+
+  # ──────────────────────────────────────────────
   # Dev-only app layout (component showcase)
   # ──────────────────────────────────────────────
 

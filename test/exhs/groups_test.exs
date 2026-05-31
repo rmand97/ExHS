@@ -107,26 +107,28 @@ defmodule Exhs.GroupsTest do
       assert mg.group_id == group.id
     end
 
-    test "cannot add same member to same group twice" do
+    test "adding the same member to the same group twice is idempotent" do
       forening = create_forening!()
       member = register_user!()
       join_forening!(forening, member)
       group = create_group!(forening)
       membership = membership_for!(forening, member)
 
-      Organizations.add_member_to_group!(
-        %{membership_id: membership.id, group_id: group.id},
-        tenant: forening.id,
-        authorize?: false
-      )
-
-      assert_raise Ash.Error.Invalid, fn ->
+      add = fn ->
         Organizations.add_member_to_group!(
           %{membership_id: membership.id, group_id: group.id},
           tenant: forening.id,
           authorize?: false
         )
       end
+
+      add.()
+      add.()
+
+      joins = Organizations.list_member_groups!(tenant: forening.id, authorize?: false)
+
+      assert Enum.count(joins, &(&1.membership_id == membership.id and &1.group_id == group.id)) ==
+               1
     end
 
     test "admin can remove a member from a group" do

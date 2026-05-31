@@ -35,6 +35,7 @@ defmodule Exhs.Seeds do
     forening = upsert_default_forening()
     membership = upsert_membership(user, forening, :admin)
     upsert_groups(forening)
+    upsert_sample_members(forening)
     upsert_sample_billing(forening, membership)
     upsert_sample_events(forening, membership)
 
@@ -231,6 +232,115 @@ defmodule Exhs.Seeds do
         Logger.info("Created group: #{attrs.name}")
       end
     end)
+  end
+
+  # A handful of members so the admin Members list has something to show:
+  # varied roles, one deactivated, some assigned to groups.
+  @sample_members [
+    %{
+      email: "frida@demo.dk",
+      first: "Frida",
+      last: "Hansen",
+      role: :board,
+      status: :active,
+      group: "Bestyrelse"
+    },
+    %{
+      email: "jonas@demo.dk",
+      first: "Jonas",
+      last: "Berg",
+      role: :member,
+      status: :active,
+      group: "Frivillige"
+    },
+    %{
+      email: "mette@demo.dk",
+      first: "Mette",
+      last: "Sørensen",
+      role: :member,
+      status: :active,
+      group: "Ungdom"
+    },
+    %{
+      email: "lars@demo.dk",
+      first: "Lars",
+      last: "Nielsen",
+      role: :member,
+      status: :inactive,
+      group: nil
+    },
+    %{
+      email: "sofie@demo.dk",
+      first: "Sofie",
+      last: "Andersen",
+      role: :member,
+      status: :active,
+      group: nil
+    }
+  ]
+
+  defp upsert_sample_members(forening) do
+    groups =
+      Group
+      |> Ash.read!(tenant: forening.id, authorize?: false)
+      |> Map.new(&{&1.name, &1})
+
+    Enum.each(@sample_members, fn attrs ->
+      member = upsert_member_user(attrs)
+      membership = upsert_membership(member, forening, attrs.role)
+      ensure_member_status(membership, attrs.status, forening)
+      ensure_member_group(membership, groups[attrs.group], forening)
+    end)
+  end
+
+  defp upsert_member_user(attrs) do
+    existing =
+      User
+      |> Ash.Query.filter(email == ^attrs.email)
+      |> Ash.read_one!(authorize?: false)
+
+    case existing do
+      %User{} = u ->
+        u
+
+      nil ->
+        {:ok, user} =
+          User
+          |> Ash.Changeset.for_create(:register_with_password, %{
+            email: attrs.email,
+            password: @test_password,
+            password_confirmation: @test_password
+          })
+          |> Ash.create(authorize?: false)
+
+        {:ok, user} =
+          Exhs.Accounts.update_profile(
+            user,
+            %{first_name: attrs.first, last_name: attrs.last},
+            authorize?: false
+          )
+
+        Logger.info("Created sample member: #{user.email}")
+        user
+    end
+  end
+
+  defp ensure_member_status(membership, :inactive, forening) do
+    if membership.status != :inactive do
+      Organizations.deactivate_member!(membership, tenant: forening.id, authorize?: false)
+    end
+  end
+
+  defp ensure_member_status(_membership, _status, _forening), do: :ok
+
+  defp ensure_member_group(_membership, nil, _forening), do: :ok
+
+  defp ensure_member_group(membership, group, forening) do
+    Organizations.add_member_to_group!(
+      %{membership_id: membership.id, group_id: group.id},
+      tenant: forening.id,
+      authorize?: false
+    )
   end
 
   # Seeds use placeholder Stripe IDs — no Stripe API calls happen here. They

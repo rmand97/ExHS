@@ -78,6 +78,10 @@ defmodule Exhs.Organizations.Membership do
       get? true
     end
 
+    read :get_by_id do
+      get_by :id
+    end
+
     read :my_memberships do
       multitenancy :allow_global
       filter expr(user_id == ^actor(:id))

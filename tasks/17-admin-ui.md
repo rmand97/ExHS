@@ -9,25 +9,25 @@ The forening admin's command center: members, events, shop, newsletters, economy
 ## Plan
 
 ### Routing & auth
-- [ ] Admin scope under forening subdomain, requires Membership role `:admin` (or `:board` for read-only views)
-- [ ] Use code interface `can_*` functions for conditional rendering (no policy duplication in UI)
+- [x] Admin scope under forening subdomain, requires Membership role `:admin` (or `:board` for read-only views) — `LiveForeningAuth.:require_admin` on_mount, `admin_routes` live_session
+- [ ] Use code interface `can_*` functions for conditional rendering (no policy duplication in UI) — currently gated via `@can_write?` assign derived from role; revisit if `can_*` interfaces are added
 
 ### Layout
-- [ ] App shell with sidebar (Members, Events, Shop, Newsletters, Economy, Audit, Settings) and topbar (user menu, forening switcher)
-- [ ] Active-route highlighting
-- [ ] Mobile-responsive (collapsible sidebar)
+- [x] App shell with sidebar (Members, Events, Shop, Newsletters, Economy, Audit, Settings) and topbar (user menu, forening switcher) — `Layouts.admin`; unbuilt sections shown disabled ("snart")
+- [x] Active-route highlighting
+- [x] Mobile-responsive (collapsible sidebar)
 
 ### Members
-- [ ] List with filters (status, role, group), search, sort, pagination
-- [ ] Bulk actions (assign to group, send newsletter to selection, export CSV)
-- [ ] Member detail page: profile, memberships, payments, registrations, orders, groups, audit history
-- [ ] Invite new member
-- [ ] Manual activate/deactivate (escape hatch, audit-logged)
-- [ ] Role management
+- [x] List with filters (status, role, group), search, sort, pagination — `AdminLive.Members.Index`, `MemberFilter`
+- [x] Bulk actions (assign to group, send newsletter to selection, export CSV) — group-assign + activate/deactivate + CSV export done; newsletter deferred to Newsletters slice
+- [x] Member detail page: profile, memberships, payments, registrations, orders, groups, audit history — `AdminLive.Members.Show` (orders pending Shop slice)
+- [x] Invite new member — email + passwordless user + magic-link via `InviteWorker` (Oban)
+- [x] Manual activate/deactivate (escape hatch, audit-logged)
+- [x] Role management
 
 ### Groups
-- [ ] CRUD groups
-- [ ] Member assignment UI (chip selector)
+- [x] CRUD groups — `AdminLive.Groups.Index`
+- [x] Member assignment UI (chip selector)
 
 ### Events
 - [ ] List events (upcoming, past, drafts)
@@ -41,7 +41,7 @@ The forening admin's command center: members, events, shop, newsletters, economy
 - [ ] Create / edit product
 - [ ] Orders list with fulfillment status
 
-### Newsletters
+### Newsletters (TBD - defer for now)
 - [ ] Drafts list, sent list
 - [ ] Composer (subject, body, segment picker)
 - [ ] Test-send to admin
@@ -75,11 +75,11 @@ The forening admin's command center: members, events, shop, newsletters, economy
 ### Tests
 LiveView tests via `Phoenix.LiveViewTest` — every interactive admin screen gets at least one test.
 
-- [ ] Admin-only routes deny non-admin (sign-in redirect or 403)
-- [ ] Board role sees read-only views; write actions are absent or rejected
-- [ ] Primary create/update/destroy action per admin LiveView submits and updates the page
-- [ ] All admin actions appear in audit log
-- [ ] Bulk-action selection + apply works for at least one resource
+- [x] Admin-only routes deny non-admin (sign-in redirect or 403) — Members slice
+- [x] Board role sees read-only views; write actions are absent or rejected — Members slice
+- [x] Primary create/update/destroy action per admin LiveView submits and updates the page — Members + Groups
+- [x] All admin actions appear in audit log — AshEvents logs invite/set_role/deactivate/group-add against the record; asserted in `admin_members_test` "audit log"
+- [x] Bulk-action selection + apply works for at least one resource — bulk deactivate on members
 
 ## Open decisions
 - [ ] **Bulk actions UX** — selection model (page-level vs filter-based "select all matching")

@@ -9,6 +9,7 @@ defmodule Exhs.Audit do
   resources do
     resource Exhs.Audit.EventLog do
       define :list_my_activity, action: :my_activity
+      define :list_events_for_record, action: :for_record, args: [:record_id]
     end
   end
 end

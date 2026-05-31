@@ -27,6 +27,8 @@ defmodule Exhs.Organizations.MemberGroup do
 
     create :add do
       accept [:membership_id, :group_id]
+      upsert? true
+      upsert_identity :unique_member_group
     end
 
     destroy :remove
