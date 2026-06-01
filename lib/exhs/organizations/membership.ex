@@ -94,6 +94,12 @@ defmodule Exhs.Organizations.Membership do
       filter expr(user_id == ^actor(:id))
       prepare build(load: [:forening])
     end
+
+    # Cross-tenant read for superadmin platform stats. Returns memberships
+    # across every forening; gated to superadmins by policy.
+    read :all_global do
+      multitenancy :bypass_all
+    end
   end
 
   policies do
@@ -111,6 +117,10 @@ defmodule Exhs.Organizations.Membership do
 
     policy action(:get_my_membership) do
       authorize_if actor_present()
+    end
+
+    policy action(:all_global) do
+      authorize_if Exhs.Checks.Superadmin
     end
 
     policy action(:join) do

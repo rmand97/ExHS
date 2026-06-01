@@ -42,6 +42,7 @@ defmodule Exhs.Organizations do
       define :list_memberships, action: :read
       define :list_my_memberships, action: :my_memberships
       define :get_my_membership, action: :get_my_membership, args: [:id], get?: true
+      define :list_all_memberships, action: :all_global
     end
 
     resource Exhs.Organizations.Group do
@@ -77,6 +78,25 @@ defmodule Exhs.Organizations do
          {:ok, membership} <- invite_member(user.id, attrs, scope: scope) do
       InviteWorker.enqueue(email)
       {:ok, membership}
+    end
+  end
+
+  @doc """
+  Provision a brand-new forening and its first admin in one step. Intended for
+  superadmin use: the `actor` must be a superadmin (enforced by the Forening
+  `:create` policy's superadmin bypass). Creates the forening, finds or creates
+  the admin user by email, attaches an `:admin` membership, and queues a
+  magic-link sign-in email. Returns `{:ok, forening}` or `{:error, reason}`.
+  """
+  def provision_forening(attrs, admin_email, actor) do
+    email = admin_email |> to_string() |> String.trim()
+
+    with {:ok, forening} <- create_forening(attrs, actor: actor),
+         scope = %Exhs.Scope{actor: actor, tenant: forening.id},
+         {:ok, user} <- ensure_user(email),
+         {:ok, _membership} <- invite_member(user.id, %{role: :admin}, scope: scope) do
+      InviteWorker.enqueue(email)
+      {:ok, forening}
     end
   end
 

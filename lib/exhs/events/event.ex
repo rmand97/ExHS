@@ -83,6 +83,11 @@ defmodule Exhs.Events.Event do
       get_by :id
       filter expr(published == true)
     end
+
+    # Cross-tenant read for superadmin platform stats.
+    read :all_global do
+      multitenancy :bypass_all
+    end
   end
 
   policies do
@@ -96,6 +101,10 @@ defmodule Exhs.Events.Event do
 
     policy action(:list_member_events) do
       authorize_if actor_present()
+    end
+
+    policy action(:all_global) do
+      authorize_if Exhs.Checks.Superadmin
     end
 
     bypass action([:list_public, :get_public]) do

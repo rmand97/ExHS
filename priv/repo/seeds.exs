@@ -27,10 +27,12 @@ defmodule Exhs.Seeds do
 
   @test_email "test@exhs.dk"
   @test_password "password123"
+  @superadmin_email "superadmin@exhs.dk"
 
   def run do
     Logger.info("Seeding…")
 
+    superadmin = upsert_superadmin_user()
     user = upsert_test_user()
     forening = upsert_default_forening()
     membership = upsert_membership(user, forening, :admin)
@@ -49,8 +51,36 @@ defmodule Exhs.Seeds do
       "Seed complete. Sign in with #{user.email} / #{@test_password}\n" <>
         "  Demo:   #{forening.subdomain}.lvh.me\n" <>
         "  Sport:  #{second.subdomain}.lvh.me\n" <>
-        "  Dashboard: lvh.me:4000/dashboard"
+        "  Dashboard: lvh.me:4000/dashboard\n" <>
+        "  Superadmin: #{superadmin.email} / #{@test_password} → lvh.me:4000/superadmin"
     )
+  end
+
+  defp upsert_superadmin_user do
+    existing =
+      User
+      |> Ash.Query.filter(email == ^@superadmin_email)
+      |> Ash.read_one!(authorize?: false)
+
+    case existing do
+      %User{} = user ->
+        Logger.info("Superadmin already exists: #{user.email}")
+        user
+
+      nil ->
+        {:ok, user} =
+          User
+          |> Ash.Changeset.for_create(:register_with_password, %{
+            email: @superadmin_email,
+            password: @test_password,
+            password_confirmation: @test_password
+          })
+          |> Ash.Changeset.force_change_attribute(:is_superadmin, true)
+          |> Ash.create(authorize?: false)
+
+        Logger.info("Created superadmin: #{user.email}")
+        user
+    end
   end
 
   defp upsert_test_user do

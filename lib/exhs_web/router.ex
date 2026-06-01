@@ -96,6 +96,15 @@ defmodule ExhsWeb.Router do
       live "/admin/events/:id", AdminLive.Events.Show
     end
 
+    ash_authentication_live_session :superadmin_routes,
+      on_mount: [
+        {ExhsWeb.LiveCurrentPath, :default},
+        {ExhsWeb.LiveUserAuth, :live_user_required},
+        {ExhsWeb.LiveUserAuth, :require_superadmin}
+      ] do
+      live "/superadmin", SuperadminLive.Dashboard
+    end
+
     get "/admin/export/members.csv", AdminExportController, :members
     get "/admin/export/payments.csv", AdminExportController, :payments
 

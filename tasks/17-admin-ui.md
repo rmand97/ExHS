@@ -67,10 +67,10 @@ The forening admin's command center: members, events, shop, newsletters, economy
 - [ ] Webhook secrets (Stripe) — deferred (app-level/sensitive)
 
 ### Superadmin area
-- [ ] Separate scope (root domain or `admin.exhs.dk`)
-- [ ] List all foreninger, create new, assign initial admin, archive
-- [ ] Cross-tenant system health
-- [ ] Oban dashboard mount (Task 13)
+- [x] Separate scope — `/superadmin` path, `LiveUserAuth.:require_superadmin` (gated on `user.is_superadmin`); `admin` is a reserved subdomain so no tenant is resolved
+- [x] List all foreninger, create new, assign initial admin, archive — `SuperadminLive.Dashboard` + `Organizations.provision_forening/3` (creates forening + admin membership + magic-link email)
+- [x] Cross-tenant system health — platform stats (foreninger, active, memberships, events) via superadmin-gated `:all_global` reads (`multitenancy :bypass_all`) on Membership/Event
+- [ ] Oban dashboard mount (Task 13) — deferred; dev-only mount exists at `/dev/oban`, production superadmin mount not yet wired
 
 ### Tests
 LiveView tests via `Phoenix.LiveViewTest` — every interactive admin screen gets at least one test.
