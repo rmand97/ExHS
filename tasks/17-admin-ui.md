@@ -30,11 +30,11 @@ The forening admin's command center: members, events, shop, newsletters, economy
 - [x] Member assignment UI (chip selector)
 
 ### Events
-- [ ] List events (upcoming, past, drafts)
-- [ ] Create / edit event with multiple ticket types
-- [ ] Cover image upload (Task 12)
-- [ ] Registration list per event (export CSV, see waitlist)
-- [ ] Publish / unpublish
+- [x] List events (upcoming, past, drafts) — `AdminLive.Events.Index`, tabbed + LiveView streams
+- [x] Create / edit event with multiple ticket types — create modal on Index; edit + ticket-type CRUD on `AdminLive.Events.Show`
+- [ ] Cover image upload (Task 12) — edit form takes a cover-image **URL**; actual S3 upload plumbing deferred (same as Settings logo)
+- [x] Registration list per event (export CSV, see waitlist) — Show lists confirmed + waitlist, promote/cancel, CSV via `AdminExportController.event_registrations`
+- [x] Publish / unpublish — from both Index cards and Show; added `:promote` policy (admin) on Registration
 
 ### Shop (mostly TBD per Task 10)
 - [ ] Product list

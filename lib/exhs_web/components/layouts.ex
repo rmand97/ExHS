@@ -196,7 +196,7 @@ defmodule ExhsWeb.Layouts do
     {"Dashboard", "/admin", "hero-squares-2x2", true},
     {"Medlemmer", "/admin/members", "hero-users", true},
     {"Grupper", "/admin/groups", "hero-tag", true},
-    {"Events", "/admin/events", "hero-calendar-days", false},
+    {"Events", "/admin/events", "hero-calendar-days", true},
     {"Shop", "/admin/shop", "hero-shopping-bag", false},
     {"Nyhedsbreve", "/admin/newsletters", "hero-envelope", false},
     {"Økonomi", "/admin/economy", "hero-banknotes", true},

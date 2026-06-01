@@ -2,6 +2,8 @@ defmodule ExhsWeb.MemberLive.Registrations do
   @moduledoc false
   use ExhsWeb, :live_view
 
+  import ExhsWeb.Labels
+
   alias LiveFilter.Params.Serializer
 
   @impl true
@@ -155,16 +157,6 @@ defmodule ExhsWeb.MemberLive.Registrations do
   end
 
   defp apply_filter(registrations, _filter), do: registrations
-
-  defp reg_status_variant(:confirmed), do: "success"
-  defp reg_status_variant(:waitlisted), do: "warning"
-  defp reg_status_variant(:cancelled), do: "error"
-  defp reg_status_variant(:pending_payment), do: "default"
-
-  defp reg_status_label(:confirmed), do: "Bekræftet"
-  defp reg_status_label(:waitlisted), do: "Venteliste"
-  defp reg_status_label(:cancelled), do: "Annulleret"
-  defp reg_status_label(:pending_payment), do: "Afventer betaling"
 
   defp event_url(reg) do
     ~p"/go/forening/#{reg.membership.forening.subdomain}?#{%{return_to: "/events/#{reg.ticket_type.event.id}"}}"

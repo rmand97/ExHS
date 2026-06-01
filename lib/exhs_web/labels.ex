@@ -61,4 +61,16 @@ defmodule ExhsWeb.Labels do
   def payable_type_label(:registration), do: "Event"
   def payable_type_label(:order), do: "Ordre"
   def payable_type_label(other), do: to_string(other)
+
+  def reg_status_label(:confirmed), do: "Bekræftet"
+  def reg_status_label(:waitlisted), do: "Venteliste"
+  def reg_status_label(:cancelled), do: "Annulleret"
+  def reg_status_label(:pending_payment), do: "Afventer betaling"
+  def reg_status_label(other), do: to_string(other)
+
+  def reg_status_variant(:confirmed), do: "success"
+  def reg_status_variant(:waitlisted), do: "warning"
+  def reg_status_variant(:cancelled), do: "error"
+  def reg_status_variant(:pending_payment), do: "default"
+  def reg_status_variant(_), do: "default"
 end

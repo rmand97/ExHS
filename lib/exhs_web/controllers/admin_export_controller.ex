@@ -8,6 +8,7 @@ defmodule ExhsWeb.AdminExportController do
   alias Exhs.Billing
   alias Exhs.Billing.PaymentFilter
   alias Exhs.Checks.Helpers
+  alias Exhs.Events
   alias Exhs.Organizations
   alias Exhs.Organizations.Forening
   alias Exhs.Organizations.MemberFilter
@@ -46,6 +47,36 @@ defmodule ExhsWeb.AdminExportController do
       {:ok, all} = Billing.list_payments(scope: scope, authorize?: false)
       csv = all |> PaymentFilter.apply(filters) |> build_payments_csv()
       download(conn, "betalinger.csv", csv)
+    end)
+  end
+
+  def event_registrations(conn, %{"event_id" => event_id}) do
+    with_admin_scope(conn, fn scope ->
+      case Events.get_event_by_id(event_id,
+             scope: scope,
+             load: [:ticket_types],
+             authorize?: false
+           ) do
+        {:ok, event} ->
+          ticket_ids = MapSet.new(event.ticket_types, & &1.id)
+
+          {:ok, all} =
+            Events.list_registrations(
+              scope: scope,
+              load: [:ticket_type, membership: [:user]],
+              authorize?: false
+            )
+
+          csv =
+            all
+            |> Enum.filter(&MapSet.member?(ticket_ids, &1.ticket_type_id))
+            |> build_registrations_csv()
+
+          download(conn, "tilmeldinger.csv", csv)
+
+        _ ->
+          conn |> put_status(:not_found) |> text("Not found")
+      end
     end)
   end
 
@@ -98,6 +129,23 @@ defmodule ExhsWeb.AdminExportController do
           Labels.status_label(m.status),
           Enum.map_join(m.groups, ", ", & &1.name),
           Labels.format_date(m.joined_at)
+        ]
+      end)
+
+    to_csv([header | rows])
+  end
+
+  defp build_registrations_csv(registrations) do
+    header = ["Navn", "Email", "Billettype", "Status", "Tilmeldt"]
+
+    rows =
+      Enum.map(registrations, fn r ->
+        [
+          Labels.member_name(r.membership),
+          to_string(r.membership.user.email),
+          r.ticket_type.name,
+          Labels.reg_status_label(r.status),
+          Labels.format_date(r.registered_at)
         ]
       end)
 
