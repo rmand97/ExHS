@@ -44,4 +44,21 @@ defmodule ExhsWeb.Labels do
   def format_amount(cents, currency \\ "DKK") when is_integer(cents) do
     "#{div(cents, 100)} #{currency}"
   end
+
+  def payment_status_label(:succeeded), do: "Betalt"
+  def payment_status_label(:pending), do: "Afventer"
+  def payment_status_label(:failed), do: "Fejlet"
+  def payment_status_label(:refunded), do: "Refunderet"
+  def payment_status_label(other), do: to_string(other)
+
+  def payment_status_variant(:succeeded), do: "success"
+  def payment_status_variant(:pending), do: "warning"
+  def payment_status_variant(:failed), do: "error"
+  def payment_status_variant(:refunded), do: "default"
+  def payment_status_variant(_), do: "default"
+
+  def payable_type_label(:subscription), do: "Kontingent"
+  def payable_type_label(:registration), do: "Event"
+  def payable_type_label(:order), do: "Ordre"
+  def payable_type_label(other), do: to_string(other)
 end

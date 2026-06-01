@@ -91,9 +91,11 @@ defmodule ExhsWeb.Router do
       live "/admin/members/:id", AdminLive.Members.Show
       live "/admin/groups", AdminLive.Groups.Index
       live "/admin/settings", AdminLive.Settings.Index
+      live "/admin/economy", AdminLive.Economy.Index
     end
 
     get "/admin/export/members.csv", AdminExportController, :members
+    get "/admin/export/payments.csv", AdminExportController, :payments
   end
 
   scope "/", ExhsWeb do

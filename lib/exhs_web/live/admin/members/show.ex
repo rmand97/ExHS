@@ -258,7 +258,9 @@ defmodule ExhsWeb.AdminLive.Members.Show do
                   <span class="text-base-content font-medium">
                     {format_amount(p.amount_cents, p.currency)}
                   </span>
-                  <.badge variant={payment_variant(p.status)}>{payment_label(p.status)}</.badge>
+                  <.badge variant={payment_status_variant(p.status)}>
+                    {payment_status_label(p.status)}
+                  </.badge>
                 </span>
               </li>
             </ul>
@@ -304,14 +306,4 @@ defmodule ExhsWeb.AdminLive.Members.Show do
     </div>
     """
   end
-
-  defp payment_label(:succeeded), do: "Betalt"
-  defp payment_label(:refunded), do: "Refunderet"
-  defp payment_label(:failed), do: "Fejlet"
-  defp payment_label(other), do: to_string(other)
-
-  defp payment_variant(:succeeded), do: "success"
-  defp payment_variant(:refunded), do: "warning"
-  defp payment_variant(:failed), do: "error"
-  defp payment_variant(_), do: "default"
 end

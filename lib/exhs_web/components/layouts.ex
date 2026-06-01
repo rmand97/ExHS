@@ -199,7 +199,7 @@ defmodule ExhsWeb.Layouts do
     {"Events", "/admin/events", "hero-calendar-days", false},
     {"Shop", "/admin/shop", "hero-shopping-bag", false},
     {"Nyhedsbreve", "/admin/newsletters", "hero-envelope", false},
-    {"Økonomi", "/admin/economy", "hero-banknotes", false},
+    {"Økonomi", "/admin/economy", "hero-banknotes", true},
     {"Audit", "/admin/audit", "hero-clipboard-document-list", false},
     {"Indstillinger", "/admin/settings", "hero-cog-6-tooth", true}
   ]

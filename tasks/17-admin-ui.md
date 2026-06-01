@@ -50,10 +50,10 @@ The forening admin's command center: members, events, shop, newsletters, economy
 - [ ] Segment manager (CRUD reusable segments)
 
 ### Economy
-- [ ] Revenue dashboard (kontingent, tickets, merch by month)
-- [ ] Payment list with filters, refund action
-- [ ] CSV export for accounting (Bogføringslov)
-- [ ] Outstanding / failed payments
+- [x] Revenue dashboard (kontingent, tickets, merch by month) — `AdminLive.Economy.Index`; `Exhs.Billing.Revenue` aggregates by `PayableType`/`PaymentStatus` enum values (extensible — new revenue source appears with no code change)
+- [x] Payment list with filters, refund action — LiveView streams + `Exhs.Billing.PaymentFilter`; refund = `mark_refunded` state flip (real Stripe refund API deferred to a billing task)
+- [x] CSV export for accounting (Bogføringslov) — `AdminExportController.payments`
+- [x] Outstanding / failed payments — surfaced as the "Udestående" figure (pending + failed)
 
 ### Audit
 - [ ] Forening-wide audit log with filters (actor, resource, action, date range)

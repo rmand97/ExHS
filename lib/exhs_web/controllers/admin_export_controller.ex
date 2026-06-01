@@ -5,6 +5,8 @@ defmodule ExhsWeb.AdminExportController do
   """
   use ExhsWeb, :controller
 
+  alias Exhs.Billing
+  alias Exhs.Billing.PaymentFilter
   alias Exhs.Checks.Helpers
   alias Exhs.Organizations
   alias Exhs.Organizations.Forening
@@ -14,15 +16,7 @@ defmodule ExhsWeb.AdminExportController do
   @admin_roles [:admin, :board]
 
   def members(conn, params) do
-    with %Forening{} = forening <- conn.assigns[:current_forening],
-         %{} = user <- conn.assigns[:current_user],
-         {:ok, %{role: role}} when role in @admin_roles <-
-           Helpers.lookup_membership(user.id, forening.id) do
-      scope = %Exhs.Scope{actor: user, tenant: forening.id}
-
-      {:ok, all} =
-        Organizations.list_memberships(scope: scope, load: [:user, :groups], authorize?: false)
-
+    with_admin_scope(conn, fn scope ->
       filters = %{
         q: params["q"],
         status: params["status"],
@@ -31,18 +25,68 @@ defmodule ExhsWeb.AdminExportController do
         sort: params["sort"]
       }
 
-      csv = all |> MemberFilter.apply(filters) |> build_csv()
+      {:ok, all} =
+        Organizations.list_memberships(scope: scope, load: [:user, :groups], authorize?: false)
 
-      conn
-      |> put_resp_content_type("text/csv")
-      |> put_resp_header("content-disposition", ~s(attachment; filename="medlemmer.csv"))
-      |> send_resp(200, csv)
+      csv = all |> MemberFilter.apply(filters) |> build_members_csv()
+      download(conn, "medlemmer.csv", csv)
+    end)
+  end
+
+  def payments(conn, params) do
+    with_admin_scope(conn, fn scope ->
+      filters = %{
+        q: params["q"],
+        status: params["status"],
+        type: params["type"],
+        month: params["month"],
+        sort: params["sort"]
+      }
+
+      {:ok, all} = Billing.list_payments(scope: scope, authorize?: false)
+      csv = all |> PaymentFilter.apply(filters) |> build_payments_csv()
+      download(conn, "betalinger.csv", csv)
+    end)
+  end
+
+  defp with_admin_scope(conn, fun) do
+    with %Forening{} = forening <- conn.assigns[:current_forening],
+         %{} = user <- conn.assigns[:current_user],
+         {:ok, %{role: role}} when role in @admin_roles <-
+           Helpers.lookup_membership(user.id, forening.id) do
+      fun.(%Exhs.Scope{actor: user, tenant: forening.id})
     else
       _ -> conn |> put_status(:forbidden) |> text("Forbidden")
     end
   end
 
-  defp build_csv(memberships) do
+  defp download(conn, filename, csv) do
+    conn
+    |> put_resp_content_type("text/csv")
+    |> put_resp_header("content-disposition", ~s(attachment; filename="#{filename}"))
+    |> send_resp(200, csv)
+  end
+
+  defp build_payments_csv(payments) do
+    header = ["Dato", "Beskrivelse", "Type", "Beløb", "Valuta", "Status", "Stripe Payment Intent"]
+
+    rows =
+      Enum.map(payments, fn p ->
+        [
+          Labels.format_date(p.paid_at),
+          p.description || "",
+          Labels.payable_type_label(p.payable_type),
+          to_string(div(p.amount_cents, 100)),
+          p.currency,
+          Labels.payment_status_label(p.status),
+          p.stripe_payment_intent_id || ""
+        ]
+      end)
+
+    to_csv([header | rows])
+  end
+
+  defp build_members_csv(memberships) do
     header = ["Navn", "Email", "Rolle", "Status", "Grupper", "Medlem siden"]
 
     rows =
@@ -57,9 +101,10 @@ defmodule ExhsWeb.AdminExportController do
         ]
       end)
 
-    [header | rows]
-    |> Enum.map_join("\r\n", &csv_line/1)
+    to_csv([header | rows])
   end
+
+  defp to_csv(rows), do: Enum.map_join(rows, "\r\n", &csv_line/1)
 
   defp csv_line(fields), do: Enum.map_join(fields, ",", &escape/1)
 

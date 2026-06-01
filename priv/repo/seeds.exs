@@ -355,6 +355,52 @@ defmodule Exhs.Seeds do
     _membership = ensure_seed_customer(membership, forening)
     subscription = upsert_seed_subscription(forening, membership)
     upsert_seed_payment(forening, membership, subscription)
+    upsert_extra_payments(forening, membership)
+  end
+
+  # A registration payment and an outstanding (pending) one, so the admin
+  # economy dashboard shows a revenue mix and an outstanding figure.
+  @extra_seed_payments [
+    %{
+      intent: "pi_demo_seed_event",
+      payable_type: :registration,
+      amount_cents: 12_000,
+      status: :succeeded,
+      description: "Eventbillet — seed"
+    },
+    %{
+      intent: "pi_demo_seed_pending",
+      payable_type: :subscription,
+      amount_cents: 30_000,
+      status: :pending,
+      description: "Kontingent (afventer) — seed"
+    }
+  ]
+
+  defp upsert_extra_payments(forening, membership) do
+    Enum.each(@extra_seed_payments, fn attrs ->
+      existing =
+        Payment
+        |> Ash.Query.filter(stripe_payment_intent_id == ^attrs.intent)
+        |> Ash.read_one!(tenant: forening.id, authorize?: false)
+
+      if is_nil(existing) do
+        Billing.record_payment!(
+          %{
+            payable_type: attrs.payable_type,
+            payable_id: membership.id,
+            amount_cents: attrs.amount_cents,
+            currency: "DKK",
+            status: attrs.status,
+            stripe_payment_intent_id: attrs.intent,
+            description: attrs.description,
+            paid_at: if(attrs.status == :succeeded, do: DateTime.utc_now())
+          },
+          tenant: forening.id,
+          authorize?: false
+        )
+      end
+    end)
   end
 
   defp ensure_seed_connect_account(%Forening{stripe_account_id: id} = f) when is_binary(id), do: f
