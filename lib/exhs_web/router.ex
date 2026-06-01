@@ -90,6 +90,7 @@ defmodule ExhsWeb.Router do
       live "/admin/members", AdminLive.Members.Index
       live "/admin/members/:id", AdminLive.Members.Show
       live "/admin/groups", AdminLive.Groups.Index
+      live "/admin/settings", AdminLive.Settings.Index
     end
 
     get "/admin/export/members.csv", AdminExportController, :members

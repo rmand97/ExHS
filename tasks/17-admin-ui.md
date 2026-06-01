@@ -60,11 +60,11 @@ The forening admin's command center: members, events, shop, newsletters, economy
 - [ ] Per-record history panel (linked from member detail, event detail, etc.)
 
 ### Settings
-- [ ] Forening profile (name, branding, logo upload)
-- [ ] Kontingent settings (amount, Stripe price ID)
-- [ ] Email "from" name and reply-to
-- [ ] Admin management (add/remove admins, transfer ownership)
-- [ ] Webhook secrets (Stripe)
+- [x] Forening profile (name, branding) — `AdminLive.Settings.Index` General tab; logo/banner upload deferred (upload plumbing not yet wired)
+- [x] Kontingent settings (amount, Stripe price ID)
+- [x] Email "from" name and reply-to — stored in `branding` map
+- [x] Admin management (add/remove admins) — promote/demote via Admins tab, reuses `set_member_role` (NotLastAdmin guard); transfer-ownership deferred
+- [ ] Webhook secrets (Stripe) — deferred (app-level/sensitive)
 
 ### Superadmin area
 - [ ] Separate scope (root domain or `admin.exhs.dk`)

@@ -201,7 +201,7 @@ defmodule ExhsWeb.Layouts do
     {"Nyhedsbreve", "/admin/newsletters", "hero-envelope", false},
     {"Økonomi", "/admin/economy", "hero-banknotes", false},
     {"Audit", "/admin/audit", "hero-clipboard-document-list", false},
-    {"Indstillinger", "/admin/settings", "hero-cog-6-tooth", false}
+    {"Indstillinger", "/admin/settings", "hero-cog-6-tooth", true}
   ]
 
   attr :flash, :map, required: true
