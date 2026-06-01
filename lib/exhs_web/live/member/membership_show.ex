@@ -54,9 +54,9 @@ defmodule ExhsWeb.MemberLive.MembershipShow do
         {@membership.forening.name}
         <:subtitle>Medlemskab og kontingent</:subtitle>
         <:actions>
-          <a href={forening_url(@membership.forening)} class="btn btn-ghost btn-sm">
+          <.link href={forening_url(@membership.forening)} class="btn btn-ghost btn-sm">
             Besøg forening →
-          </a>
+          </.link>
         </:actions>
       </.header>
 

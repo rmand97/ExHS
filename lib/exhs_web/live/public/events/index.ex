@@ -52,7 +52,7 @@ defmodule ExhsWeb.PublicLive.Events.Index do
 
   defp event_card(assigns) do
     ~H"""
-    <a href={"/events/#{@event.id}"} class="group">
+    <.link navigate={~p"/events/#{@event.id}"} class="group">
       <.card class="overflow-hidden transition sm:hover:scale-[1.02]">
         <div :if={@event.cover_image_url} class="aspect-video overflow-hidden">
           <img
@@ -80,7 +80,7 @@ defmodule ExhsWeb.PublicLive.Events.Index do
           </p>
         </div>
       </.card>
-    </a>
+    </.link>
     """
   end
 

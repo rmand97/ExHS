@@ -78,9 +78,13 @@ defmodule ExhsWeb.PublicLive.Join do
             </div>
 
             <div class="border-base-content/5 mt-8 border-t pt-6">
-              <a :if={!@current_user} href="/register" class="btn btn-block btn-lg btn-primary">
+              <.link
+                :if={!@current_user}
+                navigate={~p"/register"}
+                class="btn btn-block btn-lg btn-primary"
+              >
                 Opret konto
-              </a>
+              </.link>
               <button
                 :if={@current_user && !@already_member?}
                 phx-click="join"
@@ -95,7 +99,7 @@ defmodule ExhsWeb.PublicLive.Join do
               </div>
               <p :if={!@current_user} class="text-base-content/50 mt-3 text-center text-sm">
                 Har du allerede en konto?
-                <a href="/sign-in" class="text-primary hover:underline">Log ind</a>
+                <.link navigate={~p"/sign-in"} class="text-primary hover:underline">Log ind</.link>
               </p>
             </div>
           </.card>

@@ -245,13 +245,13 @@ defmodule ExhsWeb.AdminLive.Members.Index do
           <option value="joined_asc" selected={@filters.sort == "joined_asc"}>Ældste først</option>
           <option value="name" selected={@filters.sort == "name"}>Navn (A–Å)</option>
         </select>
-        <a
+        <.link
           href={export_path(@filters)}
           class="btn btn-ghost btn-sm"
           download
         >
           <.icon name="hero-arrow-down-tray" class="size-4" /> Eksporter CSV
-        </a>
+        </.link>
       </div>
 
       <%!-- sort lives in its own tiny form so the select can submit independently --%>

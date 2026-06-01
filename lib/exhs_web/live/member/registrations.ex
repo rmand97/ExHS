@@ -75,12 +75,12 @@ defmodule ExhsWeb.MemberLive.Registrations do
             </:col>
             <:col :let={reg} label="Dato">{format_date(reg.registered_at)}</:col>
             <:col :let={reg} label="">
-              <a
+              <.link
                 href={event_url(reg)}
                 class="text-primary text-sm font-medium hover:underline"
               >
                 Se event
-              </a>
+              </.link>
             </:col>
           </.table>
         </div>

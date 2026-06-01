@@ -61,9 +61,9 @@ defmodule ExhsWeb.PublicLive.Home do
         <div class="mx-auto max-w-7xl">
           <div class="mb-8 flex items-center justify-between">
             <h2 class="text-base-content text-2xl font-bold">Kommende events</h2>
-            <a href="/events" class="btn btn-ghost btn-sm gap-1">
+            <.link navigate={~p"/events"} class="btn btn-ghost btn-sm gap-1">
               Se alle <.icon name="hero-arrow-right-micro" class="size-4" />
-            </a>
+            </.link>
           </div>
 
           <div :if={@upcoming_events == []} class="py-12">
@@ -104,12 +104,12 @@ defmodule ExhsWeb.PublicLive.Home do
           {@forening.branding["tagline"]}
         </p>
         <div class="mt-8 flex flex-wrap items-center justify-center gap-4">
-          <a href="/events" class="btn btn-primary gap-2">
+          <.link navigate={~p"/events"} class="btn btn-primary gap-2">
             <.icon name="hero-calendar-days" class="size-5" /> Se events
-          </a>
-          <a href="/join" class="btn btn-ghost gap-2">
+          </.link>
+          <.link navigate={~p"/join"} class="btn btn-ghost gap-2">
             <.icon name="hero-user-plus" class="size-5" /> Bliv medlem
-          </a>
+          </.link>
         </div>
       </div>
     </section>
@@ -118,7 +118,7 @@ defmodule ExhsWeb.PublicLive.Home do
 
   defp event_card(assigns) do
     ~H"""
-    <a href={"/events/#{@event.id}"} class="group">
+    <.link navigate={~p"/events/#{@event.id}"} class="group">
       <.card class="overflow-hidden transition sm:hover:scale-[1.02]">
         <div :if={@event.cover_image_url} class="aspect-video overflow-hidden">
           <img
@@ -143,7 +143,7 @@ defmodule ExhsWeb.PublicLive.Home do
           </p>
         </div>
       </.card>
-    </a>
+    </.link>
     """
   end
 
@@ -157,9 +157,9 @@ defmodule ExhsWeb.PublicLive.Home do
         <p class="text-base-content/60 mx-auto mt-3 max-w-lg">
           Bliv medlem og få adgang til events, fællesskab og meget mere.
         </p>
-        <a href="/join" class="btn btn-lg btn-primary mt-6">
+        <.link navigate={~p"/join"} class="btn btn-lg btn-primary mt-6">
           Bliv medlem
-        </a>
+        </.link>
       </div>
     </section>
     """
@@ -181,9 +181,9 @@ defmodule ExhsWeb.PublicLive.Home do
           bygget til foreninger.
         </p>
         <div class="mt-10 flex flex-wrap items-center justify-center gap-4">
-          <a href="/register" class="btn btn-lg btn-primary gap-2">
+          <.link navigate={~p"/register"} class="btn btn-lg btn-primary gap-2">
             <.icon name="hero-rocket-launch" class="size-5" /> Kom i gang gratis
-          </a>
+          </.link>
         </div>
       </div>
     </section>
@@ -257,8 +257,8 @@ defmodule ExhsWeb.PublicLive.Home do
           Opret din forening på under 5 minutter. Gratis at prøve.
         </p>
         <div class="mt-8 flex flex-wrap items-center justify-center gap-4">
-          <a href="/register" class="btn btn-lg btn-primary">Opret gratis konto</a>
-          <a href="/sign-in" class="btn btn-ghost btn-lg">Har du allerede en konto</a>
+          <.link navigate={~p"/register"} class="btn btn-lg btn-primary">Opret gratis konto</.link>
+          <.link navigate={~p"/sign-in"} class="btn btn-ghost btn-lg">Har du allerede en konto</.link>
         </div>
       </div>
     </section>

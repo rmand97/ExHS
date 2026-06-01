@@ -17,15 +17,21 @@ defmodule ExhsWeb.Layouts do
     <div class="bg-base-200 min-h-screen">
       <nav class="bg-base-100/80 border-base-content/5 sticky top-0 z-50 border-b backdrop-blur-xl">
         <div class="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6">
-          <a href="/" class="flex items-center gap-2.5">
+          <.link navigate={~p"/"} class="flex items-center gap-2.5">
             <.exhs_logo />
             <span class="text-base-content text-lg font-semibold tracking-tight">Exhs</span>
-          </a>
+          </.link>
           <div class="flex items-center gap-3">
             <.theme_toggle />
-            <a :if={!@current_user} href="/sign-in" class="btn btn-ghost btn-sm">Log ind</a>
-            <a :if={!@current_user} href="/register" class="btn btn-primary btn-sm">Opret konto</a>
-            <a :if={@current_user} href="/dashboard" class="btn btn-ghost btn-sm">Din side</a>
+            <.link :if={!@current_user} navigate={~p"/sign-in"} class="btn btn-ghost btn-sm">
+              Log ind
+            </.link>
+            <.link :if={!@current_user} navigate={~p"/register"} class="btn btn-primary btn-sm">
+              Opret konto
+            </.link>
+            <.link :if={@current_user} navigate={~p"/dashboard"} class="btn btn-ghost btn-sm">
+              Din side
+            </.link>
           </div>
         </div>
       </nav>
@@ -62,12 +68,12 @@ defmodule ExhsWeb.Layouts do
       <nav class="bg-base-100/80 border-base-content/5 sticky top-0 z-50 border-b backdrop-blur-xl">
         <div class="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6">
           <div class="flex items-center gap-3">
-            <a href="/" class="flex items-center gap-2.5">
+            <.link navigate={~p"/"} class="flex items-center gap-2.5">
               <.forening_logo forening={@current_forening} />
               <span class="text-base-content hidden text-lg font-semibold tracking-tight sm:inline">
                 {@current_forening.name}
               </span>
-            </a>
+            </.link>
             <div class="hidden items-center gap-1 sm:flex">
               <.nav_link href="/" label="Hjem" current_path={@current_path} />
               <.nav_link href="/events" label="Events" current_path={@current_path} />
@@ -76,13 +82,19 @@ defmodule ExhsWeb.Layouts do
           </div>
           <div class="flex items-center gap-3">
             <.theme_toggle />
-            <a :if={@current_role in [:admin, :board]} href="/admin" class="btn btn-primary btn-sm">
+            <.link
+              :if={@current_role in [:admin, :board]}
+              navigate={~p"/admin"}
+              class="btn btn-primary btn-sm"
+            >
               <.icon name="hero-cog-6-tooth" class="size-4" /> Admin
-            </a>
-            <a :if={!@current_user} href="/sign-in" class="btn btn-ghost btn-sm">Log ind</a>
-            <a :if={@current_user} href="/dashboard" class="btn btn-ghost btn-sm">
+            </.link>
+            <.link :if={!@current_user} navigate={~p"/sign-in"} class="btn btn-ghost btn-sm">
+              Log ind
+            </.link>
+            <.link :if={@current_user} navigate={~p"/dashboard"} class="btn btn-ghost btn-sm">
               <.icon name="hero-squares-2x2" class="size-4" /> Din side
-            </a>
+            </.link>
           </div>
         </div>
         <div class="border-base-content/5 flex items-center gap-1 border-t px-4 py-2 sm:hidden">
@@ -433,10 +445,10 @@ defmodule ExhsWeb.Layouts do
     <div class="bg-base-200 min-h-screen">
       <nav class="bg-base-100/80 border-base-content/5 navbar sticky top-0 z-50 border-b px-4 backdrop-blur-xl sm:px-6">
         <div class="flex-1 gap-4">
-          <a href="/" class="flex items-center gap-2.5">
+          <.link navigate={~p"/"} class="flex items-center gap-2.5">
             <.exhs_logo />
             <span class="text-base-content hidden font-semibold tracking-tight sm:inline">Exhs</span>
-          </a>
+          </.link>
         </div>
         <div class="flex flex-none items-center gap-3">
           <.theme_toggle />

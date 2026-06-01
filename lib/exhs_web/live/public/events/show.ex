@@ -42,12 +42,12 @@ defmodule ExhsWeb.PublicLive.Events.Show do
     >
       <div class="px-4 py-8 sm:px-6">
         <div class="mx-auto max-w-4xl">
-          <a
-            href="/events"
+          <.link
+            navigate={~p"/events"}
             class="hover:text-base-content text-base-content/50 mb-6 inline-flex items-center gap-1 text-sm transition"
           >
             <.icon name="hero-arrow-left-micro" class="size-4" /> Alle events
-          </a>
+          </.link>
 
           <div :if={@event.cover_image_url} class="mb-8 overflow-hidden rounded-2xl">
             <img
@@ -169,16 +169,16 @@ defmodule ExhsWeb.PublicLive.Events.Show do
         >
           <.icon name="hero-check-circle" class="size-5" /> Du er tilmeldt
         </div>
-        <a
+        <.link
           :if={@current_user && !@already_registered?}
           href="#"
           class="btn btn-block btn-primary"
         >
           Tilmeld
-        </a>
-        <a :if={!@current_user} href="/sign-in" class="btn btn-block btn-primary">
+        </.link>
+        <.link :if={!@current_user} navigate={~p"/sign-in"} class="btn btn-block btn-primary">
           Log ind for at tilmelde
-        </a>
+        </.link>
       </div>
     </.card>
     """

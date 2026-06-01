@@ -127,19 +127,19 @@ defmodule ExhsWeb.MemberLive.Dashboard do
         >
           Detaljer
         </.link>
-        <a
+        <.link
           href={forening_url(@membership.forening)}
           class="text-base-content/40 text-sm hover:underline"
         >
           Besøg forening →
-        </a>
-        <a
+        </.link>
+        <.link
           :if={@membership.role in [:admin, :board]}
           href={admin_url(@membership.forening)}
           class="text-primary ml-auto text-sm font-medium hover:underline"
         >
           <.icon name="hero-cog-6-tooth" class="size-4" /> Admin
-        </a>
+        </.link>
       </div>
     </.card>
     """

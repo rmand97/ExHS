@@ -76,7 +76,7 @@ defmodule ExhsWeb.MemberLive.Events do
 
   defp event_card(assigns) do
     ~H"""
-    <a href={event_url(@entry)} class="group">
+    <.link href={event_url(@entry)} class="group">
       <.card class="overflow-hidden p-4 transition sm:hover:scale-[1.02]">
         <p class="text-primary mb-1 text-xs font-semibold uppercase">
           {format_datetime(@entry.event.starts_at)}
@@ -90,7 +90,7 @@ defmodule ExhsWeb.MemberLive.Events do
           <.icon name="hero-map-pin-micro" class="size-3.5" /> {@entry.event.location}
         </p>
       </.card>
-    </a>
+    </.link>
     """
   end
 
