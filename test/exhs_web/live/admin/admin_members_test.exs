@@ -107,6 +107,22 @@ defmodule ExhsWeb.AdminLive.AdminMembersTest do
       assert html =~ "inviteret"
       assert html =~ email
     end
+
+    test "inviting an already-invited email shows an error", %{conn: conn, forening: forening} do
+      existing = register_user!(email: "dup_invite@example.com")
+      invite_member!(forening, existing, :member)
+
+      {:ok, view, _html} = live(conn, "/admin/members")
+
+      html =
+        view
+        |> form("#invite-modal form", %{
+          invite: %{email: "dup_invite@example.com", role: "member"}
+        })
+        |> render_submit()
+
+      assert html =~ "Kunne ikke" or html =~ "allerede"
+    end
   end
 
   describe "bulk actions" do

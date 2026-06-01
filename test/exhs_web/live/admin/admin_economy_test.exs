@@ -111,15 +111,29 @@ defmodule ExhsWeb.AdminLive.AdminEconomyTest do
       forening = create_forening!(%{subdomain: "eco_board"})
       board = register_user!()
       membership = invite_member!(forening, board, :board)
-      pay!(forening, membership, %{description: "Kontingent 2026"})
+      payment = pay!(forening, membership, %{description: "Kontingent 2026"})
       conn = build_conn() |> log_in_user(board) |> on_subdomain(forening)
-      %{conn: conn}
+      %{conn: conn, forening: forening, board: board, payment: payment}
     end
 
     test "board sees payments but no refund button", %{conn: conn} do
       {:ok, _view, html} = live(conn, "/admin/economy")
       assert html =~ "Kontingent 2026"
       refute html =~ "Markér refunderet"
+    end
+
+    test "the refund policy rejects a board actor (server-side boundary)", %{
+      forening: forening,
+      board: board,
+      payment: payment
+    } do
+      scope = %Exhs.Scope{actor: board, tenant: forening.id}
+      assert {:error, _} = Billing.mark_payment_refunded(payment, scope: scope)
+
+      {:ok, reloaded} =
+        Billing.get_payment_by_id(payment.id, tenant: forening.id, authorize?: false)
+
+      assert reloaded.status == :succeeded
     end
   end
 

@@ -121,16 +121,102 @@ defmodule ExhsWeb.AdminLive.AdminEventsTest do
       assert html =~ "Voksen"
     end
 
-    test "promotes and cancels registrations", %{conn: conn, forening: forening} do
+    test "unpublishes a published event", %{conn: conn, forening: forening} do
+      event = create_published_event!(forening, %{title: "Live"})
+      {:ok, view, _html} = live(conn, "/admin/events/#{event.id}")
+
+      view |> element("button", "Afpublicér") |> render_click()
+
+      {:ok, reloaded} = Events.get_event_by_id(event.id, tenant: forening.id, authorize?: false)
+      refute reloaded.published
+    end
+
+    test "edits event details", %{conn: conn, forening: forening} do
+      event = create_event!(forening, %{title: "Gammel titel"})
+      {:ok, view, _html} = live(conn, "/admin/events/#{event.id}")
+
+      view |> element("button", "Rediger") |> render_click()
+
+      view
+      |> form("#event-edit-modal form",
+        event: %{
+          "title" => "Ny titel",
+          "location" => "Klubhuset",
+          "starts_at" => "2026-09-01T18:00",
+          "membership_required" => "false"
+        }
+      )
+      |> render_submit()
+
+      {:ok, reloaded} = Events.get_event_by_id(event.id, tenant: forening.id, authorize?: false)
+      assert reloaded.title == "Ny titel"
+      assert reloaded.location == "Klubhuset"
+      refute reloaded.membership_required
+    end
+
+    test "rejects an event edit with a blank title", %{conn: conn, forening: forening} do
+      event = create_event!(forening, %{title: "Beholdes"})
+      {:ok, view, _html} = live(conn, "/admin/events/#{event.id}")
+
+      view |> element("button", "Rediger") |> render_click()
+
+      html =
+        view
+        |> form("#event-edit-modal form",
+          event: %{"title" => "", "starts_at" => "2026-09-01T18:00"}
+        )
+        |> render_submit()
+
+      assert html =~ "Kunne ikke gemme"
+      {:ok, reloaded} = Events.get_event_by_id(event.id, tenant: forening.id, authorize?: false)
+      assert reloaded.title == "Beholdes"
+    end
+
+    test "edits a ticket type", %{conn: conn, forening: forening} do
+      event = create_event!(forening, %{title: "Med billet"})
+      tt = create_ticket_type!(forening, event, %{name: "Standard", price_cents: 5000})
+      {:ok, view, _html} = live(conn, "/admin/events/#{event.id}")
+
+      view
+      |> element("button[phx-click='edit_ticket'][phx-value-id='#{tt.id}']")
+      |> render_click()
+
+      view
+      |> form("#ticket-modal form", ticket: %{"name" => "VIP", "price_kr" => "500"})
+      |> render_submit()
+
+      {:ok, reloaded} =
+        Events.get_ticket_type_by_id(tt.id, tenant: forening.id, authorize?: false)
+
+      assert reloaded.name == "VIP"
+      assert reloaded.price_cents == 50_000
+    end
+
+    test "deletes a ticket type", %{conn: conn, forening: forening} do
+      event = create_event!(forening, %{title: "Slet billet"})
+      tt = create_ticket_type!(forening, event, %{name: "Engang"})
+      {:ok, view, _html} = live(conn, "/admin/events/#{event.id}")
+
+      html =
+        view
+        |> element("button[phx-click='delete_ticket'][phx-value-id='#{tt.id}']")
+        |> render_click()
+
+      refute html =~ "Engang"
+
+      {:ok, tickets} =
+        Events.list_ticket_types_for_event(event.id, tenant: forening.id, authorize?: false)
+
+      assert tickets == []
+    end
+
+    test "promotes a registration from the waitlist", %{conn: conn, forening: forening} do
       event = create_published_event!(forening, %{title: "Fest"})
       tt = create_ticket_type!(forening, event, %{capacity: 1})
 
-      u1 = register_user!()
-      m1 = invite_member!(forening, u1, :member)
+      m1 = invite_member!(forening, register_user!(), :member)
       reg1 = register_for_event!(forening, m1, tt)
-
-      u2 = register_user!()
-      m2 = invite_member!(forening, u2, :member)
+      m2 = invite_member!(forening, register_user!(), :member)
       reg2 = register_for_event!(forening, m2, tt)
 
       # capacity 1 → reg1 confirmed, reg2 waitlisted
@@ -138,13 +224,46 @@ defmodule ExhsWeb.AdminLive.AdminEventsTest do
       assert reg2.status == :waitlisted
 
       {:ok, view, _html} = live(conn, "/admin/events/#{event.id}")
-
       view |> element("button[phx-value-id='#{reg2.id}']", "Bekræft") |> render_click()
 
       {:ok, promoted} =
         Events.get_registration_by_id(reg2.id, tenant: forening.id, authorize?: false)
 
       assert promoted.status == :confirmed
+    end
+
+    test "cancels a confirmed registration", %{conn: conn, forening: forening} do
+      event = create_published_event!(forening, %{title: "Fest"})
+      tt = create_ticket_type!(forening, event)
+      membership = invite_member!(forening, register_user!(), :member)
+      reg = register_for_event!(forening, membership, tt)
+      assert reg.status == :confirmed
+
+      {:ok, view, _html} = live(conn, "/admin/events/#{event.id}")
+      view |> element("button[phx-value-id='#{reg.id}']", "Annullér") |> render_click()
+
+      {:ok, cancelled} =
+        Events.get_registration_by_id(reg.id, tenant: forening.id, authorize?: false)
+
+      assert cancelled.status == :cancelled
+    end
+  end
+
+  describe "create event validation" do
+    setup :admin_setup
+
+    test "rejects an event with a blank title", %{conn: conn} do
+      {:ok, view, _html} = live(conn, "/admin/events")
+      view |> element("button", "Nyt event") |> render_click()
+
+      html =
+        view
+        |> form("#event-modal form",
+          event: %{"title" => "", "starts_at" => "2026-08-01T18:00"}
+        )
+        |> render_submit()
+
+      assert html =~ "Kunne ikke oprette"
     end
   end
 

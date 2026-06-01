@@ -84,6 +84,18 @@ defmodule ExhsWeb.AdminLive.AdminSettingsTest do
       assert f.kontingent_amount_cents == 30_000
       assert f.kontingent_stripe_price_id == "price_123"
     end
+
+    test "rejects a save with a blank name", %{conn: conn, forening: forening} do
+      {:ok, view, _html} = live(conn, "/admin/settings")
+
+      html =
+        view
+        |> form("form", forening: %{"name" => "", "kontingent_kr" => "300"})
+        |> render_submit()
+
+      assert html =~ "Kunne ikke gemme"
+      assert reload(forening).name == "Fodboldklubben"
+    end
   end
 
   describe "board read-only" do
@@ -92,13 +104,31 @@ defmodule ExhsWeb.AdminLive.AdminSettingsTest do
       board = register_user!()
       invite_member!(forening, board, :board)
       conn = build_conn() |> log_in_user(board) |> on_subdomain(forening)
-      %{conn: conn, forening: forening}
+      %{conn: conn, forening: forening, board: board}
     end
 
     test "board sees no save button", %{conn: conn} do
       {:ok, _view, html} = live(conn, "/admin/settings")
       refute html =~ "Gem ændringer"
       assert html =~ "skrivebeskyttet"
+    end
+
+    test "the board form inputs are disabled", %{conn: conn} do
+      {:ok, _view, html} = live(conn, "/admin/settings")
+      assert html =~ "disabled"
+    end
+
+    test "the update policy rejects a board actor (server-side boundary)", %{
+      forening: forening,
+      board: board
+    } do
+      scope = %Exhs.Scope{actor: board, tenant: forening.id}
+
+      assert {:error, _} =
+               Organizations.update_forening(forening, %{name: "Kapret Klub"}, scope: scope)
+
+      {:ok, reloaded} = Organizations.get_forening_by_id(forening.id, authorize?: false)
+      refute reloaded.name == "Kapret Klub"
     end
   end
 

@@ -53,5 +53,17 @@ defmodule Exhs.SuperadminTest do
                  regular
                )
     end
+
+    test "a duplicate subdomain is rejected" do
+      superadmin = register_user!(superadmin: true)
+      existing = create_forening!(%{subdomain: "taget"})
+
+      assert {:error, _} =
+               Organizations.provision_forening(
+                 %{name: "Konflikt", subdomain: existing.subdomain, slug: "konflikt-slug"},
+                 "dup@example.com",
+                 superadmin
+               )
+    end
   end
 end

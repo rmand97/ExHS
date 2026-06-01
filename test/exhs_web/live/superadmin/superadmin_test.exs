@@ -57,6 +57,40 @@ defmodule ExhsWeb.SuperadminLive.SuperadminTest do
       assert Enum.any?(members, &(&1.role == :admin))
     end
 
+    test "rejects a duplicate subdomain", %{conn: conn} do
+      create_forening!(%{name: "Eksisterer", subdomain: "optaget"})
+      {:ok, view, _html} = live(conn, "/superadmin")
+
+      view |> element("button", "Ny forening") |> render_click()
+
+      html =
+        view
+        |> form("#forening-modal form",
+          forening: %{"name" => "Ny", "subdomain" => "optaget", "admin_email" => "x@y.dk"}
+        )
+        |> render_submit()
+
+      assert html =~ "Kunne ikke oprette"
+
+      all = Organizations.list_foreninger!(authorize?: false)
+      assert Enum.count(all, &(&1.subdomain == "optaget")) == 1
+    end
+
+    test "rejects provisioning with a blank name", %{conn: conn} do
+      {:ok, view, _html} = live(conn, "/superadmin")
+      view |> element("button", "Ny forening") |> render_click()
+
+      html =
+        view
+        |> form("#forening-modal form",
+          forening: %{"name" => "", "subdomain" => "tomnavn", "admin_email" => "x@y.dk"}
+        )
+        |> render_submit()
+
+      assert html =~ "Kunne ikke oprette"
+      assert {:error, _} = Organizations.get_forening_by_subdomain("tomnavn", authorize?: false)
+    end
+
     test "archives a forening", %{conn: conn} do
       forening = create_forening!(%{name: "Lukket Klub", subdomain: "sa_arch"})
       {:ok, view, _html} = live(conn, "/superadmin")
