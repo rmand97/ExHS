@@ -17,20 +17,52 @@
     </script>
     <script>
       (() => {
-        const setTheme = (theme) => {
-          if (theme === "system") {
-            localStorage.removeItem("phx:theme");
-            document.documentElement.removeAttribute("data-theme");
-          } else {
-            localStorage.setItem("phx:theme", theme);
-            document.documentElement.setAttribute("data-theme", theme);
-          }
+        // Theme preference is stored in a cookie scoped to the parent domain so
+        // it is shared across the landing page and every forening subdomain
+        // (localStorage is per-origin and would not carry across subdomains).
+        const COOKIE = "theme";
+
+        const parentDomain = () => {
+          const labels = location.hostname.split(".");
+          // Use the registrable parent (last two labels) so *.localhost and
+          // *.exhs.dk share one cookie. Single-label hosts use themselves.
+          return labels.length <= 1 ? location.hostname : labels.slice(-2).join(".");
         };
-        if (!document.documentElement.hasAttribute("data-theme")) {
-          setTheme(localStorage.getItem("phx:theme") || "system");
+
+        const readPref = () => {
+          const m = document.cookie.match(/(?:^|;\s*)theme=([^;]+)/);
+          return m ? decodeURIComponent(m[1]) : "system";
+        };
+
+        const writePref = (theme) => {
+          const maxAge = 60 * 60 * 24 * 365;
+          document.cookie =
+            `${COOKIE}=${encodeURIComponent(theme)};path=/;max-age=${maxAge};domain=${parentDomain()};SameSite=Lax`;
+        };
+
+        const prefersDark = () =>
+          window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+
+        const apply = (theme) => {
+          const resolved = theme === "system" ? (prefersDark() ? "dark" : "light") : theme;
+          document.documentElement.setAttribute("data-theme", resolved);
+          // Raw preference (incl. "system") drives the toggle's active highlight.
+          document.documentElement.setAttribute("data-theme-pref", theme);
+        };
+
+        const setTheme = (theme) => {
+          writePref(theme);
+          apply(theme);
+        };
+
+        apply(readPref());
+
+        if (window.matchMedia) {
+          window
+            .matchMedia("(prefers-color-scheme: dark)")
+            .addEventListener("change", () => readPref() === "system" && apply("system"));
         }
-        window.addEventListener("storage", (e) => e.key === "phx:theme" && setTheme(e.newValue || "system"));
-        
+
         window.addEventListener("phx:set-theme", (e) => setTheme(e.target.dataset.phxTheme));
       })();
     </script>

@@ -22,7 +22,6 @@ defmodule ExhsWeb.Layouts do
             <span class="text-base-content text-lg font-semibold tracking-tight">Exhs</span>
           </.link>
           <div class="flex items-center gap-3">
-            <.theme_toggle />
             <.link :if={!@current_user} navigate={~p"/sign-in"} class="btn btn-ghost btn-sm">
               Log ind
             </.link>
@@ -81,7 +80,6 @@ defmodule ExhsWeb.Layouts do
             </div>
           </div>
           <div class="flex items-center gap-3">
-            <.theme_toggle />
             <.link
               :if={@current_role in [:admin, :board]}
               navigate={~p"/admin"}
@@ -152,7 +150,6 @@ defmodule ExhsWeb.Layouts do
             </div>
           </div>
           <div class="flex items-center gap-3">
-            <.theme_toggle />
             <div class="dropdown dropdown-end">
               <div tabindex="0" role="button">
                 <.avatar initials={user_initials(@current_user)} size="sm" class="cursor-pointer" />
@@ -272,7 +269,6 @@ defmodule ExhsWeb.Layouts do
             </span>
             <div class="hidden lg:block"></div>
             <div class="flex items-center gap-3">
-              <.theme_toggle />
               <div class="dropdown dropdown-end">
                 <div tabindex="0" role="button">
                   <.avatar initials={user_initials(@current_user)} size="sm" class="cursor-pointer" />
@@ -451,7 +447,6 @@ defmodule ExhsWeb.Layouts do
           </.link>
         </div>
         <div class="flex flex-none items-center gap-3">
-          <.theme_toggle />
           <div :if={@current_scope} class="flex items-center gap-3">
             <.avatar initials={user_initials(@current_scope.actor)} size="sm" />
           </div>
@@ -607,7 +602,7 @@ defmodule ExhsWeb.Layouts do
   def theme_toggle(assigns) do
     ~H"""
     <div class="bg-base-300 border-base-300 card relative flex flex-row items-center rounded-full border-2">
-      <div class="bg-base-100 border-base-200 absolute left-0 h-full w-1/3 rounded-full border brightness-200 transition-[left] in-data-[theme=dark]:left-2/3 in-data-[theme=light]:left-1/3" />
+      <div class="bg-base-100 border-base-200 absolute left-0 h-full w-1/3 rounded-full border brightness-200 transition-[left] in-data-[theme-pref=dark]:left-2/3 in-data-[theme-pref=light]:left-1/3" />
 
       <button
         class="flex w-1/3 cursor-pointer p-2"

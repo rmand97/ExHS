@@ -64,6 +64,18 @@ defmodule ExhsWeb.MemberLive.Profile do
             </div>
           </.form>
         </.card>
+
+        <.card class="mt-6 p-6 sm:p-8">
+          <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <h3 class="text-base-content font-semibold">Udseende</h3>
+              <p class="text-base-content/50 mt-0.5 text-sm">
+                Vælg lyst, mørkt eller følg systemets indstilling. Gælder på tværs af alle sider.
+              </p>
+            </div>
+            <Layouts.theme_toggle />
+          </div>
+        </.card>
       </div>
     </Layouts.member>
     """

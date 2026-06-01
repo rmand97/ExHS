@@ -116,3 +116,9 @@
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
+
+/* Always reserve the scrollbar gutter so centered, max-width layouts (e.g. the
+   navbar) don't shift horizontally between short and tall pages. */
+html {
+  scrollbar-gutter: stable;
+}

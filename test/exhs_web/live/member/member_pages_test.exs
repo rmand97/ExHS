@@ -122,6 +122,15 @@ defmodule ExhsWeb.MemberLive.MemberPagesTest do
       assert html =~ "Efternavn"
     end
 
+    test "includes the theme selector", %{conn: conn} do
+      {:ok, _view, html} = live(conn, "/profile")
+
+      assert html =~ "Udseende"
+      assert html =~ ~s(data-phx-theme="light")
+      assert html =~ ~s(data-phx-theme="dark")
+      assert html =~ ~s(data-phx-theme="system")
+    end
+
     test "submits and persists profile changes", %{conn: conn, user: user} do
       {:ok, view, _html} = live(conn, "/profile")
 
