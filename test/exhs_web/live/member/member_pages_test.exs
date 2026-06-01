@@ -80,6 +80,32 @@ defmodule ExhsWeb.MemberLive.MemberPagesTest do
 
       assert html =~ "Ingen medlemskaber endnu"
     end
+
+    test "shows an Admin link only for admin/board memberships", %{conn: conn} do
+      admin = register_user!()
+      f = create_forening!(%{name: "Adminklub", subdomain: "adminklub"})
+      invite_member!(f, admin, :admin)
+
+      {:ok, _view, html} = conn |> log_in_user(admin) |> live("/dashboard")
+      assert html =~ "/go/forening/adminklub?return_to=%2Fadmin"
+
+      member = register_user!()
+      f2 = create_forening!(%{name: "Menigklub", subdomain: "menigklub"})
+      join_forening!(f2, member)
+
+      {:ok, _view, html2} = conn |> log_in_user(member) |> live("/dashboard")
+      refute html2 =~ "return_to=%2Fadmin"
+    end
+
+    test "shows a Superadmin link only for superadmins", %{conn: conn} do
+      super_user = register_user!(superadmin: true)
+      {:ok, _view, html} = conn |> log_in_user(super_user) |> live("/dashboard")
+      assert html =~ "/superadmin"
+
+      regular = register_user!()
+      {:ok, _view, html2} = conn |> log_in_user(regular) |> live("/dashboard")
+      refute html2 =~ "/superadmin"
+    end
   end
 
   describe "profile" do

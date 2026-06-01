@@ -133,6 +133,13 @@ defmodule ExhsWeb.MemberLive.Dashboard do
         >
           Besøg forening →
         </a>
+        <a
+          :if={@membership.role in [:admin, :board]}
+          href={admin_url(@membership.forening)}
+          class="text-primary ml-auto text-sm font-medium hover:underline"
+        >
+          <.icon name="hero-cog-6-tooth" class="size-4" /> Admin
+        </a>
       </div>
     </.card>
     """
@@ -229,5 +236,9 @@ defmodule ExhsWeb.MemberLive.Dashboard do
 
   defp forening_url(forening) do
     ~p"/go/forening/#{forening.subdomain}"
+  end
+
+  defp admin_url(forening) do
+    ~p"/go/forening/#{forening.subdomain}?#{%{return_to: "/admin"}}"
   end
 end

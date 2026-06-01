@@ -53,6 +53,7 @@ defmodule ExhsWeb.Layouts do
   attr :current_forening, :map, required: true
   attr :current_user, :map, default: nil
   attr :current_path, :string, default: nil
+  attr :current_role, :atom, default: nil
   slot :inner_block, required: true
 
   def public(assigns) do
@@ -75,6 +76,9 @@ defmodule ExhsWeb.Layouts do
           </div>
           <div class="flex items-center gap-3">
             <.theme_toggle />
+            <a :if={@current_role in [:admin, :board]} href="/admin" class="btn btn-primary btn-sm">
+              <.icon name="hero-cog-6-tooth" class="size-4" /> Admin
+            </a>
             <a :if={!@current_user} href="/sign-in" class="btn btn-ghost btn-sm">Log ind</a>
             <a :if={@current_user} href="/dashboard" class="btn btn-ghost btn-sm">
               <.icon name="hero-squares-2x2" class="size-4" /> Din side
@@ -151,6 +155,14 @@ defmodule ExhsWeb.Layouts do
                     class="hover:bg-base-content/5 hover:text-base-content text-base-content/70 flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm"
                   >
                     <.icon name="hero-user" class="size-4" /> Profil
+                  </.link>
+                </li>
+                <li :if={@current_user && @current_user.is_superadmin}>
+                  <.link
+                    navigate="/superadmin"
+                    class="hover:bg-base-content/5 hover:text-base-content text-base-content/70 flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm"
+                  >
+                    <.icon name="hero-shield-check" class="size-4" /> Superadmin
                   </.link>
                 </li>
                 <li>

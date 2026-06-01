@@ -44,6 +44,7 @@ defmodule ExhsWeb.PublicLive.Home do
       current_forening={@current_forening}
       current_user={@current_user}
       current_path={@current_path}
+      current_role={@current_role}
     >
       <.hero forening={@current_forening} />
 

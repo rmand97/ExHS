@@ -22,9 +22,9 @@ defmodule ExhsWeb.LiveForeningAuth do
     socket = maybe_load_forening(socket, session)
 
     if socket.assigns[:current_forening] do
-      {:cont, assign_scope(socket)}
+      {:cont, socket |> assign_scope() |> assign_role()}
     else
-      {:cont, assign(socket, current_scope: nil, current_forening: nil)}
+      {:cont, assign(socket, current_scope: nil, current_forening: nil, current_role: nil)}
     end
   end
 
@@ -75,5 +75,21 @@ defmodule ExhsWeb.LiveForeningAuth do
     }
 
     assign(socket, :current_scope, scope)
+  end
+
+  # Resolves the current user's membership role in the current forening (nil if
+  # not signed in or not a member). Used by the public layout to decide whether
+  # to surface an admin link.
+  defp assign_role(socket) do
+    role =
+      with %{} = user <- socket.assigns[:current_user],
+           {:ok, %{role: role}} <-
+             Helpers.lookup_membership(user.id, socket.assigns.current_forening.id) do
+        role
+      else
+        _ -> nil
+      end
+
+    assign(socket, :current_role, role)
   end
 end

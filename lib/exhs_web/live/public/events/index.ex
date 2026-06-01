@@ -26,6 +26,7 @@ defmodule ExhsWeb.PublicLive.Events.Index do
       current_forening={@current_forening}
       current_user={@current_user}
       current_path={@current_path}
+      current_role={@current_role}
     >
       <div class="px-4 py-12 sm:px-6">
         <div class="mx-auto max-w-7xl">

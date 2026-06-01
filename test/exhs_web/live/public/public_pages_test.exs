@@ -332,6 +332,51 @@ defmodule ExhsWeb.PublicLive.PublicPagesTest do
     end
   end
 
+  describe "admin link in forening navbar" do
+    test "admin of the forening sees an Admin link", %{conn: conn, forening: forening} do
+      admin = register_user!()
+      invite_member!(forening, admin, :admin)
+
+      {:ok, _view, html} = conn |> log_in_user(admin) |> forening_conn(forening) |> live("/")
+      assert html =~ ~s(href="/admin")
+    end
+
+    test "board member sees an Admin link", %{conn: conn, forening: forening} do
+      board = register_user!()
+      invite_member!(forening, board, :board)
+
+      {:ok, _view, html} = conn |> log_in_user(board) |> forening_conn(forening) |> live("/")
+      assert html =~ ~s(href="/admin")
+    end
+
+    test "plain member does not see an Admin link", %{conn: conn, forening: forening} do
+      member = register_user!()
+      join_forening!(forening, member)
+
+      {:ok, _view, html} = conn |> log_in_user(member) |> forening_conn(forening) |> live("/")
+      refute html =~ ~s(href="/admin")
+    end
+
+    test "anonymous visitor does not see an Admin link", %{conn: conn, forening: forening} do
+      {:ok, _view, html} = conn |> forening_conn(forening) |> live("/")
+      refute html =~ ~s(href="/admin")
+    end
+
+    test "an admin of a different forening does not see an Admin link here", %{
+      conn: conn,
+      forening: forening
+    } do
+      other = create_forening!(%{name: "Anden", subdomain: "anden"})
+      admin_elsewhere = register_user!()
+      invite_member!(other, admin_elsewhere, :admin)
+
+      {:ok, _view, html} =
+        conn |> log_in_user(admin_elsewhere) |> forening_conn(forening) |> live("/")
+
+      refute html =~ ~s(href="/admin")
+    end
+  end
+
   describe "unknown subdomain" do
     test "returns 404 for nonexistent forening subdomain", %{conn: conn} do
       conn =

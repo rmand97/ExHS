@@ -52,6 +52,7 @@ defmodule ExhsWeb.PublicLive.Join do
       current_forening={@current_forening}
       current_user={@current_user}
       current_path={@current_path}
+      current_role={@current_role}
     >
       <div class="px-4 py-16 sm:px-6">
         <div class="mx-auto max-w-2xl text-center">
