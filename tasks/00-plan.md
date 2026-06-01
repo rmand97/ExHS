@@ -12,46 +12,48 @@ This file indexes all tasks. Each task is a self-contained chunk of work with it
 
 ## Task Index
 
+Legend: `[x]` core delivered (residuals deferred to a dependent task or tracked in-file) · `[~]` in progress · `[ ]` not started.
+
 ### Foundations
-- [ ] [Task 1 — Project setup & tooling](./01-project-setup.md)
-- [ ] [Task 2 — AI-driven dev setup](./02-ai-dev-setup.md)
+- [x] [Task 1 — Project setup & tooling](./01-project-setup.md) — core complete; CI green + boot smoke test deferred
+- [x] [Task 2 — AI-driven dev setup](./02-ai-dev-setup.md)
 
 ### Core domain
-- [ ] [Task 3 — Accounts & authentication](./03-accounts-auth.md)
-- [ ] [Task 4 — Organizations core & multitenancy](./04-organizations-core.md)
-- [ ] [Task 5 — Roles & policies](./05-roles-policies.md)
-- [ ] [Task 6 — Groups & tagging](./06-groups-tagging.md)
-- [ ] [Task 7 — Audit trail](./07-audit-trail.md)
+- [x] [Task 3 — Accounts & authentication](./03-accounts-auth.md) — password + magic link + confirmation, superadmin flag
+- [x] [Task 4 — Organizations core & multitenancy](./04-organizations-core.md) — attribute multitenancy, subdomain plug, scope
+- [x] [Task 5 — Roles & policies](./05-roles-policies.md) — admin/board/member, HasMembershipRole, Superadmin bypass
+- [x] [Task 6 — Groups & tagging](./06-groups-tagging.md)
+- [x] [Task 7 — Audit trail](./07-audit-trail.md) — AshEvents event log live; forening-wide UI is Task 24
 
 ### Business domains
-- [ ] [Task 8 — Billing & Stripe](./08-billing-stripe.md)
-- [ ] [Task 9 — Events](./09-events.md)
-- [ ] [Task 25 — Ticket purchasing & checkout](./25-ticketing.md)
+- [x] [Task 8 — Billing & Stripe](./08-billing-stripe.md) — Connect onboarding, subscriptions, payments, webhooks
+- [x] [Task 9 — Events](./09-events.md) — domain + admin & public UI; paid-ticket wiring pending Task 25
+- [ ] [Task 25 — Ticket purchasing & checkout](./25-ticketing.md) — not started (public "Tilmeld" button not wired)
 
 ### Nice-to-have (post-launch)
-- [ ] [Task 10 — Shop (mostly TBD)](./10-shop.md)
-- [ ] [Task 11 — Communications & newsletters](./11-communications.md)
+- [ ] [Task 10 — Shop (mostly TBD)](./10-shop.md) — not started
+- [ ] [Task 11 — Communications & newsletters](./11-communications.md) — not started
 
 ### Cross-cutting infrastructure
-- [ ] [Task 12 — File uploads & S3/Minio](./12-uploads-s3.md)
-- [ ] [Task 13 — Background jobs (Oban)](./13-oban-workers.md)
+- [~] [Task 12 — File uploads & S3/Minio](./12-uploads-s3.md) — storage + S3 client + presign helper done; upload LiveViews (logo/banner/cover/avatar) deferred
+- [x] [Task 13 — Background jobs (Oban)](./13-oban-workers.md) — queues + core workers (invite, waitlist, webhooks, upload cleanup, membership deactivation); newsletter/GDPR/orphan-sweeper workers pending their tasks
 
 ### UI layer
-- [ ] [Task 14 — Design system](./14-design-system.md)
-- [ ] [Task 15 — Public forening pages](./15-public-ui.md)
-- [ ] [Task 16 — Member self-service UI](./16-member-ui.md)
-- [ ] [Task 17 — Admin dashboard UI](./17-admin-ui.md)
+- [x] [Task 14 — Design system](./14-design-system.md)
+- [x] [Task 15 — Public forening pages](./15-public-ui.md) — home/events/join live; shop pages deferred (Task 10)
+- [x] [Task 16 — Member self-service UI](./16-member-ui.md) — dashboard, profile, registrations, payments, cross-forening handoff; live Stripe self-service + avatar upload pending
+- [~] [Task 17 — Admin dashboard UI](./17-admin-ui.md) — **in progress**: Members, Groups, Settings, Economy, Events, and Superadmin slices done (built, tested, audit-logged). Remaining: Shop, Newsletters, Audit UI, and logo/cover image uploads
 
 ### Admin tools (pre-deploy)
-- [ ] [Task 23 — Merge duplicate user accounts](./23-merge-users.md)
-- [ ] [Task 24 — Audit trail UI](./24-audit-trail-ui.md)
+- [ ] [Task 23 — Merge duplicate user accounts](./23-merge-users.md) — not started
+- [ ] [Task 24 — Audit trail UI](./24-audit-trail-ui.md) — not started (per-record history panel already in Task 17 member detail)
 
 ### Compliance & ops
-- [ ] [Task 18 — GDPR & data retention](./18-gdpr-retention.md)
-- [ ] [Task 19 — Internationalization](./19-i18n.md)
-- [ ] [Task 20 — Observability](./20-observability.md)
-- [ ] [Task 21 — Backups & DR](./21-backups-dr.md)
-- [ ] [Task 22 — Deployment & CI/CD](./22-deployment.md)
+- [ ] [Task 18 — GDPR & data retention](./18-gdpr-retention.md) — not started
+- [ ] [Task 19 — Internationalization](./19-i18n.md) — not started (UI is Danish-only, no gettext extraction yet)
+- [ ] [Task 20 — Observability](./20-observability.md) — not started
+- [ ] [Task 21 — Backups & DR](./21-backups-dr.md) — not started
+- [ ] [Task 22 — Deployment & CI/CD](./22-deployment.md) — not started
 
 ## Global open decisions
 
