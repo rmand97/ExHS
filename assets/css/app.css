@@ -122,3 +122,13 @@
 html {
   scrollbar-gutter: stable;
 }
+
+/* Draining countdown bar for auto-dismissing flash messages. */
+@keyframes flash-countdown {
+  from {
+    transform: scaleX(1);
+  }
+  to {
+    transform: scaleX(0);
+  }
+}

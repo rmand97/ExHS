@@ -131,6 +131,20 @@ defmodule ExhsWeb.MemberLive.MemberPagesTest do
       assert html =~ ~s(data-phx-theme="system")
     end
 
+    test "a flash is wired for auto-dismiss", %{conn: conn} do
+      {:ok, view, _html} = live(conn, "/profile")
+
+      {:ok, _view, html} =
+        view
+        |> form("form", %{"form" => %{"first_name" => "Test"}})
+        |> render_submit()
+        |> follow_redirect(conn)
+
+      assert html =~ "Profil opdateret"
+      assert html =~ "data-dismiss-after"
+      assert html =~ "data-progress"
+    end
+
     test "submits and persists profile changes", %{conn: conn, user: user} do
       {:ok, view, _html} = live(conn, "/profile")
 
