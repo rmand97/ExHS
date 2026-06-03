@@ -122,7 +122,10 @@ defmodule ExhsWeb.MemberLive.MembershipShow do
             </.list>
           </div>
 
-          <div :if={!@subscription && (@membership.forening.kontingent_stripe_price_id != nil)} class="mt-4">
+          <div
+            :if={!@subscription && @membership.forening.kontingent_stripe_price_id != nil}
+            class="mt-4"
+          >
             <p class="text-base-content/50 text-sm">
               Intet aktivt abonnement.
             </p>

@@ -71,6 +71,7 @@ defmodule ExhsWeb.Router do
       live "/registrations", MemberLive.Registrations
       live "/memberships/:id", MemberLive.MembershipShow
       live "/payments", MemberLive.Payments
+      live "/activity", MemberLive.Activity
     end
   end
 
@@ -82,7 +83,10 @@ defmodule ExhsWeb.Router do
 
     ash_authentication_live_session :public_pages,
       session: {__MODULE__, :public_session, []},
-      on_mount: [{ExhsWeb.LiveCurrentPath, :default}, {ExhsWeb.LiveForeningAuth, :optional_forening}] do
+      on_mount: [
+        {ExhsWeb.LiveCurrentPath, :default},
+        {ExhsWeb.LiveForeningAuth, :optional_forening}
+      ] do
       live "/", PublicLive.Home
       live "/events", PublicLive.Events.Index
       live "/events/:id", PublicLive.Events.Show

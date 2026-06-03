@@ -7,6 +7,8 @@ defmodule Exhs.Audit do
   end
 
   resources do
-    resource Exhs.Audit.EventLog
+    resource Exhs.Audit.EventLog do
+      define :list_my_activity, action: :my_activity
+    end
   end
 end

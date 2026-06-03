@@ -164,7 +164,7 @@ defmodule ExhsWeb.PublicLive.Events.Show do
       <div class="mt-4">
         <div
           :if={@current_user && @already_registered?}
-          class="flex items-center justify-center gap-2 rounded-lg bg-success/10 px-4 py-3 text-sm font-medium text-success"
+          class="bg-success/10 text-success flex items-center justify-center gap-2 rounded-lg px-4 py-3 text-sm font-medium"
         >
           <.icon name="hero-check-circle" class="size-5" /> Du er tilmeldt
         </div>

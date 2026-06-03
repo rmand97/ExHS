@@ -42,6 +42,8 @@ defmodule Exhs.Seeds do
     second_membership = upsert_membership(user, second, :member)
     upsert_sport_events(second, second_membership)
 
+    seed_audit_activity(user, forening, membership, second, second_membership)
+
     Logger.info(
       "Seed complete. Sign in with #{user.email} / #{@test_password}\n" <>
         "  Demo:   #{forening.subdomain}.lvh.me\n" <>
@@ -401,10 +403,10 @@ defmodule Exhs.Seeds do
     end
   end
 
-  defp upsert_seed_registration(forening, event, membership) do
+  defp upsert_seed_registration(forening, event, membership, ticket_name \\ "Medlem") do
     ticket_type =
       TicketType
-      |> Ash.Query.filter(event_id == ^event.id and name == "Medlem")
+      |> Ash.Query.filter(event_id == ^event.id and name == ^ticket_name)
       |> Ash.read_one!(tenant: forening.id, authorize?: false)
 
     existing =
@@ -427,12 +429,186 @@ defmodule Exhs.Seeds do
     end
   end
 
+  defp seed_audit_activity(user, forening, membership, second_forening, second_membership) do
+    alias Exhs.Audit.EventLog
+
+    has_user_events =
+      EventLog
+      |> Ash.Query.filter(user_id == ^user.id)
+      |> Ash.read!(authorize?: false)
+      |> length()
+
+    if has_user_events >= 25 do
+      Logger.info("Audit activity already seeded (#{has_user_events} events)")
+    else
+      Logger.info("Seeding audit activity as #{user.email} (clearing partial data)…")
+
+      Exhs.Repo.query!("DELETE FROM audit_events WHERE user_id = $1", [
+        Ecto.UUID.dump!(user.id)
+      ])
+
+      Exhs.Repo.query!(
+        "DELETE FROM groups WHERE name LIKE 'Udvalg %' OR name LIKE 'Sporthold %' OR name = 'Hovedudvalget'"
+      )
+
+      Exhs.Repo.query!(~s[
+        DELETE FROM event_registrations WHERE ticket_type_id IN
+          (SELECT id FROM event_ticket_types WHERE event_id IN
+            (SELECT id FROM events WHERE title IN ('Admin-oprettet Event', 'Løbetræning')))
+      ])
+
+      Exhs.Repo.query!(~s[
+        DELETE FROM event_ticket_types WHERE event_id IN
+          (SELECT id FROM events WHERE title IN ('Admin-oprettet Event', 'Løbetræning'))
+      ])
+
+      Exhs.Repo.query!(
+        "DELETE FROM events WHERE title IN ('Admin-oprettet Event', 'Løbetræning')"
+      )
+
+      for i <- 1..8 do
+        Organizations.create_group!(
+          %{
+            name: "Udvalg #{i}",
+            color: "##{String.pad_leading(Integer.to_string(i * 30, 16), 6, "0")}"
+          },
+          tenant: forening.id,
+          actor: user
+        )
+      end
+
+      for i <- 1..4 do
+        Organizations.create_group!(
+          %{name: "Sporthold #{i}", color: "#e11d48"},
+          tenant: second_forening.id,
+          authorize?: false,
+          actor: user
+        )
+      end
+
+      extra_user_1 = upsert_extra_user("medlem1@exhs.dk", "Marie", "Jensen")
+      extra_user_2 = upsert_extra_user("medlem2@exhs.dk", "Lars", "Nielsen")
+
+      m1 = upsert_membership(extra_user_1, forening, :member)
+      m2 = upsert_membership(extra_user_2, forening, :member)
+
+      Organizations.set_member_role!(m1, %{role: :board}, tenant: forening.id, actor: user)
+      Organizations.set_member_role!(m2, %{role: :board}, tenant: forening.id, actor: user)
+      Organizations.set_member_role!(m2, %{role: :member}, tenant: forening.id, actor: user)
+
+      groups = Group |> Ash.read!(tenant: forening.id, authorize?: false)
+
+      if g = Enum.find(groups, &(&1.name == "Udvalg 1")) do
+        Organizations.update_group!(g, %{name: "Hovedudvalget"}, tenant: forening.id, actor: user)
+      end
+
+      if g = Enum.find(groups, &(&1.name == "Udvalg 8")) do
+        Organizations.destroy_group!(g, tenant: forening.id, actor: user)
+      end
+
+      event =
+        Events.create_event!(
+          %{
+            title: "Admin-oprettet Event",
+            description: "Oprettet via seed som test-bruger",
+            location: "Foreningslokalet",
+            starts_at: DateTime.add(DateTime.utc_now(), 14, :day)
+          },
+          tenant: forening.id,
+          actor: user
+        )
+
+      Events.publish_event!(event, actor: user)
+
+      tt =
+        Events.create_ticket_type!(
+          %{event_id: event.id, name: "Standard", price_cents: 0},
+          tenant: forening.id,
+          actor: user
+        )
+
+      Events.register_for_event!(
+        %{ticket_type_id: tt.id, membership_id: membership.id},
+        tenant: forening.id,
+        actor: user
+      )
+
+      sport_event =
+        Events.create_event!(
+          %{
+            title: "Løbetræning",
+            description: "Tirsdags-løb",
+            location: "Fælledparken",
+            starts_at: DateTime.add(DateTime.utc_now(), 7, :day)
+          },
+          tenant: second_forening.id,
+          authorize?: false,
+          actor: user
+        )
+
+      Events.publish_event!(sport_event, authorize?: false, actor: user)
+
+      stt =
+        Events.create_ticket_type!(
+          %{event_id: sport_event.id, name: "Deltager", price_cents: 0},
+          tenant: second_forening.id,
+          authorize?: false,
+          actor: user
+        )
+
+      Events.register_for_event!(
+        %{ticket_type_id: stt.id, membership_id: second_membership.id},
+        tenant: second_forening.id,
+        authorize?: false,
+        actor: user
+      )
+
+      count =
+        EventLog
+        |> Ash.Query.filter(user_id == ^user.id)
+        |> Ash.read!(authorize?: false)
+        |> length()
+
+      Logger.info("Seeded #{count} audit events for #{user.email}")
+    end
+  end
+
+  defp upsert_extra_user(email, first, last) do
+    existing =
+      User
+      |> Ash.Query.filter(email == ^email)
+      |> Ash.read_one!(authorize?: false)
+
+    case existing do
+      %User{} = u ->
+        u
+
+      nil ->
+        {:ok, u} =
+          User
+          |> Ash.Changeset.for_create(:register_with_password, %{
+            email: email,
+            password: @test_password,
+            password_confirmation: @test_password
+          })
+          |> Ash.create(authorize?: false)
+
+        {:ok, u} =
+          Exhs.Accounts.update_profile(u, %{first_name: first, last_name: last},
+            authorize?: false
+          )
+
+        Logger.info("Created extra user: #{email}")
+        u
+    end
+  end
+
   defp upsert_sport_events(forening, membership) do
     event = upsert_seed_event(forening, "Fodboldturnering 2026", false)
     yoga = upsert_seed_event(forening, "Yoga i Parken", false)
     ensure_ticket_type(forening, event, "Deltager", 5_000, 40)
     ensure_ticket_type(forening, yoga, "Gratis", 0, nil)
-    if membership, do: upsert_seed_registration(forening, event, membership)
+    if membership, do: upsert_seed_registration(forening, event, membership, "Deltager")
   end
 end
 

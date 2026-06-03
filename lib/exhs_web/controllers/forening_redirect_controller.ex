@@ -13,7 +13,15 @@ defmodule ExhsWeb.ForeningRedirectController do
   defp build_handoff_url(conn, subdomain, return_to) do
     base_host = Application.get_env(:exhs, :base_host, "exhs.dk")
     uri = ExhsWeb.Endpoint.url() |> URI.parse()
-    base = URI.to_string(%{uri | host: "#{subdomain}.#{base_host}", path: "/auth/handoff", query: nil, fragment: nil})
+
+    base =
+      URI.to_string(%{
+        uri
+        | host: "#{subdomain}.#{base_host}",
+          path: "/auth/handoff",
+          query: nil,
+          fragment: nil
+      })
 
     case get_session(conn, "user_token") do
       nil ->

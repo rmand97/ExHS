@@ -123,13 +123,16 @@ defmodule ExhsWeb.Layouts do
           <div class="flex items-center gap-4">
             <.link navigate="/dashboard" class="flex items-center gap-2.5">
               <.exhs_logo />
-              <span class="text-base-content hidden font-semibold tracking-tight sm:inline">Exhs</span>
+              <span class="text-base-content hidden font-semibold tracking-tight sm:inline">
+                Exhs
+              </span>
             </.link>
             <div class="hidden items-center gap-1 md:flex">
               <.nav_link href="/dashboard" label="Dashboard" current_path={@current_path} />
               <.nav_link href="/upcoming" label="Kommende events" current_path={@current_path} />
               <.nav_link href="/registrations" label="Mine events" current_path={@current_path} />
               <.nav_link href="/payments" label="Betalinger" current_path={@current_path} />
+              <.nav_link href="/activity" label="Aktivitet" current_path={@current_path} />
             </div>
           </div>
           <div class="flex items-center gap-3">
@@ -140,12 +143,12 @@ defmodule ExhsWeb.Layouts do
               </div>
               <ul
                 tabindex="0"
-                class="dropdown-content bg-base-100 border-base-content/10 z-50 mt-2 w-48 rounded-xl border p-1 shadow-lg"
+                class="bg-base-100 border-base-content/10 dropdown-content z-50 mt-2 w-48 rounded-xl border p-1 shadow-lg"
               >
                 <li>
                   <.link
                     navigate="/profile"
-                    class="hover:bg-base-content/5 text-base-content/70 hover:text-base-content flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm"
+                    class="hover:bg-base-content/5 hover:text-base-content text-base-content/70 flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm"
                   >
                     <.icon name="hero-user" class="size-4" /> Profil
                   </.link>
@@ -154,7 +157,7 @@ defmodule ExhsWeb.Layouts do
                   <.link
                     href="/sign-out"
                     method="delete"
-                    class="hover:bg-base-content/5 text-base-content/70 hover:text-base-content flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm"
+                    class="hover:bg-base-content/5 hover:text-base-content text-base-content/70 flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm"
                   >
                     <.icon name="hero-arrow-right-start-on-rectangle" class="size-4" /> Log ud
                   </.link>
@@ -170,6 +173,7 @@ defmodule ExhsWeb.Layouts do
         <.nav_link href="/upcoming" label="Events" current_path={@current_path} />
         <.nav_link href="/registrations" label="Mine events" current_path={@current_path} />
         <.nav_link href="/payments" label="Betalinger" current_path={@current_path} />
+        <.nav_link href="/activity" label="Aktivitet" current_path={@current_path} />
         <.nav_link href="/profile" label="Profil" current_path={@current_path} />
       </div>
 
@@ -244,10 +248,10 @@ defmodule ExhsWeb.Layouts do
     <.link
       navigate={@href}
       class={[
-        "rounded-lg px-3 py-1.5 text-sm font-medium transition whitespace-nowrap",
+        "rounded-lg px-3 py-1.5 text-sm font-medium whitespace-nowrap transition",
         if(@active,
           do: "bg-base-content/8 text-base-content",
-          else: "text-base-content/50 hover:bg-base-content/5 hover:text-base-content/80"
+          else: "hover:bg-base-content/5 hover:text-base-content/80 text-base-content/50"
         )
       ]}
     >

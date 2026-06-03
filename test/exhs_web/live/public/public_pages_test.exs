@@ -260,7 +260,11 @@ defmodule ExhsWeb.PublicLive.PublicPagesTest do
   end
 
   describe "PublicLive.Events.Show - tilmeld button" do
-    test "shows tilmeld button when not registered", %{conn: conn, forening: forening, event: event} do
+    test "shows tilmeld button when not registered", %{
+      conn: conn,
+      forening: forening,
+      event: event
+    } do
       user = register_user!()
       join_forening!(forening, user)
 
