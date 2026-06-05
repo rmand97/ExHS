@@ -12,6 +12,7 @@ defmodule ExhsWeb.PublicLive.Home do
         |> assign(:page_title, forening.name)
         |> assign(:page_description, tagline)
         |> assign(:page_image, forening.banner_url)
+        |> assign(:upcoming_events, list_upcoming_events(socket.assigns))
       else
         socket
         |> assign(:page_title, nil)
@@ -19,6 +20,7 @@ defmodule ExhsWeb.PublicLive.Home do
           :page_description,
           "Medlemmer, events, kontingent og kommunikation — alt i én moderne platform bygget til foreninger."
         )
+        |> assign(:upcoming_events, [])
       end
 
     {:ok, socket}
@@ -36,9 +38,6 @@ defmodule ExhsWeb.PublicLive.Home do
   end
 
   def render(assigns) do
-    events = list_upcoming_events(assigns)
-    assigns = assign(assigns, :upcoming_events, events)
-
     ~H"""
     <Layouts.public
       flash={@flash}

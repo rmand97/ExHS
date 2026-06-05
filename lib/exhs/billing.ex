@@ -40,7 +40,7 @@ defmodule Exhs.Billing do
         get?: true
 
       define :list_payments, action: :read
-      define :list_my_payments, action: :my_payments, args: [:membership_ids]
+      define :list_my_payments, action: :my_payments
     end
   end
 

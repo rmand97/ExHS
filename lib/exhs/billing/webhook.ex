@@ -10,6 +10,15 @@ defmodule Exhs.Billing.Webhook do
   alias Exhs.Organizations
 
   require Ash.Query
+  require Logger
+
+  @stripe_status_map %{
+    "trialing" => :trialing,
+    "active" => :active,
+    "past_due" => :past_due,
+    "canceled" => :canceled,
+    "incomplete" => :incomplete
+  }
 
   def apply_event(%{"type" => type} = event), do: dispatch(type, event)
 
@@ -80,9 +89,8 @@ defmodule Exhs.Billing.Webhook do
 
   defp upsert_subscription(sub, account_id) do
     with {:ok, forening} <- forening_for_account(account_id),
-         {:ok, membership} <- membership_for_customer(sub["customer"], forening.id) do
-      attrs = subscription_attrs(sub)
-
+         {:ok, membership} <- membership_for_customer(sub["customer"], forening.id),
+         {:ok, attrs} <- subscription_attrs(sub) do
       case existing_subscription(sub["id"], forening.id) do
         nil ->
           Billing.create_subscription(
@@ -148,12 +156,28 @@ defmodule Exhs.Billing.Webhook do
   end
 
   defp subscription_attrs(sub) do
-    %{
-      status: String.to_existing_atom(sub["status"]),
-      current_period_start: timestamp_or_nil(sub["current_period_start"]),
-      current_period_end: timestamp_or_nil(sub["current_period_end"]),
-      cancel_at_period_end: sub["cancel_at_period_end"] || false
-    }
+    case map_subscription_status(sub["status"]) do
+      {:ok, status} ->
+        {:ok,
+         %{
+           status: status,
+           current_period_start: timestamp_or_nil(sub["current_period_start"]),
+           current_period_end: timestamp_or_nil(sub["current_period_end"]),
+           cancel_at_period_end: sub["cancel_at_period_end"] || false
+         }}
+
+      :unknown ->
+        :ok
+    end
+  end
+
+  defp map_subscription_status(status) when is_map_key(@stripe_status_map, status) do
+    {:ok, Map.fetch!(@stripe_status_map, status)}
+  end
+
+  defp map_subscription_status(status) do
+    Logger.warning("Unknown Stripe subscription status: #{inspect(status)}")
+    :unknown
   end
 
   defp existing_subscription(stripe_id, forening_id) do

@@ -106,13 +106,7 @@ defmodule ExhsWeb.MemberLive.Payments do
   defp load_payments(socket, filters, pagination) do
     user = socket.assigns.current_user
 
-    membership_ids =
-      case Exhs.Organizations.list_my_memberships(actor: user) do
-        {:ok, memberships} -> Enum.map(memberships, & &1.id)
-        _ -> []
-      end
-
-    case Exhs.Billing.list_my_payments(membership_ids, actor: user) do
+    case Exhs.Billing.list_my_payments(actor: user) do
       {:ok, all_payments} ->
         filtered = apply_filters(all_payments, filters)
         total = length(filtered)

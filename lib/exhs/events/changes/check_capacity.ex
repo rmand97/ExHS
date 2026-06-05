@@ -12,10 +12,10 @@ defmodule Exhs.Events.Changes.CheckCapacity do
       tenant = changeset.tenant
 
       ticket_type =
-        Ash.get!(Exhs.Events.TicketType, ticket_type_id,
-          tenant: tenant,
-          authorize?: false
-        )
+        Exhs.Events.TicketType
+        |> Ash.Query.filter(id == ^ticket_type_id)
+        |> Ash.Query.lock("FOR UPDATE")
+        |> Ash.read_one!(tenant: tenant, authorize?: false)
 
       status = resolve_status(ticket_type, tenant)
       Changeset.force_change_attribute(changeset, :status, status)

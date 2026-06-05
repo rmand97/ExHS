@@ -58,12 +58,14 @@ defmodule Exhs.Organizations.Membership do
     update :set_role do
       require_atomic? false
       accept [:role]
-      validate Exhs.Organizations.Membership.Validations.NotLastAdmin
+
+      validate {Exhs.Organizations.Membership.Validations.NotLastAdmin,
+                message: "cannot remove or demote the last admin"}
     end
 
     destroy :leave do
       require_atomic? false
-      validate Exhs.Organizations.Membership.Validations.NotLastAdminDestroy
+      validate {Exhs.Organizations.Membership.Validations.NotLastAdmin, on: :destroy}
     end
 
     update :set_stripe_customer do

@@ -32,7 +32,7 @@ defmodule ExhsWeb.Endpoint do
     only: ExhsWeb.static_paths(),
     raise_on_missing_only: code_reloading?
 
-  if Mix.env() == :dev do
+  if code_reloading? do
     plug Tidewave
   end
 

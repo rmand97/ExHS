@@ -167,7 +167,7 @@ defmodule Exhs.MemberQueriesTest do
         authorize?: false
       )
 
-      {:ok, payments} = Exhs.Billing.list_my_payments([m1.id], actor: user)
+      {:ok, payments} = Exhs.Billing.list_my_payments(actor: user)
       assert length(payments) == 1
       assert hd(payments).amount_cents == 30_000
     end
@@ -192,7 +192,7 @@ defmodule Exhs.MemberQueriesTest do
         authorize?: false
       )
 
-      {:ok, payments} = Exhs.Billing.list_my_payments([m1.id], actor: user)
+      {:ok, payments} = Exhs.Billing.list_my_payments(actor: user)
       assert payments == []
     end
   end

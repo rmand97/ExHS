@@ -27,6 +27,7 @@ defmodule ExhsWeb.HandoffController do
   end
 
   # Only allow relative paths to prevent open-redirect attacks
+  defp sanitize_return_to("//" <> _), do: "/"
   defp sanitize_return_to("/" <> _ = path), do: path
   defp sanitize_return_to(_), do: "/"
 end

@@ -298,10 +298,18 @@ defmodule ExhsWeb.Layouts do
     end
   end
 
+  @safe_css_color_re ~r/\A(#[0-9a-fA-F]{3,8}|oklch\([0-9a-zA-Z.,% ]+\)|[a-z]{3,20})\z/
+
+  defp safe_css_color(value) when is_binary(value) do
+    if Regex.match?(@safe_css_color_re, String.trim(value)), do: String.trim(value)
+  end
+
+  defp safe_css_color(_value), do: nil
+
   defp forening_css_vars(forening) do
     branding = forening.branding || %{}
-    primary = branding["primary_color"]
-    accent = branding["accent_color"]
+    primary = safe_css_color(branding["primary_color"])
+    accent = safe_css_color(branding["accent_color"])
 
     vars =
       [

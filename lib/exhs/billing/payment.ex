@@ -48,12 +48,7 @@ defmodule Exhs.Billing.Payment do
 
     read :my_payments do
       multitenancy :bypass_all
-
-      argument :membership_ids, {:array, :uuid} do
-        allow_nil? false
-      end
-
-      filter expr(payable_id in ^arg(:membership_ids))
+      prepare Exhs.Billing.Preparations.FilterByActorMemberships
       prepare build(sort: [paid_at: :desc])
     end
 

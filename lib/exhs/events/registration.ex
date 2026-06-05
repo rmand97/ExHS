@@ -99,6 +99,10 @@ defmodule Exhs.Events.Registration do
       authorize_if expr(membership.user_id == ^actor(:id))
       authorize_if {Exhs.Checks.HasMembershipRole, roles: [:admin]}
     end
+
+    policy action(:promote) do
+      authorize_if {Exhs.Checks.HasMembershipRole, roles: [:admin]}
+    end
   end
 
   multitenancy do

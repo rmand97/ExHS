@@ -50,5 +50,11 @@ defmodule ExhsWeb.HandoffControllerTest do
 
       assert redirected_to(conn) == "/"
     end
+
+    test "protocol-relative URL in return_to is sanitized to /", %{conn: conn} do
+      conn = get(conn, "/auth/handoff?return_to=%2F%2Fevil.com%2Fsteal")
+
+      assert redirected_to(conn) == "/"
+    end
   end
 end
