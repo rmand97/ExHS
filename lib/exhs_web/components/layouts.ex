@@ -482,7 +482,7 @@ defmodule ExhsWeb.Layouts do
     <.link
       navigate={@href}
       class={[
-        "rounded-lg px-2.5 py-1.5 text-xs sm:px-3 sm:text-sm font-medium whitespace-nowrap transition",
+        "rounded-lg px-2.5 py-1.5 text-xs font-medium whitespace-nowrap transition sm:px-3 sm:text-sm",
         if(@active,
           do: "bg-base-content/8 text-base-content",
           else: "hover:bg-base-content/5 hover:text-base-content/80 text-base-content/50"
