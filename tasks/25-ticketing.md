@@ -119,20 +119,110 @@ the core.
 - [ ] `mix ash.codegen --dev` iteratively, final `mix ash.codegen ticketing`
 
 ### Tests
-Tenant isolation, external dep (Stripe), and LiveView interactivity all apply — test thoroughly per CLAUDE.md.
 
-- [ ] **Tenant isolation**: two foreninger, orders/ticket types in both, each sees only its own; cross-tenant order/ticket-type IDs rejected (list, show, mutations)
-- [ ] **Group gating**: member NOT in eligible group rejected; member IN group succeeds; ungated ticket open to all
-- [ ] **Sales window**: before `sales_starts_at` rejected; after `sales_ends_at` rejected; inside window OK
-- [ ] **Capacity with holds**: 200-cap presale — holds count toward capacity; oversell prevented; last seat race resolves to one buyer
-- [ ] **Hold expiry**: expired hold releases seat (Oban worker), order → `:expired`, waitlist promoted
-- [ ] **Free ticket**: confirms instantly, no Payment, no Stripe call
-- [ ] **Paid ticket (Stripe via `StripeClient.Stub`)**: order → checkout session created → `checkout.session.completed` webhook → order paid, registration confirmed, Payment recorded (`:order`)
-- [ ] **Webhook**: signature rejection, idempotency (same event twice), failure path (declined/timeout) leaves no half-committed state
-- [ ] **Add-on**: bus add-on included in order total and Checkout line items
-- [ ] **Questions**: required question unanswered → rejected; answers persisted in `OrderItem.responses`
-- [ ] **One-per-member**: duplicate ticket for same member/ticket type rejected
-- [ ] **LiveView** (`Phoenix.LiveViewTest`): mounts; full purchase flow (select → answer → review → pay) works; ineligible member sees gated reason; **live availability updates** — second test process buys, assert first viewer's `seats_left` decrements via PubSub; countdown renders while held
+Tenant isolation, external dep (Stripe), and LiveView interactivity all apply — test thoroughly per CLAUDE.md. Test through code interfaces (the real caller entry point), not internals. Each area below lists happy paths and the bad paths that must fail loudly. Two foreninger seeded in every isolation-sensitive test.
+
+#### Order lifecycle (code interface)
+Happy:
+- [ ] `create_order` → `:building`, zero total, linked to membership + event
+- [ ] `add_order_item` (ticket) → recomputes `total_cents` from `unit_price_cents` snapshot; item links/creates Registration
+- [ ] `add_order_item` (addon) → total includes add-on price
+- [ ] `remove_order_item` → total recomputed; removing last item leaves empty `:building` order
+- [ ] `cancel_order` from `:building` / `:pending_payment` → `:cancelled`, any held seats released
+- [ ] `get_order` returns order with items + payment loaded
+
+Bad:
+- [ ] `add_order_item` to a non-`:building` order (`:paid`/`:cancelled`/`:expired`) rejected
+- [ ] `checkout_order` on empty order rejected
+- [ ] `unit_price_cents` is a snapshot — later ticket-type price change does NOT mutate an existing order total
+- [ ] mutate someone else's order (other membership) rejected by policy
+
+#### OrderItem validation
+Happy:
+- [ ] ticket item with `ticket_type_id` valid; addon item with `add_on_id` valid
+- [ ] required questions answered → item persists; `responses` stored keyed by question id
+
+Bad:
+- [ ] ticket item missing `ticket_type_id` rejected; addon item missing `add_on_id` rejected
+- [ ] item with both `ticket_type_id` and `add_on_id` rejected
+- [ ] required question unanswered → rejected
+- [ ] answer for `:select` question not in `options` → rejected
+- [ ] answer wrong type (text for `:number`) → rejected
+- [ ] `quantity > 1` when `allow_multiple = false` → rejected (v1 enforces 1)
+
+#### Group gating
+- [ ] ungated ticket type: any member buys (happy)
+- [ ] gated, member IN an eligible group: buys (happy)
+- [ ] gated, member NOT in any eligible group: rejected with clear reason (bad)
+- [ ] gated to multiple groups, member in one of them: buys (happy)
+- [ ] member removed from group after gating: subsequent buy rejected (bad)
+
+#### Sales window
+- [ ] inside window (`sales_starts_at` < now < `sales_ends_at`): buys (happy)
+- [ ] before `sales_starts_at`: rejected (bad)
+- [ ] after `sales_ends_at`: rejected (bad)
+- [ ] null window falls back to event window: respects event start/end (happy + bad either side)
+
+#### Capacity & holds
+- [ ] `seats_taken` counts `confirmed` + unexpired held; `seats_left = capacity - seats_taken`
+- [ ] nil capacity = unlimited, never blocks (happy)
+- [ ] hold counts toward capacity: last seat held → next buyer blocked even before payment (bad)
+- [ ] free oversell → `:waitlisted`; paid presale oversell → rejected
+- [ ] **last-seat race**: two concurrent `checkout_order` on a 1-left ticket type — exactly one wins, other rejected/waitlisted (no oversell)
+- [ ] expired hold no longer counts toward capacity (seat reusable)
+
+#### Hold expiry (Oban `ReservationExpiry`)
+- [ ] worker on `held_until` lapse: releases hold, order → `:expired`, Registration hold cleared (happy)
+- [ ] expiry enqueues `WaitlistPromoter`; next waitlisted member promoted (happy)
+- [ ] worker is idempotent — running twice on same order no double-promote, no error
+- [ ] worker does NOT expire an already-`:paid` order (bad/guard)
+
+#### Free ticket
+- [ ] free ticket order confirms instantly: order → `:paid` (or `:confirmed`), Registration `:confirmed`, no `held_until`
+- [ ] NO Stripe call made (assert stub not invoked)
+- [ ] NO Payment row created for a zero-total order
+
+#### Paid ticket + Stripe (`StripeClient.Stub`)
+Happy:
+- [ ] `checkout_order` builds line items (ticket + add-ons) on forening's connected account, stores `stripe_checkout_session_id`, sets `held_until = now + N`, order → `:pending_payment`
+- [ ] `checkout.session.completed` webhook → `mark_order_paid`, Registrations `:confirmed`, Payment recorded (`payable_type: :order`), `paid_at` set, hold cleared
+- [ ] add-on appears as a distinct Checkout line item and in order total
+
+Bad:
+- [ ] webhook with bad signature rejected, no state change
+- [ ] same `checkout.session.completed` delivered twice → idempotent (Oban unique on `stripe_event_id`), single Payment, no double-confirm
+- [ ] webhook for unknown / cross-tenant session id → no-op, no crash
+- [ ] Stripe session creation failure (stub returns error) → order stays `:building`/`:pending_payment`, no seat permanently lost, surfaced to caller
+- [ ] `checkout.session.expired` / abandoned checkout → hold released on expiry (ties to Oban worker)
+- [ ] `charge.refunded` → Payment refunded AND order/registration reflect refund (seat freed per decided behavior)
+
+#### One-per-member identity
+- [ ] duplicate ticket, same member + same ticket type → rejected (bad)
+- [ ] same member, DIFFERENT ticket type same event → allowed (happy)
+- [ ] member can re-buy after their order cancelled/expired (identity not blocked by dead order) (happy)
+
+#### Tenant isolation
+- [ ] orders/ticket types/add-ons in both foreninger: each forening lists only its own
+- [ ] `get_order` with cross-tenant id → not found
+- [ ] cross-tenant `checkout_order` / `add_order_item` / `cancel_order` → rejected
+- [ ] cross-tenant ticket type id in `add_order_item` → rejected
+- [ ] webhook resolves order within correct tenant only
+
+#### LiveView (`Phoenix.LiveViewTest`)
+Happy:
+- [ ] purchase panel mounts on event show
+- [ ] full flow: select ticket → answer questions → choose add-ons → review → pay (free path confirms in place; paid path redirects to Stripe URL)
+- [ ] **live availability**: second process buys/reserves → first viewer's `seats_left` decrements via PubSub ("kun N tilbage")
+- [ ] **live countdown**: held order shows ticking `held_until` timer
+- [ ] **live release**: hold expires → first viewer's UI re-enables purchase, seats restored
+- [ ] **live waitlist**: promotion updates waitlist position for the viewer
+
+Bad / guard:
+- [ ] ineligible (gated) member: ticket disabled with reason badge, submit blocked server-side too
+- [ ] outside sales window: purchase disabled with reason
+- [ ] sold out: purchase disabled, waitlist CTA shown (free) / blocked (paid presale)
+- [ ] required question left blank: form re-renders with error, no order created
+- [ ] unauthenticated / non-member viewer: cannot purchase (redirect / disabled)
 
 ## Open decisions
 
