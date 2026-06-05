@@ -190,18 +190,7 @@ defmodule Exhs.BillingTest do
       membership = set_stripe_customer!(forening, membership)
       scope = scope(user, forening)
 
-      {:ok, sub} =
-        Billing.create_subscription(
-          %{
-            membership_id: membership.id,
-            stripe_subscription_id: "sub_cancel_test",
-            stripe_customer_id: membership.stripe_customer_id,
-            status: :active,
-            cancel_at_period_end: false
-          },
-          tenant: forening.id,
-          authorize?: false
-        )
+      sub = create_subscription!(forening, membership)
 
       Stub.set_response(
         :update_subscription,
@@ -214,6 +203,72 @@ defmodule Exhs.BillingTest do
         Billing.get_subscription_by_id!(sub.id, tenant: forening.id, authorize?: false)
 
       refute reloaded.cancel_at_period_end
+    end
+  end
+
+  describe "cross-tenant isolation" do
+    test "subscriptions from forening A are not visible in forening B" do
+      f_a = billing_forening!() |> activate_stripe_connect!()
+      f_b = billing_forening!() |> activate_stripe_connect!()
+      user = register_user!()
+      m_a = invite_member!(f_a, user)
+      m_a = set_stripe_customer!(f_a, m_a)
+      invite_member!(f_b, user)
+
+      create_subscription!(f_a, m_a)
+
+      a_subs = Billing.list_subscriptions!(tenant: f_a.id, authorize?: false)
+      b_subs = Billing.list_subscriptions!(tenant: f_b.id, authorize?: false)
+
+      assert length(a_subs) == 1
+      assert hd(a_subs).forening_id == f_a.id
+      assert b_subs == []
+    end
+
+    test "payments from forening A are not visible in forening B" do
+      f_a = billing_forening!() |> activate_stripe_connect!()
+      f_b = billing_forening!() |> activate_stripe_connect!()
+      user = register_user!()
+      m_a = invite_member!(f_a, user)
+      invite_member!(f_b, user)
+
+      record_payment!(f_a, m_a)
+
+      a_payments = Billing.list_payments!(tenant: f_a.id, authorize?: false)
+      b_payments = Billing.list_payments!(tenant: f_b.id, authorize?: false)
+
+      assert length(a_payments) == 1
+      assert hd(a_payments).forening_id == f_a.id
+      assert b_payments == []
+    end
+
+    test "admin of forening A cannot read subscriptions in forening B" do
+      f_a = billing_forening!() |> activate_stripe_connect!()
+      f_b = billing_forening!() |> activate_stripe_connect!()
+      admin = register_user!()
+      other_user = register_user!()
+      invite_member!(f_a, admin, :admin)
+      m_b = invite_member!(f_b, other_user)
+      m_b = set_stripe_customer!(f_b, m_b)
+
+      create_subscription!(f_b, m_b)
+
+      subs = Billing.list_subscriptions!(tenant: f_b.id, actor: admin)
+      assert subs == []
+    end
+
+    test "admin of forening A cannot read payments in forening B" do
+      f_a = billing_forening!() |> activate_stripe_connect!()
+      f_b = billing_forening!() |> activate_stripe_connect!()
+      admin = register_user!()
+      other_user = register_user!()
+      invite_member!(f_a, admin, :admin)
+      m_b = invite_member!(f_b, other_user)
+
+      record_payment!(f_b, m_b)
+
+      payments = Billing.list_payments!(tenant: f_b.id, actor: admin)
+      assert payments == []
     end
   end
 end

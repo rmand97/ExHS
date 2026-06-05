@@ -16,23 +16,6 @@ defmodule Exhs.Billing.MembershipDeactivatorTest do
     %{forening: forening, user: user, membership: membership}
   end
 
-  defp create_subscription!(forening, membership, attrs) do
-    defaults = %{
-      membership_id: membership.id,
-      stripe_subscription_id: "sub_#{System.unique_integer([:positive])}",
-      stripe_customer_id: membership.stripe_customer_id,
-      status: :active,
-      current_period_start: DateTime.utc_now(),
-      current_period_end: DateTime.add(DateTime.utc_now(), 365, :day),
-      cancel_at_period_end: false
-    }
-
-    Billing.create_subscription!(Map.merge(defaults, attrs),
-      tenant: forening.id,
-      authorize?: false
-    )
-  end
-
   describe "perform/1" do
     test "deactivates membership with canceled subscription past period end" do
       %{forening: f, membership: m} = setup_billing_member!()

@@ -397,4 +397,176 @@ defmodule Exhs.EventsTest do
                )
     end
   end
+
+  describe "event update and destroy" do
+    test "admin can update an event" do
+      forening = create_forening!()
+      admin = register_user!()
+      invite_member!(forening, admin, :admin)
+      scope = scope(admin, forening)
+
+      {:ok, event} = Events.create_event(event_attrs(), tenant: forening.id, scope: scope)
+
+      {:ok, updated} =
+        Events.update_event(event, %{title: "Updated Title", location: "New Venue"}, scope: scope)
+
+      assert updated.title == "Updated Title"
+      assert updated.location == "New Venue"
+    end
+
+    test "admin can unpublish a published event" do
+      forening = create_forening!()
+      admin = register_user!()
+      invite_member!(forening, admin, :admin)
+      scope = scope(admin, forening)
+
+      {:ok, event} = Events.create_event(event_attrs(), tenant: forening.id, scope: scope)
+      {:ok, event} = Events.publish_event(event, scope: scope)
+      assert event.published
+
+      {:ok, unpublished} = Events.unpublish_event(event, scope: scope)
+      refute unpublished.published
+    end
+
+    test "regular member cannot update an event" do
+      forening = create_forening!()
+      admin = register_user!()
+      invite_member!(forening, admin, :admin)
+      user = register_user!()
+      invite_member!(forening, user)
+      scope = scope(user, forening)
+
+      event = create_published_event!(forening)
+
+      assert {:error, %Ash.Error.Forbidden{}} =
+               Events.update_event(event, %{title: "Hijacked"}, scope: scope)
+    end
+  end
+
+  describe "ticket type update and destroy" do
+    test "admin can update a ticket type" do
+      forening = create_forening!()
+      admin = register_user!()
+      invite_member!(forening, admin, :admin)
+      scope = scope(admin, forening)
+
+      event = create_event!(forening)
+
+      {:ok, tt} =
+        Events.create_ticket_type(%{event_id: event.id, name: "Early Bird", price_cents: 5000},
+          tenant: forening.id,
+          scope: scope
+        )
+
+      {:ok, updated} =
+        Events.update_ticket_type(tt, %{name: "Regular", price_cents: 10_000}, scope: scope)
+
+      assert updated.name == "Regular"
+      assert updated.price_cents == 10_000
+    end
+
+    test "admin can destroy a ticket type" do
+      forening = create_forening!()
+      admin = register_user!()
+      invite_member!(forening, admin, :admin)
+      scope = scope(admin, forening)
+
+      event = create_event!(forening)
+
+      {:ok, tt} =
+        Events.create_ticket_type(%{event_id: event.id, name: "Disposable", price_cents: 0},
+          tenant: forening.id,
+          scope: scope
+        )
+
+      assert :ok = Events.destroy_ticket_type!(tt, scope: scope)
+
+      assert {:error, _} =
+               Events.get_ticket_type_by_id(tt.id, tenant: forening.id, authorize?: false)
+    end
+
+    test "regular member cannot update or destroy ticket types" do
+      forening = create_forening!()
+      admin = register_user!()
+      invite_member!(forening, admin, :admin)
+      user = register_user!()
+      invite_member!(forening, user)
+      scope = scope(user, forening)
+
+      event = create_event!(forening)
+      tt = create_ticket_type!(forening, event)
+
+      assert {:error, %Ash.Error.Forbidden{}} =
+               Events.update_ticket_type(tt, %{name: "Nope"}, scope: scope)
+
+      assert {:error, %Ash.Error.Forbidden{}} =
+               Events.destroy_ticket_type(tt, scope: scope)
+    end
+  end
+
+  describe "cross-tenant isolation" do
+    test "events from forening A are not visible in forening B" do
+      f_a = create_forening!()
+      f_b = create_forening!()
+      admin = register_user!()
+      invite_member!(f_a, admin, :admin)
+      invite_member!(f_b, admin, :admin)
+
+      create_published_event!(f_a, %{title: "Alpha Event"})
+      create_published_event!(f_b, %{title: "Beta Event"})
+
+      a_events = Events.list_upcoming_events!(scope: scope(admin, f_a))
+      b_events = Events.list_upcoming_events!(scope: scope(admin, f_b))
+
+      assert Enum.all?(a_events, &(&1.forening_id == f_a.id))
+      assert Enum.all?(b_events, &(&1.forening_id == f_b.id))
+      refute Enum.any?(a_events, &(&1.title == "Beta Event"))
+      refute Enum.any?(b_events, &(&1.title == "Alpha Event"))
+    end
+
+    test "ticket types from forening A are not visible in forening B" do
+      f_a = create_forening!()
+      f_b = create_forening!()
+
+      event_a = create_event!(f_a)
+      event_b = create_event!(f_b)
+      create_ticket_type!(f_a, event_a, %{name: "Alpha Ticket"})
+      create_ticket_type!(f_b, event_b, %{name: "Beta Ticket"})
+
+      a_tts = Events.list_ticket_types!(tenant: f_a.id, authorize?: false)
+      b_tts = Events.list_ticket_types!(tenant: f_b.id, authorize?: false)
+
+      assert Enum.all?(a_tts, &(&1.forening_id == f_a.id))
+      assert Enum.all?(b_tts, &(&1.forening_id == f_b.id))
+    end
+
+    test "registrations from forening A are not visible in forening B" do
+      f_a = create_forening!()
+      f_b = create_forening!()
+      user = register_user!()
+      m_a = invite_member!(f_a, user)
+      invite_member!(f_b, user)
+
+      event_a = create_published_event!(f_a)
+      tt_a = create_ticket_type!(f_a, event_a)
+      register_for_event!(f_a, m_a, tt_a)
+
+      a_regs = Events.list_registrations!(tenant: f_a.id, authorize?: false)
+      b_regs = Events.list_registrations!(tenant: f_b.id, authorize?: false)
+
+      assert length(a_regs) == 1
+      assert a_regs |> hd() |> Map.get(:forening_id) == f_a.id
+      assert b_regs == []
+    end
+
+    test "admin of forening A cannot create events in forening B" do
+      f_a = create_forening!()
+      f_b = create_forening!()
+      admin = register_user!()
+      invite_member!(f_a, admin, :admin)
+
+      assert {:error, %Ash.Error.Forbidden{}} =
+               Events.create_event(event_attrs(), tenant: f_b.id, scope: scope(admin, f_b))
+    end
+  end
 end

@@ -397,6 +397,156 @@ defmodule Exhs.PoliciesTest do
     end
   end
 
+  describe "Event policies" do
+    test "admin can create events" do
+      forening = create_forening!()
+      admin = register_user!()
+      invite_member!(forening, admin, :admin)
+
+      assert {:ok, _} =
+               Exhs.Events.create_event(
+                 %{title: "Test", starts_at: DateTime.add(DateTime.utc_now(), 7, :day)},
+                 tenant: forening.id,
+                 actor: admin
+               )
+    end
+
+    test "board member cannot create events" do
+      forening = create_forening!()
+      board = register_user!()
+      invite_member!(forening, board, :board)
+
+      assert {:error, %Ash.Error.Forbidden{}} =
+               Exhs.Events.create_event(
+                 %{title: "Test", starts_at: DateTime.add(DateTime.utc_now(), 7, :day)},
+                 tenant: forening.id,
+                 actor: board
+               )
+    end
+
+    test "regular member cannot create events" do
+      forening = create_forening!()
+      member = register_user!()
+      invite_member!(forening, member)
+
+      assert {:error, %Ash.Error.Forbidden{}} =
+               Exhs.Events.create_event(
+                 %{title: "Test", starts_at: DateTime.add(DateTime.utc_now(), 7, :day)},
+                 tenant: forening.id,
+                 actor: member
+               )
+    end
+
+    test "anyone can read published events via list_public" do
+      forening = create_forening!()
+      event = create_published_event!(forening)
+
+      {:ok, events} = Exhs.Events.list_public_events(tenant: forening.id)
+      assert Enum.any?(events, &(&1.id == event.id))
+    end
+
+    test "member can read published events" do
+      forening = create_forening!()
+      member = register_user!()
+      invite_member!(forening, member)
+      event = create_published_event!(forening)
+
+      {:ok, events} = Exhs.Events.list_upcoming_events(scope: scope(member, forening))
+      assert Enum.any?(events, &(&1.id == event.id))
+    end
+
+    test "admin can update events" do
+      forening = create_forening!()
+      admin = register_user!()
+      invite_member!(forening, admin, :admin)
+      event = create_event!(forening)
+
+      assert {:ok, updated} =
+               Exhs.Events.update_event(event, %{title: "Updated"}, scope: scope(admin, forening))
+
+      assert updated.title == "Updated"
+    end
+
+    test "regular member cannot update events" do
+      forening = create_forening!()
+      member = register_user!()
+      invite_member!(forening, member)
+      event = create_event!(forening)
+
+      assert {:error, %Ash.Error.Forbidden{}} =
+               Exhs.Events.update_event(event, %{title: "Nope"}, scope: scope(member, forening))
+    end
+  end
+
+  describe "Registration policies" do
+    setup do
+      forening = create_forening!()
+      admin = register_user!()
+      invite_member!(forening, admin, :admin)
+      event = create_published_event!(forening)
+      tt = create_ticket_type!(forening, event)
+
+      %{forening: forening, admin: admin, event: event, ticket_type: tt}
+    end
+
+    test "member can register for own membership", ctx do
+      user = register_user!()
+      membership = invite_member!(ctx.forening, user)
+
+      assert {:ok, reg} =
+               Exhs.Events.register_for_event(
+                 %{ticket_type_id: ctx.ticket_type.id, membership_id: membership.id},
+                 scope: scope(user, ctx.forening)
+               )
+
+      assert reg.status == :confirmed
+    end
+
+    test "admin can register on behalf of a member", ctx do
+      user = register_user!()
+      membership = invite_member!(ctx.forening, user)
+
+      assert {:ok, _reg} =
+               Exhs.Events.register_for_event(
+                 %{ticket_type_id: ctx.ticket_type.id, membership_id: membership.id},
+                 scope: scope(ctx.admin, ctx.forening)
+               )
+    end
+
+    test "member can cancel own registration", ctx do
+      user = register_user!()
+      membership = invite_member!(ctx.forening, user)
+      reg = register_for_event!(ctx.forening, membership, ctx.ticket_type)
+
+      assert {:ok, cancelled} =
+               Exhs.Events.cancel_registration(reg, scope: scope(user, ctx.forening))
+
+      assert cancelled.status == :cancelled
+    end
+
+    test "member cannot cancel another member's registration", ctx do
+      user1 = register_user!()
+      user2 = register_user!()
+      m1 = invite_member!(ctx.forening, user1)
+      invite_member!(ctx.forening, user2)
+      reg = register_for_event!(ctx.forening, m1, ctx.ticket_type)
+
+      assert {:error, %Ash.Error.Forbidden{}} =
+               Exhs.Events.cancel_registration(reg, scope: scope(user2, ctx.forening))
+    end
+
+    test "admin can cancel any member's registration", ctx do
+      user = register_user!()
+      membership = invite_member!(ctx.forening, user)
+      reg = register_for_event!(ctx.forening, membership, ctx.ticket_type)
+
+      assert {:ok, cancelled} =
+               Exhs.Events.cancel_registration(reg, scope: scope(ctx.admin, ctx.forening))
+
+      assert cancelled.status == :cancelled
+    end
+  end
+
   describe "cross-tenant isolation" do
     test "admin of forening A cannot see members of forening B" do
       admin = register_user!()

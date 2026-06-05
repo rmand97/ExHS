@@ -119,6 +119,42 @@ defmodule Exhs.Test.Builders do
     )
   end
 
+  def create_subscription!(forening, membership, attrs \\ %{}) do
+    defaults = %{
+      membership_id: membership.id,
+      stripe_subscription_id: "sub_#{unique("sub")}",
+      stripe_customer_id: membership.stripe_customer_id || "cus_#{unique("cus")}",
+      status: :active,
+      current_period_start: DateTime.utc_now(),
+      current_period_end: DateTime.add(DateTime.utc_now(), 30, :day),
+      cancel_at_period_end: false
+    }
+
+    Exhs.Billing.create_subscription!(Map.merge(defaults, attrs),
+      tenant: forening.id,
+      authorize?: false
+    )
+  end
+
+  def record_payment!(forening, membership, attrs \\ %{}) do
+    defaults = %{
+      payable_type: :subscription,
+      payable_id: membership.id,
+      amount_cents: 50_000,
+      currency: "DKK",
+      status: :succeeded,
+      stripe_payment_intent_id: "pi_#{unique("pi")}",
+      stripe_charge_id: "ch_#{unique("ch")}",
+      description: "Kontingent",
+      paid_at: DateTime.utc_now()
+    }
+
+    Exhs.Billing.record_payment!(Map.merge(defaults, attrs),
+      tenant: forening.id,
+      authorize?: false
+    )
+  end
+
   def scope(user, forening) do
     %Exhs.Scope{actor: user, tenant: forening.id}
   end

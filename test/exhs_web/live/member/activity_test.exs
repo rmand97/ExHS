@@ -117,8 +117,8 @@ defmodule ExhsWeb.MemberLive.ActivityTest do
         |> log_in_user(user_b)
         |> live("/activity")
 
-      assert html =~ "Oprettet"
-      assert html =~ "Gruppe"
+      assert html =~ "Group by B"
+      refute html =~ "Group by A"
     end
 
     test "admin changes in forening A visible only to that admin, not to member" do
