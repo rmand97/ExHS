@@ -1,4 +1,4 @@
-defmodule Exhs.Repo.Migrations.MigrateResources1 do
+defmodule Exhs.Repo.Migrations.CodebaseReviewFixes do
   @moduledoc """
   Updates resources based on their most recent snapshots.
 

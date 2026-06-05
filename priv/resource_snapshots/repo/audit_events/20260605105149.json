@@ -170,12 +170,12 @@
   "custom_indexes": [],
   "custom_statements": [],
   "has_create_action": true,
-  "hash": "8411BBE156317134C93B867FAEAE6881ADC6BDFC04C31F90E54E47D25B06FCF7",
+  "hash": "A781F42393E8AE4D697C4FA3D5100E09E418B12EEA0932EB16CA30880D8D9BD7",
   "identities": [],
   "multitenancy": {
-    "attribute": "forening_id",
-    "global": false,
-    "strategy": "attribute"
+    "attribute": null,
+    "global": null,
+    "strategy": null
   },
   "repo": "Elixir.Exhs.Repo",
   "schema": null,
