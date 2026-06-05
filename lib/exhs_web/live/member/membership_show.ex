@@ -180,26 +180,6 @@ defmodule ExhsWeb.MemberLive.MembershipShow do
 
   defp kontingent_type_variant(_), do: "success"
 
-  defp format_kontingent(%{kontingent_amount_cents: nil}), do: "Gratis"
-  defp format_kontingent(%{kontingent_amount_cents: 0}), do: "Gratis"
-
-  defp format_kontingent(%{kontingent_amount_cents: cents, kontingent_currency: currency}),
-    do: "#{div(cents, 100)} #{currency}"
-
-  defp role_variant(:admin), do: "error"
-  defp role_variant(:board), do: "warning"
-  defp role_variant(_), do: "default"
-
-  defp role_label(:admin), do: "Admin"
-  defp role_label(:board), do: "Bestyrelse"
-  defp role_label(:member), do: "Medlem"
-
-  defp status_variant(:active), do: "success"
-  defp status_variant(:inactive), do: "default"
-
-  defp status_label(:active), do: "Aktiv"
-  defp status_label(:inactive), do: "Inaktiv"
-
   defp sub_status_variant(:active), do: "success"
   defp sub_status_variant(:trialing), do: "primary"
   defp sub_status_variant(:past_due), do: "warning"
@@ -211,11 +191,4 @@ defmodule ExhsWeb.MemberLive.MembershipShow do
   defp sub_status_label(:past_due), do: "Forfalden"
   defp sub_status_label(:canceled), do: "Opsagt"
   defp sub_status_label(:incomplete), do: "Ufuldstændig"
-
-  defp format_date(nil), do: "—"
-  defp format_date(dt), do: Calendar.strftime(dt, "%d. %b %Y")
-
-  defp forening_url(forening) do
-    ~p"/go/forening/#{forening.subdomain}"
-  end
 end

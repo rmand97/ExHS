@@ -163,6 +163,9 @@ defmodule Exhs.Organizations.Membership do
       allow_nil? false
     end
 
+    has_many :subscriptions, Exhs.Billing.Subscription
+    has_many :registrations, Exhs.Events.Registration
+
     many_to_many :groups, Exhs.Organizations.Group do
       through Exhs.Organizations.MemberGroup
       source_attribute_on_join_resource :membership_id

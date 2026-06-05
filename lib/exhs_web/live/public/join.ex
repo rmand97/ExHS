@@ -13,7 +13,7 @@ defmodule ExhsWeb.PublicLive.Join do
          page_title: "Bliv medlem af #{forening.name}",
          page_description:
            "Bliv medlem af #{forening.name} og få adgang til events, fællesskab og meget mere.",
-         kontingent_amount: format_kontingent(forening),
+         kontingent_amount: join_kontingent(forening),
          already_member?: already_member?
        )}
     else
@@ -115,10 +115,10 @@ defmodule ExhsWeb.PublicLive.Join do
     """
   end
 
-  defp format_kontingent(%{kontingent_amount_cents: nil}), do: nil
-  defp format_kontingent(%{kontingent_amount_cents: 0}), do: "Gratis"
+  defp join_kontingent(%{kontingent_amount_cents: nil}), do: nil
+  defp join_kontingent(%{kontingent_amount_cents: 0}), do: "Gratis"
 
-  defp format_kontingent(%{kontingent_amount_cents: cents, kontingent_currency: currency}) do
+  defp join_kontingent(%{kontingent_amount_cents: cents, kontingent_currency: currency}) do
     "#{div(cents, 100)} #{currency || "DKK"}/år"
   end
 

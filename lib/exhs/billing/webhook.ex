@@ -13,6 +13,7 @@ defmodule Exhs.Billing.Webhook do
 
   def apply_event(%{"type" => type} = event), do: dispatch(type, event)
 
+  # Handled by customer.subscription.created which Stripe always sends alongside
   defp dispatch("checkout.session.completed", _event), do: :ok
 
   defp dispatch("account.updated", %{"data" => %{"object" => account}}) do
@@ -172,8 +173,6 @@ defmodule Exhs.Billing.Webhook do
   defp forening_for_account(nil), do: {:error, :account_missing}
 
   defp forening_for_account(account_id) do
-    require Ash.Query
-
     case Exhs.Organizations.Forening
          |> Ash.Query.filter(stripe_account_id == ^account_id)
          |> Ash.read_one(authorize?: false) do
@@ -186,8 +185,6 @@ defmodule Exhs.Billing.Webhook do
   defp membership_for_customer(nil, _forening_id), do: {:error, :customer_missing}
 
   defp membership_for_customer(customer_id, forening_id) do
-    require Ash.Query
-
     case Exhs.Organizations.Membership
          |> Ash.Query.filter(stripe_customer_id == ^customer_id)
          |> Ash.read_one(tenant: forening_id, authorize?: false) do

@@ -210,28 +210,4 @@ defmodule ExhsWeb.MemberLive.Dashboard do
       foreninger: memberships |> Enum.map(& &1.forening.id) |> Enum.uniq() |> length()
     }
   end
-
-  defp role_variant(:admin), do: "error"
-  defp role_variant(:board), do: "warning"
-  defp role_variant(_), do: "default"
-
-  defp role_label(:admin), do: "Admin"
-  defp role_label(:board), do: "Bestyrelse"
-  defp role_label(:member), do: "Medlem"
-
-  defp status_variant(:active), do: "success"
-  defp status_variant(:inactive), do: "default"
-
-  defp status_label(:active), do: "Aktiv"
-  defp status_label(:inactive), do: "Inaktiv"
-
-  defp format_date(nil), do: "—"
-
-  defp format_date(dt) do
-    Calendar.strftime(dt, "%d. %b %Y")
-  end
-
-  defp forening_url(forening) do
-    ~p"/go/forening/#{forening.subdomain}"
-  end
 end

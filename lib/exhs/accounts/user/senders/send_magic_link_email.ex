@@ -20,9 +20,10 @@ defmodule Exhs.Accounts.User.Senders.SendMagicLinkEmail do
         email -> email
       end
 
+    {name, address} = Application.fetch_env!(:exhs, Exhs.Mailer) |> Keyword.fetch!(:from)
+
     new()
-    # TODO: Replace with your email
-    |> from({"noreply", "noreply@example.com"})
+    |> from({name, address})
     |> to(to_string(email))
     |> subject("Your login link")
     |> html_body(body(token: token, email: email))

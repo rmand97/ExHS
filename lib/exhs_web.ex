@@ -103,6 +103,9 @@ defmodule ExhsWeb do
       import ExhsWeb.Components.Skeleton
       import ExhsWeb.Components.Dropdown
 
+      # Common display helpers
+      import ExhsWeb.DisplayHelpers
+
       # Common modules used in templates
       alias ExhsWeb.Layouts
       alias Phoenix.LiveView.JS

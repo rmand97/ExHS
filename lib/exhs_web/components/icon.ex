@@ -10,4 +10,10 @@ defmodule ExhsWeb.Components.Icon do
     <span class={[@name, @class]} />
     """
   end
+
+  def icon(assigns) do
+    ~H"""
+    <span class={@class} />
+    """
+  end
 end

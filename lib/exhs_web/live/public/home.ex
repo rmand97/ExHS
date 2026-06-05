@@ -135,7 +135,7 @@ defmodule ExhsWeb.PublicLive.Home do
         </div>
         <div class="p-4">
           <p class="text-primary mb-1 text-xs font-semibold uppercase">
-            {format_date(@event.starts_at)}
+            {format_datetime(@event.starts_at)}
           </p>
           <h3 class="text-base-content text-lg font-semibold">{@event.title}</h3>
           <p :if={@event.location} class="text-base-content/50 mt-1 flex items-center gap-1 text-sm">
@@ -303,8 +303,4 @@ defmodule ExhsWeb.PublicLive.Home do
   end
 
   defp list_upcoming_events(_), do: []
-
-  defp format_date(datetime) do
-    Calendar.strftime(datetime, "%d. %b %Y, kl. %H:%M")
-  end
 end

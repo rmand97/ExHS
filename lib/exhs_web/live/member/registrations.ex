@@ -157,9 +157,6 @@ defmodule ExhsWeb.MemberLive.Registrations do
   defp reg_status_label(:cancelled), do: "Annulleret"
   defp reg_status_label(:pending_payment), do: "Afventer betaling"
 
-  defp format_date(nil), do: "—"
-  defp format_date(dt), do: Calendar.strftime(dt, "%d. %b %Y")
-
   defp event_url(reg) do
     ~p"/go/forening/#{reg.membership.forening.subdomain}?#{%{return_to: "/events/#{reg.ticket_type.event.id}"}}"
   end

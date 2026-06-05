@@ -18,7 +18,7 @@ defmodule ExhsWeb.StripeWebhookController do
 
     with [signature | _] <- Plug.Conn.get_req_header(conn, "stripe-signature"),
          {:ok, _event} <- Stripe.Webhook.construct_event(raw, signature, secret),
-         event_map = Jason.decode!(raw),
+         {:ok, event_map} <- Jason.decode(raw),
          {:ok, _job} <- enqueue(event_map) do
       send_resp(conn, 200, "ok")
     else

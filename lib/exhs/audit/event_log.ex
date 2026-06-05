@@ -31,7 +31,7 @@ defmodule Exhs.Audit.EventLog do
   end
 
   policies do
-    bypass actor_attribute_equals(:is_superadmin, true) do
+    bypass Exhs.Checks.Superadmin do
       authorize_if always()
     end
 
@@ -40,7 +40,7 @@ defmodule Exhs.Audit.EventLog do
     end
 
     policy action(:read) do
-      authorize_if actor_attribute_equals(:is_superadmin, true)
+      authorize_if Exhs.Checks.Superadmin
     end
   end
 end

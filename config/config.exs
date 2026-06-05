@@ -102,7 +102,9 @@ config :exhs, ExhsWeb.Endpoint,
 #
 # For production it's recommended to configure a different adapter
 # at the `config/runtime.exs`.
-config :exhs, Exhs.Mailer, adapter: Swoosh.Adapters.Local
+config :exhs, Exhs.Mailer,
+  adapter: Swoosh.Adapters.Local,
+  from: {"ExHS", "noreply@exhs.dk"}
 
 # Configure esbuild (the version is required)
 config :esbuild,

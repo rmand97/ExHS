@@ -178,7 +178,4 @@ defmodule ExhsWeb.MemberLive.Payments do
   defp type_label(:subscription), do: "Kontingent"
   defp type_label(:registration), do: "Event"
   defp type_label(:order), do: "Ordre"
-
-  defp format_date(nil), do: "—"
-  defp format_date(dt), do: Calendar.strftime(dt, "%d. %b %Y")
 end

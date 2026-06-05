@@ -59,7 +59,7 @@ defmodule ExhsWeb.PublicLive.Events.Show do
           <div class="grid grid-cols-1 gap-8 lg:grid-cols-3">
             <div class="lg:col-span-2">
               <p class="text-primary mb-2 text-sm font-semibold uppercase">
-                {format_date(@event.starts_at)}
+                {format_datetime(@event.starts_at)}
               </p>
               <h1 class="text-base-content text-3xl font-bold sm:text-4xl">{@event.title}</h1>
 
@@ -89,12 +89,12 @@ defmodule ExhsWeb.PublicLive.Events.Show do
     <.card class="p-5">
       <h3 class="text-base-content mb-4 font-semibold">Detaljer</h3>
       <div class="space-y-3">
-        <.detail_row icon="hero-calendar-days" label="Dato" value={format_date(@event.starts_at)} />
+        <.detail_row icon="hero-calendar-days" label="Dato" value={format_datetime(@event.starts_at)} />
         <.detail_row
           :if={@event.ends_at}
           icon="hero-clock"
           label="Slut"
-          value={format_date(@event.ends_at)}
+          value={format_datetime(@event.ends_at)}
         />
         <.detail_row
           :if={@event.location}
@@ -189,11 +189,4 @@ defmodule ExhsWeb.PublicLive.Events.Show do
       _ -> []
     end
   end
-
-  defp format_date(datetime) do
-    Calendar.strftime(datetime, "%d. %b %Y, kl. %H:%M")
-  end
-
-  defp format_price(0, _currency), do: "Gratis"
-  defp format_price(cents, currency), do: "#{div(cents, 100)} #{currency}"
 end

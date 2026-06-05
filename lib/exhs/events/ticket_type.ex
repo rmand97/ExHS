@@ -105,6 +105,8 @@ defmodule Exhs.Events.TicketType do
     belongs_to :event, Exhs.Events.Event do
       allow_nil? false
     end
+
+    has_many :registrations, Exhs.Events.Registration
   end
 
   identities do

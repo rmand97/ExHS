@@ -356,6 +356,8 @@ defmodule Exhs.Accounts.User do
   end
 
   relationships do
+    has_many :memberships, Exhs.Organizations.Membership
+
     has_many :valid_api_keys, Exhs.Accounts.ApiKey do
       filter expr(valid)
     end

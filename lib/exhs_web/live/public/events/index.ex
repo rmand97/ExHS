@@ -68,7 +68,7 @@ defmodule ExhsWeb.PublicLive.Events.Index do
         </div>
         <div class="p-4">
           <p class="text-primary mb-1 text-xs font-semibold uppercase">
-            {format_date(@event.starts_at)}
+            {format_datetime(@event.starts_at)}
           </p>
           <h3 class="text-base-content text-lg font-semibold">{@event.title}</h3>
           <p :if={@event.description} class="text-base-content/50 mt-2 line-clamp-2 text-sm">
@@ -88,9 +88,5 @@ defmodule ExhsWeb.PublicLive.Events.Index do
       {:ok, events} -> events
       _ -> []
     end
-  end
-
-  defp format_date(datetime) do
-    Calendar.strftime(datetime, "%d. %b %Y, kl. %H:%M")
   end
 end

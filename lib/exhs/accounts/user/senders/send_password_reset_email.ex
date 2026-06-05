@@ -12,9 +12,10 @@ defmodule Exhs.Accounts.User.Senders.SendPasswordResetEmail do
 
   @impl true
   def send(user, token, _) do
+    {name, address} = Application.fetch_env!(:exhs, Exhs.Mailer) |> Keyword.fetch!(:from)
+
     new()
-    # TODO: Replace with your email
-    |> from({"noreply", "noreply@example.com"})
+    |> from({name, address})
     |> to(to_string(user.email))
     |> subject("Reset your password")
     |> html_body(body(token: token))

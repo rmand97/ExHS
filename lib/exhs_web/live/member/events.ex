@@ -72,7 +72,7 @@ defmodule ExhsWeb.MemberLive.Events do
     <a href={event_url(@entry)} class="group">
       <.card class="overflow-hidden p-4 transition hover:scale-[1.02]">
         <p class="text-primary mb-1 text-xs font-semibold uppercase">
-          {format_date(@entry.event.starts_at)}
+          {format_datetime(@entry.event.starts_at)}
         </p>
         <h3 class="text-base-content font-semibold">{@entry.event.title}</h3>
         <p class="text-base-content/50 mt-0.5 text-xs">{@entry.forening.name}</p>
@@ -147,9 +147,5 @@ defmodule ExhsWeb.MemberLive.Events do
 
   defp event_url(%{event: event, forening: forening}) do
     ~p"/go/forening/#{forening.subdomain}?#{%{return_to: "/events/#{event.id}"}}"
-  end
-
-  defp format_date(datetime) do
-    Calendar.strftime(datetime, "%d. %b %Y, kl. %H:%M")
   end
 end

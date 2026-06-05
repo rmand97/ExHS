@@ -322,7 +322,7 @@ The test suite is strong overall. These are the notable gaps:
 5. **Fix `Mix.env()` in endpoint** (#13) — will crash in releases
 6. **Delete dead code** (#14) — quick wins for clarity
 7. **Extract shared helpers** (#22) — biggest readability improvement
-8. **Add missing test builders** (#20) and fill cross-tenant test gaps
+8. **DONE Add missing test builders** (#20) and fill cross-tenant test gaps
 9. **Replace client-side filtering** with server-side queries as data grows
 10. **Migrate SimpleChecks to FilterChecks** (#18) — medium-term performance improvement
 
