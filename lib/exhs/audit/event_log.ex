@@ -33,6 +33,20 @@ defmodule Exhs.Audit.EventLog do
     end
   end
 
+  policies do
+    bypass Exhs.Checks.Superadmin do
+      authorize_if always()
+    end
+
+    policy action(:my_activity) do
+      authorize_if expr(user_id == ^actor(:id))
+    end
+
+    policy action(:read) do
+      authorize_if Exhs.Checks.Superadmin
+    end
+  end
+
   changes do
     change fn changeset, _context ->
       if changeset.tenant do
@@ -51,20 +65,6 @@ defmodule Exhs.Audit.EventLog do
     belongs_to :forening, Exhs.Organizations.Forening do
       define_attribute? false
       attribute_writable? true
-    end
-  end
-
-  policies do
-    bypass Exhs.Checks.Superadmin do
-      authorize_if always()
-    end
-
-    policy action(:my_activity) do
-      authorize_if expr(user_id == ^actor(:id))
-    end
-
-    policy action(:read) do
-      authorize_if Exhs.Checks.Superadmin
     end
   end
 end
