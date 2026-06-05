@@ -133,6 +133,8 @@ defmodule ExhsWeb.Router do
       live "/", PublicLive.Home
       live "/events", PublicLive.Events.Index
       live "/events/:id", PublicLive.Events.Show
+      live "/orders", PublicLive.Orders
+      live "/orders/:id", PublicLive.OrderShow
       live "/join", PublicLive.Join
     end
 

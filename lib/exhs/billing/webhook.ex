@@ -21,8 +21,9 @@ defmodule Exhs.Billing.Webhook do
 
   def apply_event(%{"type" => type} = event), do: dispatch(type, event)
 
-  # Handled by customer.subscription.created which Stripe always sends alongside
-  defp dispatch("checkout.session.completed", _event), do: :ok
+  defp dispatch("checkout.session.completed", %{"data" => %{"object" => session}} = event) do
+    confirm_order(session, account_id(event))
+  end
 
   defp dispatch("account.updated", %{"data" => %{"object" => account}}) do
     sync_account_status(account)
@@ -148,9 +149,71 @@ defmodule Exhs.Billing.Webhook do
     with {:ok, forening} <- forening_for_account(account_id),
          intent_id when is_binary(intent_id) <- charge["payment_intent"],
          %Payment{} = existing <- existing_payment_by_intent(intent_id, forening.id) do
-      Billing.mark_payment_refunded(existing, authorize?: false)
+      {:ok, refunded} = Billing.mark_payment_refunded(existing, authorize?: false)
+      maybe_free_order_seats(refunded, forening.id)
+      {:ok, refunded}
     else
       _ -> :ok
+    end
+  end
+
+  # Refunding a paid ticket order frees its seats and promotes the waitlist.
+  defp maybe_free_order_seats(%Payment{payable_type: :order, payable_id: order_id}, forening_id) do
+    case Exhs.Events.get_order(order_id, tenant: forening_id, authorize?: false) do
+      {:ok, order} ->
+        Exhs.Events.cancel_order(order, tenant: forening_id, authorize?: false)
+        :ok
+
+      _ ->
+        :ok
+    end
+  end
+
+  defp maybe_free_order_seats(_payment, _forening_id), do: :ok
+
+  defp confirm_order(session, account_id) do
+    with {:ok, forening} <- forening_for_account(account_id),
+         {:ok, order} <-
+           Exhs.Events.get_order_by_session_id(session["id"],
+             tenant: forening.id,
+             authorize?: false
+           ),
+         {:ok, order} <- mark_order_paid(order, forening.id) do
+      record_order_payment(order, session, forening.id)
+    else
+      _ -> :ok
+    end
+  end
+
+  defp mark_order_paid(%{status: :paid} = order, _forening_id), do: {:ok, order}
+
+  defp mark_order_paid(order, forening_id) do
+    Exhs.Events.mark_order_paid(order, tenant: forening_id, authorize?: false)
+  end
+
+  defp record_order_payment(order, session, forening_id) do
+    intent_id = session["payment_intent"]
+
+    case existing_payment_by_intent(intent_id, forening_id) do
+      nil ->
+        Billing.record_payment(
+          %{
+            payable_type: :order,
+            payable_id: order.id,
+            amount_cents: session["amount_total"] || order.total_cents,
+            currency: String.upcase(session["currency"] || order.currency),
+            status: :succeeded,
+            stripe_payment_intent_id: intent_id,
+            stripe_charge_id: session["charge"],
+            description: "Billetkøb — ordre #{order.id}",
+            paid_at: DateTime.utc_now()
+          },
+          tenant: forening_id,
+          authorize?: false
+        )
+
+      existing ->
+        {:ok, existing}
     end
   end
 

@@ -17,6 +17,8 @@ defmodule ExhsWeb.ConnCase do
     end
   end
 
+  alias Phoenix.Ecto.SQL.Sandbox
+
   setup tags do
     pid = Exhs.DataCase.setup_sandbox(tags)
 
@@ -24,9 +26,7 @@ defmodule ExhsWeb.ConnCase do
       Phoenix.ConnTest.build_conn()
       |> Plug.Conn.put_req_header(
         "user-agent",
-        Phoenix.Ecto.SQL.Sandbox.encode_metadata(
-          Phoenix.Ecto.SQL.Sandbox.metadata_for(Exhs.Repo, pid)
-        )
+        Sandbox.encode_metadata(Sandbox.metadata_for(Exhs.Repo, pid))
       )
 
     {:ok, conn: conn}

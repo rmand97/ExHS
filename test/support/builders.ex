@@ -119,6 +119,73 @@ defmodule Exhs.Test.Builders do
     )
   end
 
+  def create_add_on!(forening, event, attrs \\ %{}) do
+    defaults = %{event_id: event.id, name: "AddOn #{unique("ao")}", price_cents: 5_000}
+
+    Exhs.Events.create_add_on!(Map.merge(defaults, attrs),
+      tenant: forening.id,
+      authorize?: false
+    )
+  end
+
+  def create_question!(forening, ticket_type, attrs \\ %{}) do
+    defaults = %{
+      ticket_type_id: ticket_type.id,
+      label: "Question #{unique("q")}",
+      field_type: :text,
+      required: true
+    }
+
+    Exhs.Events.create_ticket_type_question!(Map.merge(defaults, attrs),
+      tenant: forening.id,
+      authorize?: false
+    )
+  end
+
+  def gate_ticket_type!(forening, ticket_type, groups) do
+    Exhs.Events.set_ticket_type_groups!(
+      ticket_type,
+      Enum.map(groups, & &1.id),
+      tenant: forening.id,
+      authorize?: false
+    )
+  end
+
+  def add_to_group!(forening, membership, group) do
+    Exhs.Organizations.add_member_to_group!(
+      %{membership_id: membership.id, group_id: group.id},
+      tenant: forening.id,
+      authorize?: false
+    )
+  end
+
+  def create_order!(forening, membership, event, attrs \\ %{}) do
+    defaults = %{membership_id: membership.id, event_id: event.id}
+
+    Exhs.Events.create_order!(Map.merge(defaults, attrs),
+      tenant: forening.id,
+      authorize?: false
+    )
+  end
+
+  def add_ticket_item!(forening, order, ticket_type, attrs \\ %{}) do
+    defaults = %{order_id: order.id, item_type: :ticket, ticket_type_id: ticket_type.id}
+
+    Exhs.Events.add_order_item!(Map.merge(defaults, attrs),
+      tenant: forening.id,
+      authorize?: false
+    )
+  end
+
+  def add_addon_item!(forening, order, add_on, attrs \\ %{}) do
+    defaults = %{order_id: order.id, item_type: :addon, add_on_id: add_on.id}
+
+    Exhs.Events.add_order_item!(Map.merge(defaults, attrs),
+      tenant: forening.id,
+      authorize?: false
+    )
+  end
+
   def create_subscription!(forening, membership, attrs \\ %{}) do
     defaults = %{
       membership_id: membership.id,

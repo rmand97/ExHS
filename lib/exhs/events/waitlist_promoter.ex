@@ -5,9 +5,10 @@ defmodule Exhs.Events.WaitlistPromoter do
     max_attempts: 3,
     unique: [period: 30, keys: [:ticket_type_id, :tenant]]
 
-  require Ash.Query
-
+  alias Ash.Query
   alias Exhs.Events.Registration
+
+  require Ash.Query
 
   @impl Oban.Worker
   def perform(%Oban.Job{args: %{"ticket_type_id" => ticket_type_id, "tenant" => tenant}}) do
@@ -19,9 +20,9 @@ defmodule Exhs.Events.WaitlistPromoter do
 
   defp next_waitlisted(ticket_type_id, tenant) do
     Registration
-    |> Ash.Query.filter(ticket_type_id == ^ticket_type_id and status == :waitlisted)
-    |> Ash.Query.sort(registered_at: :asc)
-    |> Ash.Query.limit(1)
+    |> Query.filter(ticket_type_id == ^ticket_type_id and status == :waitlisted)
+    |> Query.sort(registered_at: :asc)
+    |> Query.limit(1)
     |> Ash.read!(tenant: tenant, authorize?: false)
     |> List.first()
   end

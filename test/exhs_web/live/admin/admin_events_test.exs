@@ -317,4 +317,81 @@ defmodule ExhsWeb.AdminLive.AdminEventsTest do
       assert body =~ "deltager@example.com"
     end
   end
+
+  describe "ticketing management" do
+    setup :admin_setup
+
+    test "shows sold/left availability per ticket type", %{conn: conn, forening: f} do
+      event = create_published_event!(f, %{title: "Sommerfest", membership_required: false})
+      tt = create_ticket_type!(f, event, %{name: "Standard", price_cents: 0, capacity: 5})
+      buyer = register_user!()
+      join_forening!(f, buyer)
+      register_for_event!(f, membership_for!(f, buyer), tt)
+
+      {:ok, _view, html} = live(conn, "/admin/events/#{event.id}")
+
+      assert html =~ "1 solgt"
+      assert html =~ "4 tilbage"
+    end
+
+    test "admin creates an add-on", %{conn: conn, forening: f} do
+      event = create_published_event!(f, %{title: "Sommerfest"})
+      {:ok, view, _html} = live(conn, "/admin/events/#{event.id}")
+
+      view |> element("button[phx-click='new_addon']") |> render_click()
+
+      html =
+        view
+        |> form("#addon-modal form", addon: %{name: "Bus", price_kr: "50"})
+        |> render_submit()
+
+      assert html =~ "Bus"
+      {:ok, addons} = Events.list_add_ons_for_event(event.id, tenant: f.id, authorize?: false)
+      assert Enum.any?(addons, &(&1.name == "Bus"))
+    end
+
+    test "admin gates a ticket type to a group", %{conn: conn, forening: f} do
+      event = create_published_event!(f, %{title: "Sommerfest"})
+      tt = create_ticket_type!(f, event, %{name: "Presale"})
+      group = create_group!(f, %{name: "Graduates"})
+
+      {:ok, view, _html} = live(conn, "/admin/events/#{event.id}")
+
+      view
+      |> element("button[phx-click='edit_ticket'][phx-value-id='#{tt.id}']")
+      |> render_click()
+
+      view
+      |> form("#ticket-modal form",
+        ticket: %{name: "Presale", price_kr: "0", group_ids: [group.id]}
+      )
+      |> render_submit()
+
+      {:ok, groups} =
+        Events.list_ticket_type_groups(tenant: f.id, authorize?: false)
+
+      assert Enum.any?(groups, &(&1.ticket_type_id == tt.id and &1.group_id == group.id))
+    end
+
+    test "admin adds a custom question", %{conn: conn, forening: f} do
+      event = create_published_event!(f, %{title: "Sommerfest"})
+      tt = create_ticket_type!(f, event, %{name: "Standard"})
+
+      {:ok, view, _html} = live(conn, "/admin/events/#{event.id}")
+
+      view
+      |> element("button[phx-click='manage_questions'][phx-value-id='#{tt.id}']")
+      |> render_click()
+
+      html =
+        view
+        |> form("#questions-modal form", question: %{label: "Dimittendår", field_type: "text"})
+        |> render_submit()
+
+      assert html =~ "Dimittendår"
+
+      {:ok, qs} = Events.list_ticket_type_questions(tt.id, tenant: f.id, authorize?: false)
+      assert Enum.any?(qs, &(&1.label == "Dimittendår"))
+    end
+  end
 end

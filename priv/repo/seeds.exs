@@ -529,6 +529,106 @@ defmodule Exhs.Seeds do
     open_event = upsert_seed_event(forening, "Åbent Hus", false)
     upsert_seed_ticket_types(forening, event, open_event)
     if membership, do: upsert_seed_registration(forening, event, membership)
+    upsert_ticketing_showcase(forening, membership)
+  end
+
+  # A richer, purchasable event: a paid standard ticket, a group-gated presale
+  # (200 cap, "Graduates of 2010"), an add-on, custom questions, and a sample
+  # paid order for the admin so the order views have data on a fresh clone.
+  defp upsert_ticketing_showcase(forening, membership) do
+    event = upsert_seed_event(forening, "Sommerfest 2026", false)
+    group = ensure_group(forening, "Graduates of 2010", "#22c55e")
+
+    standard = ensure_ticket_type(forening, event, "Standard", 25_000, 100)
+
+    presale =
+      ensure_ticket_type(forening, event, "Jubilæum presale", 20_000, 200)
+      |> tap(&gate_to_group(forening, &1, group))
+
+    ensure_add_on(forening, event, "Bustransport", 5_000)
+    ensure_question(forening, presale, "Dimittendår", :select, ["2008", "2009", "2010"], true)
+    ensure_question(forening, standard, "Allergier", :text, [], false)
+
+    if membership, do: ensure_sample_paid_order(forening, membership, event, standard)
+  end
+
+  defp ensure_group(forening, name, color) do
+    existing =
+      Group
+      |> Ash.Query.filter(name == ^name)
+      |> Ash.read_one!(tenant: forening.id, authorize?: false)
+
+    existing ||
+      Organizations.create_group!(%{name: name, color: color},
+        tenant: forening.id,
+        authorize?: false
+      )
+  end
+
+  defp gate_to_group(forening, ticket_type, group) do
+    Events.set_ticket_type_groups!(ticket_type, [group.id],
+      tenant: forening.id,
+      authorize?: false
+    )
+  end
+
+  defp ensure_add_on(forening, event, name, price) do
+    existing =
+      Exhs.Events.AddOn
+      |> Ash.Query.filter(event_id == ^event.id and name == ^name)
+      |> Ash.read_one!(tenant: forening.id, authorize?: false)
+
+    existing ||
+      Events.create_add_on!(%{event_id: event.id, name: name, price_cents: price},
+        tenant: forening.id,
+        authorize?: false
+      )
+  end
+
+  defp ensure_question(forening, ticket_type, label, field_type, options, required) do
+    existing =
+      Exhs.Events.TicketTypeQuestion
+      |> Ash.Query.filter(ticket_type_id == ^ticket_type.id and label == ^label)
+      |> Ash.read_one!(tenant: forening.id, authorize?: false)
+
+    existing ||
+      Events.create_ticket_type_question!(
+        %{
+          ticket_type_id: ticket_type.id,
+          label: label,
+          field_type: field_type,
+          options: options,
+          required: required
+        },
+        tenant: forening.id,
+        authorize?: false
+      )
+  end
+
+  defp ensure_sample_paid_order(forening, membership, event, ticket_type) do
+    existing =
+      Exhs.Events.Order
+      |> Ash.Query.filter(membership_id == ^membership.id and event_id == ^event.id)
+      |> Ash.read_one!(tenant: forening.id, authorize?: false)
+
+    if existing do
+      Logger.info("Sample order already exists")
+    else
+      order =
+        Events.create_order!(%{membership_id: membership.id, event_id: event.id},
+          tenant: forening.id,
+          authorize?: false
+        )
+
+      Events.add_order_item!(
+        %{order_id: order.id, item_type: :ticket, ticket_type_id: ticket_type.id},
+        tenant: forening.id,
+        authorize?: false
+      )
+
+      Events.mark_order_paid!(order, tenant: forening.id, authorize?: false)
+      Logger.info("Created sample paid order for #{event.title}")
+    end
   end
 
   defp upsert_seed_event(forening, title, membership_required) do
@@ -575,17 +675,20 @@ defmodule Exhs.Seeds do
       |> Ash.read_one!(tenant: forening.id, authorize?: false)
 
     case existing do
-      %TicketType{} ->
+      %TicketType{} = tt ->
         Logger.info("Ticket type already exists: #{name}")
+        tt
 
       nil ->
-        Events.create_ticket_type!(
-          %{event_id: event.id, name: name, price_cents: price, capacity: capacity},
-          tenant: forening.id,
-          authorize?: false
-        )
+        tt =
+          Events.create_ticket_type!(
+            %{event_id: event.id, name: name, price_cents: price, capacity: capacity},
+            tenant: forening.id,
+            authorize?: false
+          )
 
         Logger.info("Created ticket type: #{name} for #{event.title}")
+        tt
     end
   end
 

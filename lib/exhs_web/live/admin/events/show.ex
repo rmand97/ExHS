@@ -10,7 +10,7 @@ defmodule ExhsWeb.AdminLive.Events.Show do
   def mount(%{"id" => id}, _session, socket) do
     case Events.get_event_by_id(id,
            scope: socket.assigns.current_scope,
-           load: [:ticket_types],
+           load: [ticket_types: [:seats_taken, :seats_left, :eligible_groups]],
            authorize?: false
          ) do
       {:ok, event} ->
@@ -20,7 +20,12 @@ defmodule ExhsWeb.AdminLive.Events.Show do
          |> assign(:modal, nil)
          |> assign(:event_form, event_form(event))
          |> assign(:ticket_form, blank_ticket_form())
+         |> assign(:addon_form, blank_addon_form())
+         |> assign(:question_form, blank_question_form())
+         |> assign(:questions, [])
+         |> assign(:groups, load_groups(socket))
          |> assign(:page_title, event.title)
+         |> load_addons()
          |> load_registrations()}
 
       _ ->
@@ -78,7 +83,11 @@ defmodule ExhsWeb.AdminLive.Events.Show do
           "name" => tt.name,
           "price_kr" => to_string(div(tt.price_cents, 100)),
           "capacity" => (tt.capacity && to_string(tt.capacity)) || "",
-          "description" => tt.description || ""
+          "description" => tt.description || "",
+          "sales_starts_at" => to_input(tt.sales_starts_at),
+          "sales_ends_at" => to_input(tt.sales_ends_at),
+          "allow_multiple" => to_string(tt.allow_multiple),
+          "group_ids" => Enum.map(tt.eligible_groups, & &1.id)
         },
         as: :ticket
       )
@@ -87,26 +96,107 @@ defmodule ExhsWeb.AdminLive.Events.Show do
   end
 
   def handle_event("save_ticket", %{"ticket" => params}, socket) do
+    scope = socket.assigns.current_scope
+    group_ids = params["group_ids"] || []
+
     result =
       case socket.assigns.modal do
         {:ticket, :new} ->
           Events.create_ticket_type(
             Map.put(ticket_attrs(params), :event_id, socket.assigns.event.id),
-            scope: socket.assigns.current_scope
+            scope: scope
           )
 
         {:ticket, tt} ->
-          Events.update_ticket_type(tt, ticket_attrs(params), scope: socket.assigns.current_scope)
+          Events.update_ticket_type(tt, ticket_attrs(params), scope: scope)
       end
 
     case result do
-      {:ok, _} ->
+      {:ok, tt} ->
+        Events.set_ticket_type_groups(tt, group_ids, scope: scope)
+
         {:noreply,
          socket |> assign(:modal, nil) |> put_flash(:info, "Billettype gemt.") |> reload()}
 
       {:error, _} ->
         {:noreply, put_flash(socket, :error, "Kunne ikke gemme billettypen. Navn er påkrævet.")}
     end
+  end
+
+  # ── Add-ons ────────────────────────────────────
+
+  def handle_event("new_addon", _params, socket) do
+    {:noreply, socket |> assign(:modal, :addon) |> assign(:addon_form, blank_addon_form())}
+  end
+
+  def handle_event("save_addon", %{"addon" => params}, socket) do
+    attrs =
+      %{
+        event_id: socket.assigns.event.id,
+        name: params["name"],
+        price_cents: kr_to_cents(params["price_kr"]),
+        description: nil_if_blank(params["description"]),
+        capacity: parse_int(params["capacity"])
+      }
+
+    case Events.create_add_on(attrs, scope: socket.assigns.current_scope) do
+      {:ok, _} ->
+        {:noreply, socket |> assign(:modal, nil) |> put_flash(:info, "Tilkøb gemt.") |> reload()}
+
+      {:error, _} ->
+        {:noreply, put_flash(socket, :error, "Kunne ikke gemme tilkøb. Navn er påkrævet.")}
+    end
+  end
+
+  def handle_event("delete_addon", %{"id" => id}, socket) do
+    addon = Enum.find(socket.assigns.add_ons, &(&1.id == id))
+    if addon, do: Events.destroy_add_on(addon, scope: socket.assigns.current_scope)
+    {:noreply, socket |> put_flash(:info, "Tilkøb slettet.") |> reload()}
+  end
+
+  # ── Questions ──────────────────────────────────
+
+  def handle_event("manage_questions", %{"id" => id}, socket) do
+    tt = Enum.find(socket.assigns.event.ticket_types, &(&1.id == id))
+
+    {:noreply,
+     socket
+     |> assign(:modal, {:questions, tt})
+     |> assign(:question_form, blank_question_form())
+     |> assign(:questions, list_questions(socket, tt.id))}
+  end
+
+  def handle_event("save_question", %{"question" => params}, socket) do
+    {:questions, tt} = socket.assigns.modal
+
+    attrs = %{
+      ticket_type_id: tt.id,
+      label: params["label"],
+      field_type: String.to_existing_atom(params["field_type"] || "text"),
+      options: split_options(params["options"]),
+      required: params["required"] == "true"
+    }
+
+    case Events.create_ticket_type_question(attrs, scope: socket.assigns.current_scope) do
+      {:ok, _} ->
+        {:noreply,
+         socket
+         |> assign(:question_form, blank_question_form())
+         |> assign(:questions, list_questions(socket, tt.id))}
+
+      {:error, _} ->
+        {:noreply, put_flash(socket, :error, "Kunne ikke gemme spørgsmål. Tekst er påkrævet.")}
+    end
+  end
+
+  def handle_event("delete_question", %{"id" => id}, socket) do
+    {:questions, tt} = socket.assigns.modal
+    question = Enum.find(socket.assigns.questions, &(&1.id == id))
+
+    if question,
+      do: Events.destroy_ticket_type_question(question, scope: socket.assigns.current_scope)
+
+    {:noreply, assign(socket, :questions, list_questions(socket, tt.id))}
   end
 
   def handle_event("delete_ticket", %{"id" => id}, socket) do
@@ -137,11 +227,28 @@ defmodule ExhsWeb.AdminLive.Events.Show do
     {:ok, event} =
       Events.get_event_by_id(socket.assigns.event.id,
         scope: socket.assigns.current_scope,
-        load: [:ticket_types],
+        load: [ticket_types: [:seats_taken, :seats_left, :eligible_groups]],
         authorize?: false
       )
 
-    socket |> assign(:event, event) |> load_registrations()
+    socket |> assign(:event, event) |> load_addons() |> load_registrations()
+  end
+
+  defp load_groups(socket) do
+    case Exhs.Organizations.list_groups(scope: socket.assigns.current_scope) do
+      {:ok, groups} -> groups
+      _ -> []
+    end
+  end
+
+  defp load_addons(socket) do
+    {:ok, add_ons} =
+      Events.list_add_ons_for_event(socket.assigns.event.id,
+        tenant: socket.assigns.current_forening.id,
+        authorize?: false
+      )
+
+    assign(socket, :add_ons, add_ons)
   end
 
   defp load_registrations(socket) do
@@ -180,7 +287,10 @@ defmodule ExhsWeb.AdminLive.Events.Show do
       name: params["name"],
       price_cents: kr_to_cents(params["price_kr"]),
       capacity: parse_int(params["capacity"]),
-      description: nil_if_blank(params["description"])
+      description: nil_if_blank(params["description"]),
+      sales_starts_at: parse_dt(params["sales_starts_at"]),
+      sales_ends_at: parse_dt(params["sales_ends_at"]),
+      allow_multiple: params["allow_multiple"] == "true"
     }
   end
 
@@ -200,9 +310,45 @@ defmodule ExhsWeb.AdminLive.Events.Show do
   end
 
   defp blank_ticket_form do
-    to_form(%{"name" => "", "price_kr" => "0", "capacity" => "", "description" => ""},
+    to_form(
+      %{
+        "name" => "",
+        "price_kr" => "0",
+        "capacity" => "",
+        "description" => "",
+        "sales_starts_at" => "",
+        "sales_ends_at" => "",
+        "allow_multiple" => "false",
+        "group_ids" => []
+      },
       as: :ticket
     )
+  end
+
+  defp blank_addon_form do
+    to_form(%{"name" => "", "price_kr" => "0", "capacity" => "", "description" => ""}, as: :addon)
+  end
+
+  defp blank_question_form do
+    to_form(%{"label" => "", "field_type" => "text", "options" => "", "required" => "true"},
+      as: :question
+    )
+  end
+
+  defp list_questions(socket, ticket_type_id) do
+    case Events.list_ticket_type_questions(ticket_type_id,
+           tenant: socket.assigns.current_forening.id,
+           authorize?: false
+         ) do
+      {:ok, qs} -> qs
+      _ -> []
+    end
+  end
+
+  defp split_options(nil), do: []
+
+  defp split_options(str) do
+    str |> String.split(",") |> Enum.map(&String.trim/1) |> Enum.reject(&(&1 == ""))
   end
 
   defp to_input(nil), do: ""
@@ -305,13 +451,29 @@ defmodule ExhsWeb.AdminLive.Events.Show do
             <ul class="divide-base-content/10 mt-2 divide-y">
               <li :for={tt <- @event.ticket_types} class="flex items-center justify-between py-2">
                 <div>
-                  <p class="text-base-content text-sm font-medium">{tt.name}</p>
+                  <p class="text-base-content text-sm font-medium">
+                    {tt.name}
+                    <span :if={tt.eligible_groups != []} class="badge badge-secondary badge-xs">
+                      presale
+                    </span>
+                  </p>
                   <p class="text-base-content/50 text-xs">
                     {format_amount(tt.price_cents, tt.currency)}
-                    <span :if={tt.capacity}>· {tt.capacity} pladser</span>
+                    <span :if={tt.capacity}>
+                      · {tt.seats_taken} solgt · {tt.seats_left} tilbage
+                    </span>
+                    <span :if={is_nil(tt.capacity)}>· {tt.seats_taken} solgt · ubegrænset</span>
                   </p>
                 </div>
                 <div :if={@can_write?} class="flex gap-1">
+                  <button
+                    phx-click="manage_questions"
+                    phx-value-id={tt.id}
+                    aria-label="Spørgsmål"
+                    class="hover:text-base-content text-base-content/40"
+                  >
+                    <.icon name="hero-question-mark-circle" class="size-4" />
+                  </button>
                   <button
                     phx-click="edit_ticket"
                     phx-value-id={tt.id}
@@ -330,6 +492,38 @@ defmodule ExhsWeb.AdminLive.Events.Show do
                     <.icon name="hero-trash" class="size-4" />
                   </button>
                 </div>
+              </li>
+            </ul>
+          </.card>
+
+          <.card class="p-5">
+            <div class="flex items-center justify-between">
+              <h3 class="text-base-content font-semibold">Tilkøb</h3>
+              <.button :if={@can_write?} phx-click="new_addon" variant="ghost">
+                <.icon name="hero-plus" class="size-4" />
+              </.button>
+            </div>
+            <p :if={@add_ons == []} class="text-base-content/40 mt-2 text-sm">
+              Ingen tilkøb endnu.
+            </p>
+            <ul class="divide-base-content/10 mt-2 divide-y">
+              <li :for={a <- @add_ons} class="flex items-center justify-between py-2">
+                <div>
+                  <p class="text-base-content text-sm font-medium">{a.name}</p>
+                  <p class="text-base-content/50 text-xs">
+                    {format_amount(a.price_cents, a.currency)}
+                  </p>
+                </div>
+                <button
+                  :if={@can_write?}
+                  phx-click="delete_addon"
+                  phx-value-id={a.id}
+                  data-confirm={"Slet \"#{a.name}\"?"}
+                  aria-label="Slet"
+                  class="hover:text-error text-base-content/40"
+                >
+                  <.icon name="hero-trash" class="size-4" />
+                </button>
               </li>
             </ul>
           </.card>
@@ -395,9 +589,90 @@ defmodule ExhsWeb.AdminLive.Events.Show do
             <.input field={@ticket_form[:capacity]} type="number" label="Kapacitet (valgfri)" />
           </div>
           <.input field={@ticket_form[:description]} label="Beskrivelse" />
+          <div class="grid gap-4 sm:grid-cols-2">
+            <.input field={@ticket_form[:sales_starts_at]} type="datetime-local" label="Salg åbner" />
+            <.input field={@ticket_form[:sales_ends_at]} type="datetime-local" label="Salg lukker" />
+          </div>
+          <.input
+            field={@ticket_form[:allow_multiple]}
+            type="select"
+            label="Tillad flere pr. medlem"
+            options={[{"Nej", "false"}, {"Ja", "true"}]}
+          />
+          <.input
+            :if={@groups != []}
+            field={@ticket_form[:group_ids]}
+            type="select"
+            multiple
+            label="Begræns til grupper (presale)"
+            options={Enum.map(@groups, &{&1.name, &1.id})}
+          />
           <div class="flex justify-end gap-2">
             <.button type="button" variant="ghost" phx-click="close">Annuller</.button>
             <.button type="submit" variant="primary">Gem</.button>
+          </div>
+        </.form>
+      </.modal>
+
+      <.modal :if={@modal == :addon} id="addon-modal" show on_cancel={JS.push("close")}>
+        <h3 class="text-base-content text-lg font-semibold">Tilkøb</h3>
+        <.form for={@addon_form} phx-submit="save_addon" class="mt-4 space-y-4">
+          <.input field={@addon_form[:name]} label="Navn" required />
+          <div class="grid gap-4 sm:grid-cols-2">
+            <.input field={@addon_form[:price_kr]} type="number" label="Pris (kr)" />
+            <.input field={@addon_form[:capacity]} type="number" label="Kapacitet (valgfri)" />
+          </div>
+          <.input field={@addon_form[:description]} label="Beskrivelse" />
+          <div class="flex justify-end gap-2">
+            <.button type="button" variant="ghost" phx-click="close">Annuller</.button>
+            <.button type="submit" variant="primary">Gem</.button>
+          </div>
+        </.form>
+      </.modal>
+
+      <.modal
+        :if={match?({:questions, _}, @modal)}
+        id="questions-modal"
+        show
+        on_cancel={JS.push("close")}
+      >
+        <h3 class="text-base-content text-lg font-semibold">Spørgsmål</h3>
+        <ul class="divide-base-content/10 mt-3 divide-y">
+          <li :for={q <- @questions} class="flex items-center justify-between py-2">
+            <div>
+              <p class="text-base-content text-sm">{q.label}</p>
+              <p class="text-base-content/50 text-xs">
+                {q.field_type}{if q.required, do: " · påkrævet"}
+              </p>
+            </div>
+            <button
+              phx-click="delete_question"
+              phx-value-id={q.id}
+              aria-label="Slet"
+              class="hover:text-error text-base-content/40"
+            >
+              <.icon name="hero-trash" class="size-4" />
+            </button>
+          </li>
+        </ul>
+        <.form for={@question_form} phx-submit="save_question" class="mt-4 space-y-3">
+          <.input field={@question_form[:label]} label="Spørgsmål" required />
+          <.input
+            field={@question_form[:field_type]}
+            type="select"
+            label="Type"
+            options={[{"Tekst", "text"}, {"Valg", "select"}, {"Tal", "number"}]}
+          />
+          <.input field={@question_form[:options]} label="Valgmuligheder (komma-adskilt)" />
+          <.input
+            field={@question_form[:required]}
+            type="select"
+            label="Påkrævet"
+            options={[{"Ja", "true"}, {"Nej", "false"}]}
+          />
+          <div class="flex justify-end gap-2">
+            <.button type="button" variant="ghost" phx-click="close">Luk</.button>
+            <.button type="submit" variant="primary">Tilføj</.button>
           </div>
         </.form>
       </.modal>

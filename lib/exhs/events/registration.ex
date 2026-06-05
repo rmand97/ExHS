@@ -7,9 +7,13 @@ defmodule Exhs.Events.Registration do
     authorizers: [Ash.Policy.Authorizer],
     extensions: [AshEvents.Events]
 
+  alias Exhs.Events.WaitlistPromoter
+
   postgres do
     table "event_registrations"
     repo Exhs.Repo
+
+    identity_wheres_to_sql one_per_ticket_type: "status != 'cancelled'"
 
     references do
       reference :forening, on_delete: :delete
@@ -32,6 +36,42 @@ defmodule Exhs.Events.Registration do
 
       change set_attribute(:registered_at, &DateTime.utc_now/0)
       change Exhs.Events.Changes.CheckCapacity
+      change Exhs.Events.Changes.BroadcastAvailability
+    end
+
+    # Paid-ticket cart entry: validated but not yet holding a seat (held_until nil).
+    # The seat hold is taken later by `:hold` at checkout time.
+    create :reserve do
+      accept [:ticket_type_id, :membership_id]
+
+      validate Exhs.Events.Validations.RegistrationAllowed
+
+      change set_attribute(:registered_at, &DateTime.utc_now/0)
+      change set_attribute(:status, :pending_payment)
+    end
+
+    # Take a timed seat hold for a pending_payment registration. Rejects (no
+    # waitlist) when the ticket type is full — paid presale oversell is not allowed.
+    update :hold do
+      require_atomic? false
+      argument :minutes, :integer, default: 10
+      change Exhs.Events.Changes.HoldSeat
+      change Exhs.Events.Changes.BroadcastAvailability
+    end
+
+    update :confirm do
+      accept []
+      change set_attribute(:status, :confirmed)
+      change set_attribute(:held_until, nil)
+      change Exhs.Events.Changes.BroadcastAvailability
+    end
+
+    update :release_hold do
+      accept []
+      change set_attribute(:status, :cancelled)
+      change set_attribute(:held_until, nil)
+      change set_attribute(:cancelled_at, &DateTime.utc_now/0)
+      change Exhs.Events.Changes.BroadcastAvailability
     end
 
     update :cancel do
@@ -41,7 +81,7 @@ defmodule Exhs.Events.Registration do
 
       change after_action(fn _changeset, registration, _context ->
                %{ticket_type_id: registration.ticket_type_id, tenant: registration.forening_id}
-               |> Exhs.Events.WaitlistPromoter.new()
+               |> WaitlistPromoter.new()
                |> Oban.insert()
 
                {:ok, registration}
@@ -51,6 +91,7 @@ defmodule Exhs.Events.Registration do
     update :promote do
       accept []
       change set_attribute(:status, :confirmed)
+      change Exhs.Events.Changes.BroadcastAvailability
     end
 
     read :get_by_id do
@@ -85,7 +126,12 @@ defmodule Exhs.Events.Registration do
       authorize_if actor_present()
     end
 
-    policy action(:register) do
+    policy action([:register, :reserve]) do
+      authorize_if expr(membership.user_id == ^actor(:id))
+      authorize_if {Exhs.Checks.HasMembershipRole, roles: [:admin]}
+    end
+
+    policy action([:hold, :confirm, :release_hold]) do
       authorize_if expr(membership.user_id == ^actor(:id))
       authorize_if {Exhs.Checks.HasMembershipRole, roles: [:admin]}
     end
@@ -120,6 +166,7 @@ defmodule Exhs.Events.Registration do
 
     attribute :registered_at, :utc_datetime_usec, public?: true
     attribute :cancelled_at, :utc_datetime_usec, public?: true
+    attribute :held_until, :utc_datetime_usec, public?: true
 
     create_timestamp :inserted_at
     update_timestamp :updated_at
@@ -140,6 +187,8 @@ defmodule Exhs.Events.Registration do
   end
 
   identities do
-    identity :one_per_ticket_type, [:membership_id, :ticket_type_id]
+    # Cancelled registrations free the slot so a member can re-buy after a dead order.
+    identity :one_per_ticket_type, [:membership_id, :ticket_type_id],
+      where: expr(status != :cancelled)
   end
 end

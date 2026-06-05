@@ -259,8 +259,8 @@ defmodule ExhsWeb.PublicLive.PublicPagesTest do
     end
   end
 
-  describe "PublicLive.Events.Show - tilmeld button" do
-    test "shows tilmeld button when not registered", %{
+  describe "PublicLive.Events.Show - purchase panel" do
+    test "member sees a Vælg button for an available ticket", %{
       conn: conn,
       forening: forening,
       event: event
@@ -274,28 +274,20 @@ defmodule ExhsWeb.PublicLive.PublicPagesTest do
         |> forening_conn(forening)
         |> live("/events/#{event.id}")
 
-      assert html =~ "Tilmeld"
-      refute html =~ "Du er tilmeldt"
+      assert html =~ "Vælg"
     end
 
-    test "hides tilmeld button and shows tilmeldt when already registered", %{
+    test "anonymous visitor is prompted to log in", %{
       conn: conn,
       forening: forening,
       event: event
     } do
-      user = register_user!()
-      membership = join_forening!(forening, user)
-      ticket_type = create_ticket_type!(forening, event)
-      register_for_event!(forening, membership, ticket_type)
-
       {:ok, _view, html} =
         conn
-        |> log_in_user(user)
         |> forening_conn(forening)
         |> live("/events/#{event.id}")
 
-      assert html =~ "Du er tilmeldt"
-      refute html =~ ~s(btn btn-block btn-primary">Tilmeld)
+      assert html =~ "Log ind for at tilmelde"
     end
   end
 

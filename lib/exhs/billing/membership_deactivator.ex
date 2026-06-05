@@ -4,11 +4,11 @@ defmodule Exhs.Billing.MembershipDeactivator do
     queue: :maintenance,
     max_attempts: 3
 
-  require Ash.Query
-
   alias Exhs.Billing.Subscription
   alias Exhs.Organizations
   alias Exhs.Organizations.Forening
+
+  require Ash.Query
 
   @impl Oban.Worker
   def perform(%Oban.Job{}) do

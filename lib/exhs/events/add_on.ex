@@ -1,4 +1,4 @@
-defmodule Exhs.Events.TicketType do
+defmodule Exhs.Events.AddOn do
   @moduledoc false
   use Ash.Resource,
     otp_app: :exhs,
@@ -8,7 +8,7 @@ defmodule Exhs.Events.TicketType do
     extensions: [AshEvents.Events]
 
   postgres do
-    table "event_ticket_types"
+    table "event_add_ons"
     repo Exhs.Repo
 
     references do
@@ -25,36 +25,11 @@ defmodule Exhs.Events.TicketType do
     defaults [:read, :destroy]
 
     create :create do
-      accept [
-        :event_id,
-        :name,
-        :price_cents,
-        :currency,
-        :capacity,
-        :description,
-        :sales_starts_at,
-        :sales_ends_at,
-        :allow_multiple
-      ]
+      accept [:event_id, :name, :description, :price_cents, :currency, :capacity]
     end
 
     update :update do
-      accept [
-        :name,
-        :price_cents,
-        :currency,
-        :capacity,
-        :description,
-        :sales_starts_at,
-        :sales_ends_at,
-        :allow_multiple
-      ]
-    end
-
-    update :set_groups do
-      require_atomic? false
-      argument :group_ids, {:array, :uuid}, allow_nil?: false
-      change manage_relationship(:group_ids, :eligible_groups, type: :append_and_remove)
+      accept [:name, :description, :price_cents, :currency, :capacity]
     end
 
     read :get_by_id do
@@ -69,6 +44,10 @@ defmodule Exhs.Events.TicketType do
 
   policies do
     bypass AshAuthentication.Checks.AshAuthenticationInteraction do
+      authorize_if always()
+    end
+
+    bypass AshOban.Checks.AshObanInteraction do
       authorize_if always()
     end
 
@@ -102,6 +81,8 @@ defmodule Exhs.Events.TicketType do
       public? true
     end
 
+    attribute :description, :string, public?: true
+
     attribute :price_cents, :integer do
       allow_nil? false
       default 0
@@ -116,17 +97,6 @@ defmodule Exhs.Events.TicketType do
 
     attribute :capacity, :integer, public?: true
 
-    attribute :description, :string, public?: true
-
-    attribute :sales_starts_at, :utc_datetime_usec, public?: true
-    attribute :sales_ends_at, :utc_datetime_usec, public?: true
-
-    attribute :allow_multiple, :boolean do
-      allow_nil? false
-      default false
-      public? true
-    end
-
     create_timestamp :inserted_at
     update_timestamp :updated_at
   end
@@ -139,30 +109,5 @@ defmodule Exhs.Events.TicketType do
     belongs_to :event, Exhs.Events.Event do
       allow_nil? false
     end
-
-    has_many :registrations, Exhs.Events.Registration
-    has_many :questions, Exhs.Events.TicketTypeQuestion
-
-    many_to_many :eligible_groups, Exhs.Organizations.Group do
-      through Exhs.Events.TicketTypeGroup
-      source_attribute_on_join_resource :ticket_type_id
-      destination_attribute_on_join_resource :group_id
-    end
-  end
-
-  calculations do
-    calculate :seats_left,
-              :integer,
-              expr(if is_nil(capacity), do: nil, else: capacity - seats_taken)
-  end
-
-  aggregates do
-    count :seats_taken, :registrations do
-      filter expr(status == :confirmed or (status == :pending_payment and held_until > now()))
-    end
-  end
-
-  identities do
-    identity :unique_name_per_event, [:name, :event_id]
   end
 end

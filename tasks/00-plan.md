@@ -28,7 +28,7 @@ Legend: `[x]` core delivered (residuals deferred to a dependent task or tracked 
 ### Business domains
 - [x] [Task 8 — Billing & Stripe](./08-billing-stripe.md) — Connect onboarding, subscriptions, payments, webhooks
 - [x] [Task 9 — Events](./09-events.md) — domain + admin & public UI; paid-ticket wiring pending Task 25
-- [ ] [Task 25 — Ticket purchasing & checkout](./25-ticketing.md) — not started (public "Tilmeld" button not wired)
+- [x] [Task 25 — Ticket purchasing & checkout](./25-ticketing.md) — Order/OrderItem aggregate, presales, holds, Stripe checkout + webhook, live availability, admin mgmt (live waitlist-position in buyer UI deferred)
 
 ### Nice-to-have (post-launch)
 - [ ] [Task 10 — Shop (mostly TBD)](./10-shop.md) — not started
