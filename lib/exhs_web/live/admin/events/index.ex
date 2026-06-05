@@ -2,8 +2,6 @@ defmodule ExhsWeb.AdminLive.Events.Index do
   @moduledoc false
   use ExhsWeb, :live_view
 
-  import ExhsWeb.Labels
-
   alias Exhs.Events
 
   @impl true

@@ -423,11 +423,6 @@ defmodule ExhsWeb.Layouts do
     """
   end
 
-  defp role_label(:admin), do: "Admin"
-  defp role_label(:board), do: "Bestyrelse"
-  defp role_label(:member), do: "Medlem"
-  defp role_label(_), do: "—"
-
   # ──────────────────────────────────────────────
   # Dev-only app layout (component showcase)
   # ──────────────────────────────────────────────

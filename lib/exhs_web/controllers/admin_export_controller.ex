@@ -12,6 +12,7 @@ defmodule ExhsWeb.AdminExportController do
   alias Exhs.Organizations
   alias Exhs.Organizations.Forening
   alias Exhs.Organizations.MemberFilter
+  alias ExhsWeb.DisplayHelpers
   alias ExhsWeb.Labels
 
   @admin_roles [:admin, :board]
@@ -104,7 +105,7 @@ defmodule ExhsWeb.AdminExportController do
     rows =
       Enum.map(payments, fn p ->
         [
-          Labels.format_date(p.paid_at),
+          DisplayHelpers.format_date(p.paid_at),
           p.description || "",
           Labels.payable_type_label(p.payable_type),
           to_string(div(p.amount_cents, 100)),
@@ -125,10 +126,10 @@ defmodule ExhsWeb.AdminExportController do
         [
           Labels.member_name(m),
           to_string(m.user.email),
-          Labels.role_label(m.role),
-          Labels.status_label(m.status),
+          DisplayHelpers.role_label(m.role),
+          DisplayHelpers.status_label(m.status),
           Enum.map_join(m.groups, ", ", & &1.name),
-          Labels.format_date(m.joined_at)
+          DisplayHelpers.format_date(m.joined_at)
         ]
       end)
 
@@ -145,7 +146,7 @@ defmodule ExhsWeb.AdminExportController do
           to_string(r.membership.user.email),
           r.ticket_type.name,
           Labels.reg_status_label(r.status),
-          Labels.format_date(r.registered_at)
+          DisplayHelpers.format_date(r.registered_at)
         ]
       end)
 
