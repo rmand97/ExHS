@@ -63,6 +63,12 @@ defmodule Exhs.Organizations.Forening do
     read :get_by_subdomain do
       get_by :subdomain
     end
+
+    read :get_by_stripe_account_id do
+      argument :stripe_account_id, :string, allow_nil?: false
+      filter expr(stripe_account_id == ^arg(:stripe_account_id))
+      get? true
+    end
   end
 
   policies do

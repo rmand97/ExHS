@@ -22,7 +22,10 @@ defmodule Exhs.Audit.EventLog do
     defaults [:read]
 
     read :my_activity do
+      argument :resource, :string
+
       filter expr(user_id == ^actor(:id))
+      filter expr(is_nil(^arg(:resource)) or resource == ^arg(:resource))
 
       pagination offset?: true, default_limit: 25, countable: true
 

@@ -75,6 +75,15 @@ defmodule Exhs.Events.Event do
       filter expr(starts_at > now())
     end
 
+    read :list_member_events do
+      multitenancy :bypass_all
+
+      argument :forening_ids, {:array, :uuid}, allow_nil?: false
+
+      filter expr(forening_id in ^arg(:forening_ids) and published == true and starts_at > now())
+      prepare build(sort: [starts_at: :asc], load: [:forening])
+    end
+
     read :get_public do
       get_by :id
       filter expr(published == true)
@@ -91,6 +100,10 @@ defmodule Exhs.Events.Event do
     end
 
     policy action(:list_upcoming) do
+      authorize_if actor_present()
+    end
+
+    policy action(:list_member_events) do
       authorize_if actor_present()
     end
 

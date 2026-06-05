@@ -1,25 +1,17 @@
 defmodule Exhs.Checks.ActiveMember do
   @moduledoc false
-  use Ash.Policy.SimpleCheck
-
-  import Exhs.Checks.Helpers, only: [get_tenant: 1, lookup_membership: 2]
+  use Ash.Policy.FilterCheck
 
   @impl true
   def describe(_opts), do: "actor has an active membership in the current tenant"
 
   @impl true
-  def match?(nil, _context, _opts), do: false
+  def filter(_actor, context, _opts) do
+    path = membership_path(context.resource)
 
-  def match?(actor, context, _opts) do
-    tenant = get_tenant(context)
-
-    if is_nil(tenant) do
-      false
-    else
-      case lookup_membership(actor.id, tenant) do
-        {:ok, %{status: status}} -> status == :active
-        _ -> false
-      end
-    end
+    expr(exists(^path, user_id == ^actor(:id) and status == :active))
   end
+
+  defp membership_path(Exhs.Organizations.Forening), do: [:memberships]
+  defp membership_path(_resource), do: [:forening, :memberships]
 end

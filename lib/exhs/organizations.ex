@@ -15,6 +15,12 @@ defmodule Exhs.Organizations do
       define :get_forening_by_id, action: :get_by_id, args: [:id], get?: true
       define :get_forening_by_slug, action: :get_by_slug, args: [:slug], get?: true
       define :get_forening_by_subdomain, action: :get_by_subdomain, args: [:subdomain], get?: true
+
+      define :get_forening_by_stripe_account_id,
+        action: :get_by_stripe_account_id,
+        args: [:stripe_account_id],
+        get?: true
+
       define :list_foreninger, action: :read
     end
 
@@ -26,8 +32,15 @@ defmodule Exhs.Organizations do
       define :set_member_role, action: :set_role
       define :leave_forening, action: :leave
       define :set_membership_stripe_customer, action: :set_stripe_customer
+
+      define :get_membership_by_stripe_customer_id,
+        action: :get_by_stripe_customer_id,
+        args: [:stripe_customer_id],
+        get?: true
+
       define :list_memberships, action: :read
       define :list_my_memberships, action: :my_memberships
+      define :get_my_membership, action: :get_my_membership, args: [:id], get?: true
     end
 
     resource Exhs.Organizations.Group do

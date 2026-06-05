@@ -17,6 +17,7 @@ defmodule Exhs.Events do
       define :list_events, action: :read
       define :list_public_events, action: :list_public
       define :get_public_event, action: :get_public, args: [:id], get?: true
+      define :list_member_events, action: :list_member_events, args: [:forening_ids]
     end
 
     resource Exhs.Events.TicketType do

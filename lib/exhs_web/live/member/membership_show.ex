@@ -137,18 +137,9 @@ defmodule ExhsWeb.MemberLive.MembershipShow do
   end
 
   defp find_membership(user, id) do
-    case Exhs.Organizations.list_my_memberships(actor: user) do
-      {:ok, memberships} ->
-        case Enum.find(memberships, &(&1.id == id)) do
-          nil ->
-            nil
-
-          membership ->
-            %{
-              membership
-              | __metadata__: Map.put(membership.__metadata__, :tenant, membership.forening.id)
-            }
-        end
+    case Exhs.Organizations.get_my_membership(id, actor: user) do
+      {:ok, membership} ->
+        Ash.Resource.put_metadata(membership, :tenant, membership.forening.id)
 
       _ ->
         nil

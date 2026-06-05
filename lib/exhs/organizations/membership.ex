@@ -72,10 +72,23 @@ defmodule Exhs.Organizations.Membership do
       accept [:stripe_customer_id]
     end
 
+    read :get_by_stripe_customer_id do
+      argument :stripe_customer_id, :string, allow_nil?: false
+      filter expr(stripe_customer_id == ^arg(:stripe_customer_id))
+      get? true
+    end
+
     read :my_memberships do
       multitenancy :allow_global
       filter expr(user_id == ^actor(:id))
       prepare build(sort: [joined_at: :desc], load: [:forening])
+    end
+
+    read :get_my_membership do
+      multitenancy :allow_global
+      get_by :id
+      filter expr(user_id == ^actor(:id))
+      prepare build(load: [:forening])
     end
   end
 
@@ -89,6 +102,10 @@ defmodule Exhs.Organizations.Membership do
     end
 
     policy action(:my_memberships) do
+      authorize_if actor_present()
+    end
+
+    policy action(:get_my_membership) do
       authorize_if actor_present()
     end
 

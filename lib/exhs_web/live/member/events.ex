@@ -104,16 +104,19 @@ defmodule ExhsWeb.MemberLive.Events do
   end
 
   defp load_events(socket, filters, pagination, memberships) do
+    forening_ids = Enum.map(memberships, & &1.forening_id)
+    forening_map = Map.new(memberships, &{&1.forening_id, &1.forening})
+
     all_events =
-      memberships
-      |> Enum.flat_map(fn membership ->
-        case Exhs.Events.list_public_events(tenant: membership.forening_id) do
-          {:ok, events} -> Enum.map(events, &%{event: &1, forening: membership.forening})
-          _ -> []
-        end
-      end)
-      |> Enum.uniq_by(& &1.event.id)
-      |> Enum.sort_by(& &1.event.starts_at, {:asc, DateTime})
+      case Exhs.Events.list_member_events(forening_ids, actor: socket.assigns.current_user) do
+        {:ok, events} ->
+          Enum.map(events, fn event ->
+            %{event: event, forening: forening_map[event.forening_id] || event.forening}
+          end)
+
+        _ ->
+          []
+      end
 
     filtered = apply_filters(all_events, filters)
     total = length(filtered)

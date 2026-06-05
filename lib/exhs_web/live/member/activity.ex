@@ -125,14 +125,15 @@ defmodule ExhsWeb.MemberLive.Activity do
 
   defp load_activity(socket, filters, pagination) do
     user = socket.assigns.current_user
+    resource_filter = extract_filter(filters, :resource)
+    input = if resource_filter, do: %{resource: resource_filter}, else: %{}
 
-    case Exhs.Audit.list_my_activity(actor: user, page: page_opts(pagination)) do
+    case Exhs.Audit.list_my_activity(input, actor: user, page: page_opts(pagination)) do
       {:ok, page} ->
-        events = apply_filters(page.results, filters)
-        pagination = LiveFilter.Pagination.with_total(pagination, page.count || length(events))
+        pagination = LiveFilter.Pagination.with_total(pagination, page.count || 0)
 
         socket
-        |> assign(:events, events)
+        |> assign(:events, page.results)
         |> assign(:pagination, pagination)
         |> assign(:page_title, "Aktivitet")
 
@@ -150,18 +151,12 @@ defmodule ExhsWeb.MemberLive.Activity do
     [offset: pagination.offset, limit: pagination.limit, count: true]
   end
 
-  defp apply_filters(events, filters) do
-    Enum.reduce(filters, events, fn filter, acc ->
-      apply_filter(acc, filter)
-    end)
+  defp extract_filter(filters, field) do
+    case Enum.find(filters, &(&1.field == field)) do
+      %{value: value} when is_binary(value) and value != "" -> value
+      _ -> nil
+    end
   end
-
-  defp apply_filter(events, %{field: :resource, value: value})
-       when is_binary(value) and value != "" do
-    Enum.filter(events, &(to_string(&1.resource) == value))
-  end
-
-  defp apply_filter(events, _filter), do: events
 
   defp action_type_bg(:create), do: "bg-success/15 text-success"
   defp action_type_bg(:update), do: "bg-info/15 text-info"

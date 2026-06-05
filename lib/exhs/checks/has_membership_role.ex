@@ -1,8 +1,6 @@
 defmodule Exhs.Checks.HasMembershipRole do
   @moduledoc false
-  use Ash.Policy.SimpleCheck
-
-  import Exhs.Checks.Helpers, only: [get_tenant: 1, lookup_membership: 2]
+  use Ash.Policy.FilterCheck
 
   @impl true
   def describe(opts) do
@@ -11,19 +9,13 @@ defmodule Exhs.Checks.HasMembershipRole do
   end
 
   @impl true
-  def match?(nil, _context, _opts), do: false
-
-  def match?(actor, context, opts) do
+  def filter(_actor, context, opts) do
     roles = Keyword.get(opts, :roles, [:admin])
-    tenant = get_tenant(context)
+    path = membership_path(context.resource)
 
-    if is_nil(tenant) do
-      false
-    else
-      case lookup_membership(actor.id, tenant) do
-        {:ok, %{role: role}} -> role in roles
-        _ -> false
-      end
-    end
+    expr(exists(^path, user_id == ^actor(:id) and role in ^roles))
   end
+
+  defp membership_path(Exhs.Organizations.Forening), do: [:memberships]
+  defp membership_path(_resource), do: [:forening, :memberships]
 end

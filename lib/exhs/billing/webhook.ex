@@ -9,7 +9,6 @@ defmodule Exhs.Billing.Webhook do
   alias Exhs.Billing.{Payment, Subscription}
   alias Exhs.Organizations
 
-  require Ash.Query
   require Logger
 
   @stripe_status_map %{
@@ -181,40 +180,45 @@ defmodule Exhs.Billing.Webhook do
   end
 
   defp existing_subscription(stripe_id, forening_id) do
-    Subscription
-    |> Ash.Query.filter(stripe_subscription_id == ^stripe_id)
-    |> Ash.read_one!(tenant: forening_id, authorize?: false)
+    case Billing.get_subscription_by_stripe_id(stripe_id,
+           tenant: forening_id,
+           authorize?: false
+         ) do
+      {:ok, subscription} -> subscription
+      {:error, _} -> nil
+    end
   end
 
   defp existing_payment_by_intent(nil, _forening_id), do: nil
 
   defp existing_payment_by_intent(intent_id, forening_id) do
-    Payment
-    |> Ash.Query.filter(stripe_payment_intent_id == ^intent_id)
-    |> Ash.read_one!(tenant: forening_id, authorize?: false)
+    case Billing.get_payment_by_payment_intent(intent_id,
+           tenant: forening_id,
+           authorize?: false
+         ) do
+      {:ok, payment} -> payment
+      {:error, _} -> nil
+    end
   end
 
   defp forening_for_account(nil), do: {:error, :account_missing}
 
   defp forening_for_account(account_id) do
-    case Exhs.Organizations.Forening
-         |> Ash.Query.filter(stripe_account_id == ^account_id)
-         |> Ash.read_one(authorize?: false) do
-      {:ok, nil} -> {:error, :forening_not_found}
+    case Organizations.get_forening_by_stripe_account_id(account_id, authorize?: false) do
       {:ok, forening} -> {:ok, forening}
-      {:error, err} -> {:error, err}
+      {:error, _} -> {:error, :forening_not_found}
     end
   end
 
   defp membership_for_customer(nil, _forening_id), do: {:error, :customer_missing}
 
   defp membership_for_customer(customer_id, forening_id) do
-    case Exhs.Organizations.Membership
-         |> Ash.Query.filter(stripe_customer_id == ^customer_id)
-         |> Ash.read_one(tenant: forening_id, authorize?: false) do
-      {:ok, nil} -> {:error, :membership_not_found}
+    case Organizations.get_membership_by_stripe_customer_id(customer_id,
+           tenant: forening_id,
+           authorize?: false
+         ) do
       {:ok, membership} -> {:ok, membership}
-      {:error, err} -> {:error, err}
+      {:error, _} -> {:error, :membership_not_found}
     end
   end
 
