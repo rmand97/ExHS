@@ -18,8 +18,18 @@ defmodule ExhsWeb.ConnCase do
   end
 
   setup tags do
-    Exhs.DataCase.setup_sandbox(tags)
-    {:ok, conn: Phoenix.ConnTest.build_conn()}
+    pid = Exhs.DataCase.setup_sandbox(tags)
+
+    conn =
+      Phoenix.ConnTest.build_conn()
+      |> Plug.Conn.put_req_header(
+        "user-agent",
+        Phoenix.Ecto.SQL.Sandbox.encode_metadata(
+          Phoenix.Ecto.SQL.Sandbox.metadata_for(Exhs.Repo, pid)
+        )
+      )
+
+    {:ok, conn: conn}
   end
 
   alias AshAuthentication.Plug.Helpers, as: AuthHelpers

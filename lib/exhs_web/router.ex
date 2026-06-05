@@ -64,6 +64,11 @@ defmodule ExhsWeb.Router do
     pipe_through :browser
 
     ash_authentication_live_session :authenticated_routes,
+      on_mount_prepend:
+        if(Application.compile_env(:exhs, :sql_sandbox),
+          do: [{ExhsWeb.LiveSandbox, :default}],
+          else: []
+        ),
       on_mount: [{ExhsWeb.LiveCurrentPath, :default}, {ExhsWeb.LiveUserAuth, :live_user_required}] do
       live "/dashboard", MemberLive.Dashboard
       live "/upcoming", MemberLive.Events
@@ -82,6 +87,11 @@ defmodule ExhsWeb.Router do
     get "/sitemap.xml", SeoController, :sitemap
 
     ash_authentication_live_session :public_pages,
+      on_mount_prepend:
+        if(Application.compile_env(:exhs, :sql_sandbox),
+          do: [{ExhsWeb.LiveSandbox, :default}],
+          else: []
+        ),
       session: {__MODULE__, :public_session, []},
       on_mount: [
         {ExhsWeb.LiveCurrentPath, :default},
