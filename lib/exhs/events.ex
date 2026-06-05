@@ -13,7 +13,6 @@ defmodule Exhs.Events do
       define :publish_event, action: :publish
       define :unpublish_event, action: :unpublish
       define :get_event_by_id, action: :get_by_id, args: [:id], get?: true
-      define :list_upcoming_events, action: :list_upcoming
       define :list_events, action: :read
       define :list_public_events, action: :list_public
       define :get_public_event, action: :get_public, args: [:id], get?: true

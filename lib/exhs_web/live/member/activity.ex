@@ -17,7 +17,7 @@ defmodule ExhsWeb.MemberLive.Activity do
 
   @impl true
   def mount(_params, _session, socket) do
-    {:ok, socket}
+    {:ok, assign(socket, loading: true)}
   end
 
   @impl true
@@ -56,43 +56,50 @@ defmodule ExhsWeb.MemberLive.Activity do
         <:subtitle>Din aktivitetshistorik på tværs af foreninger</:subtitle>
       </.header>
 
-      <div class="mt-6">
-        <LiveFilter.bar filter={@livefilter} />
+      <div :if={@loading} class="mt-6 space-y-4">
+        <.skeleton class="h-10 w-full" />
+        <.skeleton class="h-64 w-full" />
       </div>
 
-      <div :if={@events == []} class="mt-8">
-        <.empty_state icon="hero-clock" title="Ingen aktivitet endnu">
-          Din aktivitet vises her, når du foretager ændringer.
-        </.empty_state>
-      </div>
+      <div :if={!@loading}>
+        <div class="mt-6">
+          <LiveFilter.bar filter={@livefilter} />
+        </div>
 
-      <div :if={@events != []} class="mt-6">
-        <.table id="activity" rows={@events}>
-          <:col :let={event} label="Handling" class="w-0 whitespace-nowrap">
-            <div class="flex items-center gap-2">
-              <span class={[
-                "inline-flex size-6 shrink-0 items-center justify-center rounded-full",
-                action_type_bg(event.action_type)
-              ]}>
-                <.icon name={action_type_icon(event.action_type)} class="size-3" />
-              </span>
-              <span class="font-medium">{action_label(event.action)}</span>
-            </div>
-          </:col>
-          <:col :let={event} label="Ressource" class="w-0 whitespace-nowrap">
-            <.badge variant="default">{resource_label(event.resource)}</.badge>
-          </:col>
-          <:col :let={event} label="Tidspunkt" class="w-0 whitespace-nowrap">
-            <span class="text-base-content/50 text-xs">{format_timestamp(event.occurred_at)}</span>
-          </:col>
-          <:col :let={event} label="Detaljer">
-            <.event_data :if={event.data != %{}} data={event.data} />
-          </:col>
-        </.table>
-      </div>
+        <div :if={@events == []} class="mt-8">
+          <.empty_state icon="hero-clock" title="Ingen aktivitet endnu">
+            Din aktivitet vises her, når du foretager ændringer.
+          </.empty_state>
+        </div>
 
-      <div :if={@events != []} class="mt-6">
-        <LiveFilter.paginator pagination={@pagination} />
+        <div :if={@events != []} class="mt-6">
+          <.table id="activity" rows={@events}>
+            <:col :let={event} label="Handling" class="w-0 whitespace-nowrap">
+              <div class="flex items-center gap-2">
+                <span class={[
+                  "inline-flex size-6 shrink-0 items-center justify-center rounded-full",
+                  action_type_bg(event.action_type)
+                ]}>
+                  <.icon name={action_type_icon(event.action_type)} class="size-3" />
+                </span>
+                <span class="font-medium">{action_label(event.action)}</span>
+              </div>
+            </:col>
+            <:col :let={event} label="Ressource" class="w-0 whitespace-nowrap">
+              <.badge variant="default">{resource_label(event.resource)}</.badge>
+            </:col>
+            <:col :let={event} label="Tidspunkt" class="w-0 whitespace-nowrap">
+              <span class="text-base-content/50 text-xs">{format_timestamp(event.occurred_at)}</span>
+            </:col>
+            <:col :let={event} label="Detaljer">
+              <.event_data :if={event.data != %{}} data={event.data} />
+            </:col>
+          </.table>
+        </div>
+
+        <div :if={@events != []} class="mt-6">
+          <LiveFilter.paginator pagination={@pagination} />
+        </div>
       </div>
     </Layouts.member>
     """
@@ -136,6 +143,7 @@ defmodule ExhsWeb.MemberLive.Activity do
         |> assign(:events, page.results)
         |> assign(:pagination, pagination)
         |> assign(:page_title, "Aktivitet")
+        |> assign(:loading, false)
 
       {:error, _} ->
         pagination = LiveFilter.Pagination.with_total(pagination, 0)
@@ -144,6 +152,7 @@ defmodule ExhsWeb.MemberLive.Activity do
         |> assign(:events, [])
         |> assign(:pagination, pagination)
         |> assign(:page_title, "Aktivitet")
+        |> assign(:loading, false)
     end
   end
 

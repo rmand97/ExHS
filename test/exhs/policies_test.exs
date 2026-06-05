@@ -451,7 +451,7 @@ defmodule Exhs.PoliciesTest do
       invite_member!(forening, member)
       event = create_published_event!(forening)
 
-      {:ok, events} = Exhs.Events.list_upcoming_events(scope: scope(member, forening))
+      {:ok, events} = Exhs.Events.list_public_events(scope: scope(member, forening))
       assert Enum.any?(events, &(&1.id == event.id))
     end
 

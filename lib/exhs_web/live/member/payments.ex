@@ -6,7 +6,7 @@ defmodule ExhsWeb.MemberLive.Payments do
 
   @impl true
   def mount(_params, _session, socket) do
-    {:ok, socket}
+    {:ok, assign(socket, loading: true)}
   end
 
   @impl true
@@ -45,36 +45,43 @@ defmodule ExhsWeb.MemberLive.Payments do
         <:subtitle>Din betalingshistorik på tværs af foreninger</:subtitle>
       </.header>
 
-      <div class="mt-6">
-        <LiveFilter.bar filter={@livefilter} />
+      <div :if={@loading} class="mt-6 space-y-4">
+        <.skeleton class="h-10 w-full" />
+        <.skeleton class="h-64 w-full" />
       </div>
 
-      <div :if={@payments == []} class="mt-8">
-        <.empty_state icon="hero-banknotes" title="Ingen betalinger endnu">
-          Dine betalinger vises her.
-        </.empty_state>
-      </div>
+      <div :if={!@loading}>
+        <div class="mt-6">
+          <LiveFilter.bar filter={@livefilter} />
+        </div>
 
-      <div :if={@payments != []} class="mt-6">
-        <.table id="payments" rows={@payments}>
-          <:col :let={pay} label="Beskrivelse">
-            {pay.description || type_label(pay.payable_type)}
-          </:col>
-          <:col :let={pay} label="Beløb">{format_amount(pay.amount_cents, pay.currency)}</:col>
-          <:col :let={pay} label="Status">
-            <.badge variant={payment_status_variant(pay.status)}>
-              {payment_status_label(pay.status)}
-            </.badge>
-          </:col>
-          <:col :let={pay} label="Type">
-            <.badge variant="default">{type_label(pay.payable_type)}</.badge>
-          </:col>
-          <:col :let={pay} label="Dato">{format_date(pay.paid_at)}</:col>
-        </.table>
-      </div>
+        <div :if={@payments == []} class="mt-8">
+          <.empty_state icon="hero-banknotes" title="Ingen betalinger endnu">
+            Dine betalinger vises her.
+          </.empty_state>
+        </div>
 
-      <div :if={@payments != []} class="mt-6">
-        <LiveFilter.paginator pagination={@pagination} />
+        <div :if={@payments != []} class="mt-6">
+          <.table id="payments" rows={@payments}>
+            <:col :let={pay} label="Beskrivelse">
+              {pay.description || type_label(pay.payable_type)}
+            </:col>
+            <:col :let={pay} label="Beløb">{format_amount(pay.amount_cents, pay.currency)}</:col>
+            <:col :let={pay} label="Status">
+              <.badge variant={payment_status_variant(pay.status)}>
+                {payment_status_label(pay.status)}
+              </.badge>
+            </:col>
+            <:col :let={pay} label="Type">
+              <.badge variant="default">{type_label(pay.payable_type)}</.badge>
+            </:col>
+            <:col :let={pay} label="Dato">{format_date(pay.paid_at)}</:col>
+          </.table>
+        </div>
+
+        <div :if={@payments != []} class="mt-6">
+          <LiveFilter.paginator pagination={@pagination} />
+        </div>
       </div>
     </Layouts.member>
     """
@@ -117,6 +124,7 @@ defmodule ExhsWeb.MemberLive.Payments do
         |> assign(:payments, page)
         |> assign(:pagination, pagination)
         |> assign(:page_title, "Betalinger")
+        |> assign(:loading, false)
 
       {:error, _} ->
         pagination = LiveFilter.Pagination.with_total(pagination, 0)
@@ -125,6 +133,7 @@ defmodule ExhsWeb.MemberLive.Payments do
         |> assign(:payments, [])
         |> assign(:pagination, pagination)
         |> assign(:page_title, "Betalinger")
+        |> assign(:loading, false)
     end
   end
 

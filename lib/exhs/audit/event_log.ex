@@ -33,6 +33,27 @@ defmodule Exhs.Audit.EventLog do
     end
   end
 
+  changes do
+    change fn changeset, _context ->
+      if changeset.tenant do
+        Ash.Changeset.force_change_attribute(changeset, :forening_id, changeset.tenant)
+      else
+        changeset
+      end
+    end
+  end
+
+  attributes do
+    attribute :forening_id, :uuid, public?: true
+  end
+
+  relationships do
+    belongs_to :forening, Exhs.Organizations.Forening do
+      define_attribute? false
+      attribute_writable? true
+    end
+  end
+
   policies do
     bypass Exhs.Checks.Superadmin do
       authorize_if always()

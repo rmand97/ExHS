@@ -6,7 +6,7 @@ defmodule ExhsWeb.MemberLive.Dashboard do
 
   @impl true
   def mount(_params, _session, socket) do
-    {:ok, socket}
+    {:ok, assign(socket, loading: true)}
   end
 
   @impl true
@@ -45,40 +45,52 @@ defmodule ExhsWeb.MemberLive.Dashboard do
         <:subtitle>Dine foreninger og medlemskaber</:subtitle>
       </.header>
 
-      <div class="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        <.stat_card
-          label="Foreninger"
-          value={@stats.foreninger}
-          icon="hero-building-library"
-        />
-        <.stat_card
-          label="Aktive medlemskaber"
-          value={@stats.active}
-          icon="hero-check-badge"
-        />
-        <.stat_card
-          label="Medlemskaber i alt"
-          value={@stats.total}
-          icon="hero-user-group"
-        />
+      <div :if={@loading} class="mt-6 space-y-4">
+        <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <.skeleton class="h-24 w-full" />
+          <.skeleton class="h-24 w-full" />
+          <.skeleton class="h-24 w-full" />
+        </div>
+        <.skeleton class="h-10 w-full" />
+        <.skeleton class="h-64 w-full" />
       </div>
 
-      <div class="mt-8">
-        <LiveFilter.bar filter={@livefilter} />
-      </div>
+      <div :if={!@loading}>
+        <div class="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <.stat_card
+            label="Foreninger"
+            value={@stats.foreninger}
+            icon="hero-building-library"
+          />
+          <.stat_card
+            label="Aktive medlemskaber"
+            value={@stats.active}
+            icon="hero-check-badge"
+          />
+          <.stat_card
+            label="Medlemskaber i alt"
+            value={@stats.total}
+            icon="hero-user-group"
+          />
+        </div>
 
-      <div :if={@memberships == []} class="mt-8">
-        <.empty_state icon="hero-building-library" title="Ingen medlemskaber endnu">
-          Du er ikke medlem af nogen foreninger.
-        </.empty_state>
-      </div>
+        <div class="mt-8">
+          <LiveFilter.bar filter={@livefilter} />
+        </div>
 
-      <div :if={@memberships != []} class="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        <.membership_card :for={membership <- @memberships} membership={membership} />
-      </div>
+        <div :if={@memberships == []} class="mt-8">
+          <.empty_state icon="hero-building-library" title="Ingen medlemskaber endnu">
+            Du er ikke medlem af nogen foreninger.
+          </.empty_state>
+        </div>
 
-      <div :if={@memberships != []} class="mt-6">
-        <LiveFilter.paginator pagination={@pagination} />
+        <div :if={@memberships != []} class="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <.membership_card :for={membership <- @memberships} membership={membership} />
+        </div>
+
+        <div :if={@memberships != []} class="mt-6">
+          <LiveFilter.paginator pagination={@pagination} />
+        </div>
       </div>
     </Layouts.member>
     """
@@ -167,6 +179,7 @@ defmodule ExhsWeb.MemberLive.Dashboard do
         |> assign(:pagination, pagination)
         |> assign(:stats, compute_stats(all_memberships))
         |> assign(:page_title, "Dashboard")
+        |> assign(:loading, false)
 
       {:error, _} ->
         pagination = LiveFilter.Pagination.with_total(pagination, 0)
@@ -176,6 +189,7 @@ defmodule ExhsWeb.MemberLive.Dashboard do
         |> assign(:pagination, pagination)
         |> assign(:stats, %{total: 0, active: 0, foreninger: 0})
         |> assign(:page_title, "Dashboard")
+        |> assign(:loading, false)
     end
   end
 

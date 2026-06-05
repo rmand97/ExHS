@@ -176,7 +176,7 @@ defmodule Exhs.MemberQueriesTest do
       user = register_user!()
       other = register_user!()
       f1 = create_forening!()
-      m1 = join_forening!(f1, user)
+      _m1 = join_forening!(f1, user)
       m2 = join_forening!(f1, other)
 
       Exhs.Billing.record_payment!(

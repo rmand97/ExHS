@@ -6,7 +6,7 @@ defmodule ExhsWeb.MemberLive.Registrations do
 
   @impl true
   def mount(_params, _session, socket) do
-    {:ok, socket}
+    {:ok, assign(socket, loading: true)}
   end
 
   @impl true
@@ -45,40 +45,47 @@ defmodule ExhsWeb.MemberLive.Registrations do
         <:subtitle>Dine tilmeldinger på tværs af foreninger</:subtitle>
       </.header>
 
-      <div class="mt-6">
-        <LiveFilter.bar filter={@livefilter} />
+      <div :if={@loading} class="mt-6 space-y-4">
+        <.skeleton class="h-10 w-full" />
+        <.skeleton class="h-64 w-full" />
       </div>
 
-      <div :if={@registrations == []} class="mt-8">
-        <.empty_state icon="hero-calendar-days" title="Ingen tilmeldinger endnu">
-          Du er ikke tilmeldt nogen events.
-        </.empty_state>
-      </div>
+      <div :if={!@loading}>
+        <div class="mt-6">
+          <LiveFilter.bar filter={@livefilter} />
+        </div>
 
-      <div :if={@registrations != []} class="mt-6">
-        <.table id="registrations" rows={@registrations}>
-          <:col :let={reg} label="Event">{reg.ticket_type.event.title}</:col>
-          <:col :let={reg} label="Forening">{reg.membership.forening.name}</:col>
-          <:col :let={reg} label="Billet">{reg.ticket_type.name}</:col>
-          <:col :let={reg} label="Status">
-            <.badge variant={reg_status_variant(reg.status)}>
-              {reg_status_label(reg.status)}
-            </.badge>
-          </:col>
-          <:col :let={reg} label="Dato">{format_date(reg.registered_at)}</:col>
-          <:col :let={reg} label="">
-            <a
-              href={event_url(reg)}
-              class="text-primary text-sm font-medium hover:underline"
-            >
-              Se event
-            </a>
-          </:col>
-        </.table>
-      </div>
+        <div :if={@registrations == []} class="mt-8">
+          <.empty_state icon="hero-calendar-days" title="Ingen tilmeldinger endnu">
+            Du er ikke tilmeldt nogen events.
+          </.empty_state>
+        </div>
 
-      <div :if={@registrations != []} class="mt-6">
-        <LiveFilter.paginator pagination={@pagination} />
+        <div :if={@registrations != []} class="mt-6">
+          <.table id="registrations" rows={@registrations}>
+            <:col :let={reg} label="Event">{reg.ticket_type.event.title}</:col>
+            <:col :let={reg} label="Forening">{reg.membership.forening.name}</:col>
+            <:col :let={reg} label="Billet">{reg.ticket_type.name}</:col>
+            <:col :let={reg} label="Status">
+              <.badge variant={reg_status_variant(reg.status)}>
+                {reg_status_label(reg.status)}
+              </.badge>
+            </:col>
+            <:col :let={reg} label="Dato">{format_date(reg.registered_at)}</:col>
+            <:col :let={reg} label="">
+              <a
+                href={event_url(reg)}
+                class="text-primary text-sm font-medium hover:underline"
+              >
+                Se event
+              </a>
+            </:col>
+          </.table>
+        </div>
+
+        <div :if={@registrations != []} class="mt-6">
+          <LiveFilter.paginator pagination={@pagination} />
+        </div>
       </div>
     </Layouts.member>
     """
@@ -113,6 +120,7 @@ defmodule ExhsWeb.MemberLive.Registrations do
         |> assign(:registrations, page)
         |> assign(:pagination, pagination)
         |> assign(:page_title, "Mine events")
+        |> assign(:loading, false)
 
       {:error, _} ->
         pagination = LiveFilter.Pagination.with_total(pagination, 0)
@@ -121,6 +129,7 @@ defmodule ExhsWeb.MemberLive.Registrations do
         |> assign(:registrations, [])
         |> assign(:pagination, pagination)
         |> assign(:page_title, "Mine events")
+        |> assign(:loading, false)
     end
   end
 

@@ -6,7 +6,7 @@ defmodule ExhsWeb.MemberLive.Events do
 
   @impl true
   def mount(_params, _session, socket) do
-    {:ok, socket}
+    {:ok, assign(socket, loading: true)}
   end
 
   @impl true
@@ -46,22 +46,29 @@ defmodule ExhsWeb.MemberLive.Events do
         <:subtitle>Events fra dine foreninger</:subtitle>
       </.header>
 
-      <div class="mt-6">
-        <LiveFilter.bar filter={@livefilter} />
+      <div :if={@loading} class="mt-6 space-y-4">
+        <.skeleton class="h-10 w-full" />
+        <.skeleton class="h-64 w-full" />
       </div>
 
-      <div :if={@events == []} class="mt-8">
-        <.empty_state icon="hero-calendar-days" title="Ingen kommende events">
-          Der er ingen kommende events fra dine foreninger.
-        </.empty_state>
-      </div>
+      <div :if={!@loading}>
+        <div class="mt-6">
+          <LiveFilter.bar filter={@livefilter} />
+        </div>
 
-      <div :if={@events != []} class="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        <.event_card :for={entry <- @events} entry={entry} />
-      </div>
+        <div :if={@events == []} class="mt-8">
+          <.empty_state icon="hero-calendar-days" title="Ingen kommende events">
+            Der er ingen kommende events fra dine foreninger.
+          </.empty_state>
+        </div>
 
-      <div :if={@events != []} class="mt-6">
-        <LiveFilter.paginator pagination={@pagination} />
+        <div :if={@events != []} class="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <.event_card :for={entry <- @events} entry={entry} />
+        </div>
+
+        <div :if={@events != []} class="mt-6">
+          <LiveFilter.paginator pagination={@pagination} />
+        </div>
       </div>
     </Layouts.member>
     """
@@ -127,6 +134,7 @@ defmodule ExhsWeb.MemberLive.Events do
     |> assign(:events, page)
     |> assign(:pagination, pagination)
     |> assign(:page_title, "Kommende events")
+    |> assign(:loading, false)
   end
 
   defp apply_filters(events, filters) do

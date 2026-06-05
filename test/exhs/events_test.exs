@@ -42,7 +42,7 @@ defmodule Exhs.EventsTest do
                Events.create_event(event_attrs(), tenant: forening.id, scope: scope)
     end
 
-    test "list_upcoming_events returns only future published events" do
+    test "list_public_events returns only future published events" do
       forening = create_forening!()
       admin = register_user!()
       invite_member!(forening, admin, :admin)
@@ -60,7 +60,7 @@ defmodule Exhs.EventsTest do
           scope: scope
         )
 
-      upcoming = Events.list_upcoming_events!(scope: scope)
+      upcoming = Events.list_public_events!(scope: scope)
       assert length(upcoming) == 1
       assert hd(upcoming).id == published.id
     end
@@ -515,8 +515,8 @@ defmodule Exhs.EventsTest do
       create_published_event!(f_a, %{title: "Alpha Event"})
       create_published_event!(f_b, %{title: "Beta Event"})
 
-      a_events = Events.list_upcoming_events!(scope: scope(admin, f_a))
-      b_events = Events.list_upcoming_events!(scope: scope(admin, f_b))
+      a_events = Events.list_public_events!(scope: scope(admin, f_a))
+      b_events = Events.list_public_events!(scope: scope(admin, f_b))
 
       assert Enum.all?(a_events, &(&1.forening_id == f_a.id))
       assert Enum.all?(b_events, &(&1.forening_id == f_b.id))

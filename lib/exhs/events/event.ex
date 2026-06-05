@@ -65,11 +65,6 @@ defmodule Exhs.Events.Event do
       get_by :id
     end
 
-    read :list_upcoming do
-      prepare build(filter: [published: true], sort: [starts_at: :asc])
-      filter expr(starts_at > now())
-    end
-
     read :list_public do
       prepare build(filter: [published: true], sort: [starts_at: :asc])
       filter expr(starts_at > now())
@@ -97,10 +92,6 @@ defmodule Exhs.Events.Event do
 
     bypass Exhs.Checks.Superadmin do
       authorize_if always()
-    end
-
-    policy action(:list_upcoming) do
-      authorize_if actor_present()
     end
 
     policy action(:list_member_events) do

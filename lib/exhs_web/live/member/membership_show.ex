@@ -20,7 +20,8 @@ defmodule ExhsWeb.MemberLive.MembershipShow do
          assign(socket,
            membership: membership,
            subscription: subscription,
-           page_title: membership.forening.name
+           page_title: membership.forening.name,
+           loading: false
          )}
     end
   end
@@ -59,7 +60,12 @@ defmodule ExhsWeb.MemberLive.MembershipShow do
         </:actions>
       </.header>
 
-      <div class="mt-8 grid gap-6 lg:grid-cols-2">
+      <div :if={@loading} class="mt-6 space-y-4">
+        <.skeleton class="h-10 w-full" />
+        <.skeleton class="h-64 w-full" />
+      </div>
+
+      <div :if={!@loading} class="mt-8 grid gap-6 lg:grid-cols-2">
         <.card class="p-6">
           <h2 class="text-base-content mb-4 font-semibold">Medlemskab</h2>
           <.list>
