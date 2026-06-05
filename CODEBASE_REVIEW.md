@@ -323,8 +323,9 @@ The test suite is strong overall. These are the notable gaps:
 6. **DONE Delete dead code** (#14) — PageController, PageHTML, template removed
 7. **DONE Extract shared helpers** (#22) — ExhsWeb.DisplayHelpers module
 8. **DONE Add missing test builders** (#20) and fill cross-tenant test gaps
-9. **Replace client-side filtering** with server-side queries as data grows
-10. **Migrate SimpleChecks to FilterChecks** (#18) — medium-term performance improvement
+9. **DONE Replace client-side filtering** — events N+1 (#9), activity post-pagination filter (#10), membership show load-all (#11, #12)
+10. **DONE Migrate SimpleChecks to FilterChecks** (#18) — HasMembershipRole and ActiveMember now push into SQL
+11. **DONE Replace raw Ash.Query in webhook** (#15) — all four queries now use code interfaces
 
 ---
 
