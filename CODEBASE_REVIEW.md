@@ -315,13 +315,13 @@ The test suite is strong overall. These are the notable gaps:
 
 ## Recommendations (Priority Order)
 
-1. **Fix the security issues** — `my_payments` auth bypass (#1), open redirect (#6), CSS injection (#5)
-2. **Fix the bugs** — render-time query (#4), `Jason.decode!` crash (#8), `String.to_existing_atom` crash (#3)
-3. **Add missing policy** — Registration `:promote` (#7)
-4. **Address capacity race condition** (#2) — especially if events will have limited seating
-5. **Fix `Mix.env()` in endpoint** (#13) — will crash in releases
-6. **Delete dead code** (#14) — quick wins for clarity
-7. **Extract shared helpers** (#22) — biggest readability improvement
+1. **DONE Fix the security issues** — `my_payments` auth bypass (#1), open redirect (#6), CSS injection (#5)
+2. **DONE Fix the bugs** — render-time query (#4), `Jason.decode!` crash (#8), `String.to_existing_atom` crash (#3)
+3. **DONE Add missing policy** — Registration `:promote` (#7)
+4. **DONE Address capacity race condition** (#2) — FOR UPDATE lock on ticket type row
+5. **DONE Fix `Mix.env()` in endpoint** (#13) — replaced with `code_reloading?`
+6. **DONE Delete dead code** (#14) — PageController, PageHTML, template removed
+7. **DONE Extract shared helpers** (#22) — ExhsWeb.DisplayHelpers module
 8. **DONE Add missing test builders** (#20) and fill cross-tenant test gaps
 9. **Replace client-side filtering** with server-side queries as data grows
 10. **Migrate SimpleChecks to FilterChecks** (#18) — medium-term performance improvement
