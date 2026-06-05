@@ -168,7 +168,7 @@ defmodule ExhsWeb.Layouts do
         </div>
       </nav>
 
-      <div class="border-base-content/5 flex items-center gap-1 overflow-x-auto border-b px-4 py-2 md:hidden">
+      <div class="border-base-content/5 flex flex-wrap items-center gap-1 border-b px-4 py-2 md:hidden">
         <.nav_link href="/dashboard" label="Dashboard" current_path={@current_path} />
         <.nav_link href="/upcoming" label="Events" current_path={@current_path} />
         <.nav_link href="/registrations" label="Mine events" current_path={@current_path} />
@@ -248,7 +248,7 @@ defmodule ExhsWeb.Layouts do
     <.link
       navigate={@href}
       class={[
-        "rounded-lg px-3 py-1.5 text-sm font-medium whitespace-nowrap transition",
+        "rounded-lg px-2.5 py-1.5 text-xs sm:px-3 sm:text-sm font-medium whitespace-nowrap transition",
         if(@active,
           do: "bg-base-content/8 text-base-content",
           else: "hover:bg-base-content/5 hover:text-base-content/80 text-base-content/50"

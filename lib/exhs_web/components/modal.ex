@@ -34,7 +34,7 @@ defmodule ExhsWeb.Components.Modal do
             phx-window-keydown={JS.exec("data-cancel", to: "##{@id}")}
             phx-key="escape"
             phx-click-away={JS.exec("data-cancel", to: "##{@id}")}
-            class="glass-surface w-full max-w-lg rounded-2xl p-6 shadow-2xl"
+            class="glass-surface w-full max-w-[calc(100vw-2rem)] sm:max-w-lg rounded-2xl p-4 sm:p-6 shadow-2xl"
           >
             <div class="absolute top-4 right-4">
               <button

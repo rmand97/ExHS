@@ -118,7 +118,7 @@ defmodule ExhsWeb.PublicLive.Home do
   defp event_card(assigns) do
     ~H"""
     <a href={"/events/#{@event.id}"} class="group">
-      <.card class="overflow-hidden transition hover:scale-[1.02]">
+      <.card class="overflow-hidden transition sm:hover:scale-[1.02]">
         <div :if={@event.cover_image_url} class="aspect-video overflow-hidden">
           <img
             src={@event.cover_image_url}
@@ -202,7 +202,7 @@ defmodule ExhsWeb.PublicLive.Home do
           </p>
         </div>
 
-        <div class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+        <div class="grid grid-cols-1 gap-4 md:gap-6 md:grid-cols-2 lg:grid-cols-3">
           <.feature_card
             icon="hero-users"
             color="primary"
@@ -248,7 +248,7 @@ defmodule ExhsWeb.PublicLive.Home do
   defp marketing_cta(assigns) do
     ~H"""
     <section class="px-4 py-20 sm:px-6">
-      <div class="glass-surface mx-auto max-w-4xl rounded-3xl px-8 py-16 text-center">
+      <div class="glass-surface mx-auto max-w-4xl rounded-3xl px-6 py-12 text-center sm:px-8 sm:py-16">
         <h2 class="text-base-content text-3xl font-bold tracking-tight">
           Klar til at komme i gang?
         </h2>
@@ -266,7 +266,7 @@ defmodule ExhsWeb.PublicLive.Home do
 
   defp feature_card(assigns) do
     ~H"""
-    <.card class="group p-6 transition hover:scale-[1.02]">
+    <.card class="group p-6 transition sm:hover:scale-[1.02]">
       <div class={[
         "mb-4 flex size-12 items-center justify-center rounded-xl",
         feature_icon_class(@color)

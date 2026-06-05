@@ -8,7 +8,7 @@ defmodule ExhsWeb.Components.Header do
 
   def header(assigns) do
     ~H"""
-    <header class={[@actions != [] && "flex items-center justify-between gap-6", "pb-4"]}>
+    <header class={[@actions != [] && "flex items-center justify-between gap-3 sm:gap-6", "pb-4"]}>
       <div>
         <h1 class="text-lg/8 font-semibold">
           {render_slot(@inner_block)}

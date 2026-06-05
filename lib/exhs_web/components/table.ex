@@ -26,6 +26,7 @@ defmodule ExhsWeb.Components.Table do
       end
 
     ~H"""
+    <div class="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">
     <table class="table-zebra table">
       <thead>
         <tr>
@@ -54,6 +55,7 @@ defmodule ExhsWeb.Components.Table do
         </tr>
       </tbody>
     </table>
+    </div>
     """
   end
 end

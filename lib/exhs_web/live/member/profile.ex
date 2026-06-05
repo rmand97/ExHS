@@ -42,7 +42,7 @@ defmodule ExhsWeb.MemberLive.Profile do
       </.header>
 
       <div class="mx-auto mt-8 max-w-2xl">
-        <.card class="p-6 sm:p-8">
+        <.card class="sm:p-8">
           <.form for={@form} phx-change="validate" phx-submit="submit" class="space-y-6">
             <div class="grid gap-4 sm:grid-cols-2">
               <.input field={@form[:first_name]} label="Fornavn" />
