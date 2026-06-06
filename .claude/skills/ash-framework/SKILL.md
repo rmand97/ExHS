@@ -53,7 +53,7 @@ metadata:
 ## Searching Documentation
 
 ```sh
-mix usage_rules.search_docs "search term" -p ash -p ash_admin -p ash_ai -p ash_authentication -p ash_authentication_phoenix -p ash_events -p ash_oban -p ash_phoenix -p ash_postgres
+mix usage_rules.search_docs "search term" -p ash -p ash_admin -p ash_ai -p ash_authentication -p ash_authentication_phoenix -p ash_events -p ash_oban -p ash_phoenix -p ash_postgres -p ash_state_machine
 ```
 
 ## Available Mix Tasks
@@ -118,4 +118,7 @@ mix usage_rules.search_docs "search term" -p ash -p ash_admin -p ash_ai -p ash_a
 - `mix ash_postgres.setup_vector` - Sets up pgvector for AshPostgres
 - `mix ash_postgres.setup_vector.docs`
 - `mix ash_postgres.squash_snapshots` - Cleans snapshots folder, leaving only one snapshot per resource
+- `mix ash_state_machine.generate_flow_charts` - Generates Mermaid Flow Charts for each resource using `AshStateMachine`
+- `mix ash_state_machine.install` - Installs AshStateMachine
+- `mix ash_state_machine.install.docs`
 <!-- usage-rules-skill-end -->

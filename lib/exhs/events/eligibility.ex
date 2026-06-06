@@ -10,14 +10,27 @@ defmodule Exhs.Events.Eligibility do
 
   require Ash.Query
 
-  def status(ticket_type, event, membership, tenant) do
+  def status(ticket_type, event, membership, tenant),
+    do: status(ticket_type, event, membership, tenant, eligible_group_ids(ticket_type.id, tenant))
+
+  @doc """
+  Same as `status/4` but with the ticket type's gating group ids supplied by the
+  caller, so a UI rendering many tickets fetches them once instead of per call.
+  """
+  def status(ticket_type, event, membership, tenant, group_ids) do
     cond do
       not within_window?(ticket_type, event) -> window_state(ticket_type, event)
-      not eligible?(ticket_type, membership, tenant) -> :ineligible
+      not eligible_for_groups?(group_ids, membership, tenant) -> :ineligible
       sold_out?(ticket_type, tenant) -> :sold_out
       true -> :available
     end
   end
+
+  defp eligible_for_groups?([], _membership, _tenant), do: true
+  defp eligible_for_groups?(_group_ids, nil, _tenant), do: false
+
+  defp eligible_for_groups?(group_ids, membership, tenant),
+    do: member_in_any_group?(membership.id, group_ids, tenant)
 
   @doc "True when the ticket type is restricted to one or more groups."
   def gated?(ticket_type, tenant) do
@@ -40,12 +53,6 @@ defmodule Exhs.Events.Eligibility do
     after_close? = closes && DateTime.compare(now, closes) == :gt
 
     !before_open? and !after_close?
-  end
-
-  @doc "True when `membership` may buy `ticket_type` given its group gating."
-  def eligible?(ticket_type, membership, tenant) do
-    group_ids = eligible_group_ids(ticket_type.id, tenant)
-    group_ids == [] or (membership && member_in_any_group?(membership.id, group_ids, tenant))
   end
 
   @doc "Group ids a ticket type is gated to (empty when ungated)."

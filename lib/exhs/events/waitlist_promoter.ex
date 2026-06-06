@@ -21,7 +21,7 @@ defmodule Exhs.Events.WaitlistPromoter do
   defp next_waitlisted(ticket_type_id, tenant) do
     Registration
     |> Query.filter(ticket_type_id == ^ticket_type_id and status == :waitlisted)
-    |> Query.sort(registered_at: :asc)
+    |> Query.sort(registered_at: :asc, id: :asc)
     |> Query.limit(1)
     |> Ash.read!(tenant: tenant, authorize?: false)
     |> List.first()

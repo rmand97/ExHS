@@ -150,17 +150,26 @@ defmodule Exhs.Billing.Webhook do
          intent_id when is_binary(intent_id) <- charge["payment_intent"],
          %Payment{} = existing <- existing_payment_by_intent(intent_id, forening.id) do
       {:ok, refunded} = Billing.mark_payment_refunded(existing, authorize?: false)
-      maybe_free_order_seats(refunded, forening.id)
+      if full_refund?(charge), do: maybe_free_order_seats(refunded, forening.id)
       {:ok, refunded}
     else
       _ -> :ok
     end
   end
 
+  # Stripe sends `charge.refunded` for partial refunds too. Only a full refund
+  # releases the order's seats; a partial refund leaves the booking intact.
+  defp full_refund?(charge) do
+    refunded = charge["amount_refunded"] || 0
+    amount = charge["amount"] || 0
+    amount > 0 and refunded >= amount
+  end
+
   # Refunding a paid ticket order frees its seats and promotes the waitlist.
+  # Skips orders already cancelled/expired so a repeat refund event is a no-op.
   defp maybe_free_order_seats(%Payment{payable_type: :order, payable_id: order_id}, forening_id) do
     case Exhs.Events.get_order(order_id, tenant: forening_id, authorize?: false) do
-      {:ok, order} ->
+      {:ok, %{status: status} = order} when status in [:building, :pending_payment, :paid] ->
         Exhs.Events.cancel_order(order, tenant: forening_id, authorize?: false)
         :ok
 

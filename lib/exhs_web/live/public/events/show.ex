@@ -4,7 +4,7 @@ defmodule ExhsWeb.PublicLive.Events.Show do
 
   alias Exhs.Checks.Helpers
   alias Exhs.Events
-  alias Exhs.Events.{Availability, Eligibility}
+  alias Exhs.Events.{Availability, Eligibility, Waitlist}
 
   @impl true
   def mount(%{"id" => id}, _session, socket) do
@@ -37,10 +37,11 @@ defmodule ExhsWeb.PublicLive.Events.Show do
             selected_addons: [],
             responses: %{}
           )
-          |> load_tickets()
           |> load_addons()
+          |> load_ticket_meta()
+          |> refresh_tickets()
           |> load_pending_order()
-          |> schedule_tick()
+          |> maybe_schedule_tick()
 
         {:ok, socket}
 
@@ -49,20 +50,21 @@ defmodule ExhsWeb.PublicLive.Events.Show do
     end
   end
 
+  # Another viewer's seat change only moves availability, never this viewer's own
+  # pending order, so we refresh just the ticket list — not the whole socket.
   @impl true
   def handle_info({:availability_changed, _event_id}, socket) do
-    {:noreply, socket |> load_tickets() |> load_pending_order()}
+    {:noreply, refresh_tickets(socket)}
   end
 
   def handle_info(:tick, socket) do
-    socket = schedule_tick(socket)
-
     case socket.assigns.pending_order do
       %{held_until: held_until} = order ->
         if DateTime.compare(DateTime.utc_now(), held_until) != :lt do
-          {:noreply, socket |> assign(pending_order: nil) |> load_tickets()}
+          # Hold lapsed: drop the banner and stop the timer (no reschedule).
+          {:noreply, socket |> assign(pending_order: nil) |> refresh_tickets()}
         else
-          {:noreply, assign(socket, countdown: remaining_seconds(order))}
+          {:noreply, socket |> assign(countdown: remaining_seconds(order)) |> tick_after()}
         end
 
       _ ->
@@ -263,8 +265,14 @@ defmodule ExhsWeb.PublicLive.Events.Show do
             >
               Vælg
             </button>
+            <div
+              :if={t.waitlist}
+              class="bg-info/10 text-info rounded-lg px-3 py-2 text-center text-xs font-medium"
+            >
+              På venteliste — plads {t.waitlist.position} af {t.waitlist.total}
+            </div>
             <p
-              :if={@current_user && t.status != :available}
+              :if={@current_user && !t.waitlist && t.status != :available}
               class="text-base-content/40 text-center text-xs"
             >
               {reason(t.status)}
@@ -409,9 +417,41 @@ defmodule ExhsWeb.PublicLive.Events.Show do
     end
   end
 
-  defp load_tickets(socket) do
-    %{event: event, membership: membership} = socket.assigns
+  # Static per-ticket data that never changes on a seat event — gating groups and
+  # custom questions. Loaded once on mount so the live `refresh_tickets/1` hot
+  # path (run on every availability broadcast) only re-queries seat-dependent
+  # bits, instead of re-fetching groups and questions for every connected viewer.
+  defp load_ticket_meta(socket) do
+    %{event: event} = socket.assigns
     tenant = event.forening_id
+
+    meta =
+      case Events.list_ticket_types_for_event(event.id, tenant: tenant, authorize?: false) do
+        {:ok, types} ->
+          Enum.map(types, fn tt ->
+            group_ids = Eligibility.eligible_group_ids(tt.id, tenant)
+
+            %{
+              ticket_type: tt,
+              group_ids: group_ids,
+              gated?: group_ids != [],
+              questions: questions(tt.id, tenant)
+            }
+          end)
+
+        _ ->
+          []
+      end
+
+    assign(socket, ticket_meta: meta)
+  end
+
+  # Recomputes only the seat-dependent view of each ticket (seats left, status,
+  # waitlist standing) from the cached meta. Run on mount and on every broadcast.
+  defp refresh_tickets(socket) do
+    %{event: event, membership: membership, ticket_meta: meta} = socket.assigns
+    tenant = event.forening_id
+    meta_by_id = Map.new(meta, &{&1.ticket_type.id, &1})
 
     tickets =
       case Events.list_ticket_types_for_event(event.id,
@@ -420,15 +460,16 @@ defmodule ExhsWeb.PublicLive.Events.Show do
              load: [:seats_left]
            ) do
         {:ok, types} ->
-          Enum.map(types, fn tt ->
+          for tt <- types, m = meta_by_id[tt.id], m != nil do
             %{
               ticket_type: tt,
               seats_left: tt.seats_left,
-              gated?: Eligibility.gated?(tt, tenant),
-              status: Eligibility.status(tt, event, membership, tenant),
-              questions: questions(tt.id, tenant)
+              gated?: m.gated?,
+              status: Eligibility.status(tt, event, membership, tenant, m.group_ids),
+              waitlist: waitlist_standing(tt, membership, tenant),
+              questions: m.questions
             }
-          end)
+          end
 
         _ ->
           []
@@ -453,6 +494,11 @@ defmodule ExhsWeb.PublicLive.Events.Show do
 
     assign(socket, addons: addons)
   end
+
+  defp waitlist_standing(_ticket_type, nil, _tenant), do: nil
+
+  defp waitlist_standing(ticket_type, membership, tenant),
+    do: Waitlist.standing(ticket_type.id, membership.id, tenant)
 
   defp questions(ticket_type_id, tenant) do
     case Events.list_ticket_type_questions(ticket_type_id, tenant: tenant) do
@@ -487,7 +533,13 @@ defmodule ExhsWeb.PublicLive.Events.Show do
        order.held_until) && DateTime.compare(DateTime.utc_now(), order.held_until) == :lt
   end
 
-  defp schedule_tick(socket) do
+  # Only run the 1s countdown clock while a hold is actually pending — idle
+  # viewers don't tick.
+  defp maybe_schedule_tick(socket) do
+    if socket.assigns[:pending_order], do: tick_after(socket), else: socket
+  end
+
+  defp tick_after(socket) do
     if connected?(socket), do: Process.send_after(self(), :tick, 1000)
     socket
   end

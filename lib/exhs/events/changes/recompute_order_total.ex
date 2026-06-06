@@ -13,14 +13,20 @@ defmodule Exhs.Events.Changes.RecomputeOrderTotal do
 
       total = items_total(order_id, tenant)
 
-      {:ok, order} = Ash.get(Exhs.Events.Order, order_id, tenant: tenant, authorize?: false)
+      # The parent order can be gone (e.g. cancelled concurrently with a remove);
+      # if so there's nothing to retotal and the item change still stands.
+      case Ash.get(Exhs.Events.Order, order_id, tenant: tenant, authorize?: false) do
+        {:ok, order} ->
+          order
+          |> Changeset.for_update(:set_total, %{total_cents: total},
+            tenant: tenant,
+            authorize?: false
+          )
+          |> Ash.update!()
 
-      order
-      |> Changeset.for_update(:set_total, %{total_cents: total},
-        tenant: tenant,
-        authorize?: false
-      )
-      |> Ash.update!()
+        _ ->
+          :ok
+      end
 
       {:ok, record}
     end)

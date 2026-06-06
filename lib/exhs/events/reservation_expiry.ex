@@ -29,7 +29,10 @@ defmodule Exhs.Events.ReservationExpiry do
     :ok
   end
 
-  defp expired?(%{held_until: nil}), do: true
+  # A pending_payment order always has a `held_until` (set at `begin_checkout`).
+  # If one somehow lacks a deadline, treat it as not-yet-expired rather than
+  # releasing a hold we can't prove has lapsed.
+  defp expired?(%{held_until: nil}), do: false
 
   defp expired?(%{held_until: held_until}),
     do: DateTime.compare(DateTime.utc_now(), held_until) != :lt

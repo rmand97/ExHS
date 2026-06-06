@@ -73,6 +73,7 @@ defmodule Exhs.MixProject do
       {:ash_authentication, "~> 4.0"},
       {:ash_postgres, "~> 2.0"},
       {:ash_events, "~> 0.7"},
+      {:ash_state_machine, "~> 0.2"},
       {:ash_oban, "~> 0.4"},
       {:ash_ai, "~> 0.3"},
       {:oban, "~> 2.18"},

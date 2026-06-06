@@ -49,6 +49,50 @@ defmodule Exhs.Events.CheckoutTest do
     end
   end
 
+  describe "order state machine" do
+    test "a paid order cannot be expired or marked paid again" do
+      %{forening: f, membership: m, event: e} = setup_paid!()
+      tt = create_ticket_type!(f, e, %{price_cents: 0})
+      order = create_order!(f, m, e)
+      add_ticket_item!(f, order, tt)
+      {:ok, %{order: paid}} = checkout(f, order)
+      assert paid.status == :paid
+
+      assert {:error, %Ash.Error.Invalid{}} =
+               Events.expire_order(paid, tenant: f.id, authorize?: false)
+
+      assert {:error, %Ash.Error.Invalid{}} =
+               Events.mark_order_paid(paid, tenant: f.id, authorize?: false)
+    end
+
+    test "an expired order cannot be marked paid" do
+      %{forening: f, membership: m, event: e} = setup_paid!()
+      tt = create_ticket_type!(f, e, %{price_cents: 10_000, capacity: 1})
+      order = create_order!(f, m, e)
+      add_ticket_item!(f, order, tt)
+      {:ok, %{order: pending}} = checkout(f, order)
+      assert pending.status == :pending_payment
+
+      {:ok, expired} = Events.expire_order(pending, tenant: f.id, authorize?: false)
+      assert expired.status == :expired
+
+      assert {:error, %Ash.Error.Invalid{}} =
+               Events.mark_order_paid(expired, tenant: f.id, authorize?: false)
+    end
+
+    test "a cancelled order cannot be expired" do
+      %{forening: f, membership: m, event: e} = setup_paid!()
+      tt = create_ticket_type!(f, e, %{price_cents: 0})
+      order = create_order!(f, m, e)
+      add_ticket_item!(f, order, tt)
+      {:ok, cancelled} = Events.cancel_order(order, tenant: f.id, authorize?: false)
+      assert cancelled.status == :cancelled
+
+      assert {:error, %Ash.Error.Invalid{}} =
+               Events.expire_order(cancelled, tenant: f.id, authorize?: false)
+    end
+  end
+
   describe "paid checkout" do
     test "builds a session, stores id, sets hold, moves to pending_payment" do
       %{forening: f, membership: m, event: e} = setup_paid!()
@@ -181,7 +225,13 @@ defmodule Exhs.Events.CheckoutTest do
       refund = %{
         "type" => "charge.refunded",
         "account" => f.stripe_account_id,
-        "data" => %{"object" => %{"payment_intent" => "pi_refund"}}
+        "data" => %{
+          "object" => %{
+            "payment_intent" => "pi_refund",
+            "amount" => 10_000,
+            "amount_refunded" => 10_000
+          }
+        }
       }
 
       assert {:ok, _} = Billing.Webhook.apply_event(refund)
@@ -191,6 +241,35 @@ defmodule Exhs.Events.CheckoutTest do
 
       assert reg.status == :cancelled
       assert Events.Capacity.seats_taken(tt.id, f.id) == 0
+    end
+
+    test "partial refund marks payment refunded but keeps the seat" do
+      %{forening: f, membership: m, event: e} = setup_paid!()
+      tt = create_ticket_type!(f, e, %{price_cents: 10_000, capacity: 1})
+      order = create_order!(f, m, e)
+      item = add_ticket_item!(f, order, tt)
+      {:ok, %{order: pending}} = checkout(f, order)
+      apply_completed(f, pending, "pi_partial")
+
+      refund = %{
+        "type" => "charge.refunded",
+        "account" => f.stripe_account_id,
+        "data" => %{
+          "object" => %{
+            "payment_intent" => "pi_partial",
+            "amount" => 10_000,
+            "amount_refunded" => 4_000
+          }
+        }
+      }
+
+      assert {:ok, _} = Billing.Webhook.apply_event(refund)
+
+      {:ok, reg} =
+        Events.get_registration_by_id(item.registration_id, tenant: f.id, authorize?: false)
+
+      assert reg.status == :confirmed
+      assert Events.Capacity.seats_taken(tt.id, f.id) == 1
     end
   end
 

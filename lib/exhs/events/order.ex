@@ -10,7 +10,7 @@ defmodule Exhs.Events.Order do
     domain: Exhs.Events,
     data_layer: AshPostgres.DataLayer,
     authorizers: [Ash.Policy.Authorizer],
-    extensions: [AshEvents.Events]
+    extensions: [AshEvents.Events, AshStateMachine]
 
   postgres do
     table "event_orders"
@@ -27,12 +27,29 @@ defmodule Exhs.Events.Order do
     event_log Exhs.Audit.EventLog
   end
 
+  # Order lifecycle. `transition_state` rejects any move not listed here, so an
+  # out-of-order or duplicate webhook can't drag an order into an illegal state.
+  # `mark_paid` accepts `:building` (free orders confirm without a hold) and
+  # `:pending_payment` (paid orders after Stripe). `cancel` accepts `:paid` for
+  # refund-driven seat release.
+  state_machine do
+    initial_states([:building])
+    default_initial_state(:building)
+    state_attribute(:status)
+
+    transitions do
+      transition(:begin_checkout, from: :building, to: :pending_payment)
+      transition(:mark_paid, from: [:building, :pending_payment], to: :paid)
+      transition(:cancel, from: [:building, :pending_payment, :paid], to: :cancelled)
+      transition(:expire, from: :pending_payment, to: :expired)
+    end
+  end
+
   actions do
     defaults [:read]
 
     create :create do
       accept [:event_id, :membership_id]
-      change set_attribute(:status, :building)
       change set_attribute(:total_cents, 0)
     end
 
@@ -42,12 +59,12 @@ defmodule Exhs.Events.Order do
 
     update :begin_checkout do
       accept [:stripe_checkout_session_id, :held_until]
-      change set_attribute(:status, :pending_payment)
+      change transition_state(:pending_payment)
     end
 
     update :mark_paid do
       require_atomic? false
-      change set_attribute(:status, :paid)
+      change transition_state(:paid)
       change set_attribute(:paid_at, &DateTime.utc_now/0)
       change set_attribute(:held_until, nil)
       change Exhs.Events.Changes.ConfirmOrderRegistrations
@@ -55,14 +72,13 @@ defmodule Exhs.Events.Order do
 
     update :cancel do
       require_atomic? false
-      change set_attribute(:status, :cancelled)
+      change transition_state(:cancelled)
       change Exhs.Events.Changes.ReleaseOrderHolds
     end
 
     update :expire do
       require_atomic? false
-      validate attribute_does_not_equal(:status, :paid)
-      change set_attribute(:status, :expired)
+      change transition_state(:expired)
       change Exhs.Events.Changes.ReleaseOrderHolds
     end
 

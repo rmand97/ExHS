@@ -5,10 +5,13 @@
 > Stripe Checkout, webhook confirm/refund, `ReservationExpiry` Oban worker, live
 > availability via PubSub, hold countdown, buyer purchase flow, member order
 > views, and admin management (price/capacity/sales window/eligible groups/
-> questions/add-ons + live sold/left stats). 483 tests pass; credo --strict
-> clean. Decided open questions: hold N = 10 min fixed; refund auto-frees seat +
-> promotes waitlist; add-ons must accompany a ticket. Not done: surfacing live
-> **waitlist position** in the buyer LiveView (the two unchecked items below).
+> questions/add-ons + live sold/left stats), and live **waitlist position** in
+> the buyer LiveView (advances in real time on promotion via PubSub). Order
+> lifecycle is an `AshStateMachine`; partial Stripe refunds keep the seat;
+> waitlist ordering is `(registered_at, id)` so the shown position matches
+> promotion order. 504 tests pass; credo --strict clean. Decided open questions:
+> hold N = 10 min fixed; refund auto-frees seat + promotes waitlist; add-ons
+> must accompany a ticket.
 
 ## Goal
 
@@ -113,7 +116,7 @@ the core.
 - [x] Rework `ExhsWeb.PublicLive.Events.Show` purchase panel — replace the dead `href="#"` "Tilmeld" with a real multi-step flow in one LiveView: select ticket → answer questions → choose add-ons → review → pay
 - [x] **Live availability**: PubSub topic per event; broadcast on reserve/confirm/release so all viewers see `seats_left` update in real time (e.g. "kun 3 tilbage")
 - [x] **Live countdown**: while held, show a ticking `held_until` timer; auto-expire UI and re-enable purchase when it lapses
-- [ ] **Live waitlist**: show waitlist position; update when promoted
+- [x] **Live waitlist**: show waitlist position; update when promoted
 - [x] Group-gated tickets render a presale badge and hide/disable for ineligible members with a clear reason
 - [x] On free ticket: confirm in place, no redirect. On paid: redirect to Stripe, return to a confirmation LiveView
 - [x] `ExhsWeb.MemberLive` — "Mine billetter" / order confirmation + receipt (Stripe-hosted), live status
@@ -225,7 +228,7 @@ Happy:
 - [x] **live availability**: second process buys/reserves → first viewer's `seats_left` decrements via PubSub ("kun N tilbage")
 - [x] **live countdown**: held order shows ticking `held_until` timer
 - [x] **live release**: hold expires → first viewer's UI re-enables purchase, seats restored
-- [ ] **live waitlist**: promotion updates waitlist position for the viewer
+- [x] **live waitlist**: promotion updates waitlist position for the viewer
 
 Bad / guard:
 - [x] ineligible (gated) member: ticket disabled with reason badge, submit blocked server-side too

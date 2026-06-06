@@ -36,6 +36,21 @@ defmodule ExhsWeb.PublicLive.TicketPurchaseTest do
     assert Enum.any?(regs, &(&1.ticket_type_id == tt.id and &1.status == :confirmed))
   end
 
+  test "anonymous viewer can load an event with a gated ticket", %{
+    conn: conn,
+    forening: f,
+    event: e
+  } do
+    tt = create_ticket_type!(f, e, %{name: "Presale", price_cents: 0})
+    group = create_group!(f)
+    gate_ticket_type!(f, tt, [group])
+
+    {:ok, _view, html} = live(forening_conn(conn, f), "/events/#{e.id}")
+
+    assert html =~ "Presale"
+    assert html =~ "Log ind for at tilmelde"
+  end
+
   test "gated ticket is disabled for ineligible member", %{conn: conn, forening: f, event: e} do
     tt = create_ticket_type!(f, e, %{name: "Presale", price_cents: 0})
     group = create_group!(f)
@@ -77,5 +92,35 @@ defmodule ExhsWeb.PublicLive.TicketPurchaseTest do
     register_for_event!(f, membership_for!(f, other), tt)
 
     assert render(view) =~ "kun 2 tilbage"
+  end
+
+  test "waitlisted viewer sees position, which advances live on promotion", %{
+    conn: conn,
+    forening: f,
+    event: e
+  } do
+    tt = create_ticket_type!(f, e, %{name: "Venteliste", price_cents: 0, capacity: 1})
+
+    # one confirmed buyer takes the only seat
+    holder = register_user!()
+    join_forening!(f, holder)
+    register_for_event!(f, membership_for!(f, holder), tt)
+
+    # one member ahead of the viewer on the waitlist
+    ahead = register_user!()
+    join_forening!(f, ahead)
+    ahead_reg = register_for_event!(f, membership_for!(f, ahead), tt)
+    assert ahead_reg.status == :waitlisted
+
+    # the viewer joins the waitlist behind them
+    {conn, user} = member_conn(conn, f)
+    register_for_event!(f, membership_for!(f, user), tt)
+
+    {:ok, view, html} = live(conn, "/events/#{e.id}")
+    assert html =~ "plads 2 af 2"
+
+    Events.promote_registration!(ahead_reg, tenant: f.id, authorize?: false)
+
+    assert render(view) =~ "plads 1 af 1"
   end
 end

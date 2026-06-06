@@ -119,6 +119,21 @@ defmodule Exhs.Events.OrderTest do
       {:ok, reloaded} = Events.get_order(order.id, tenant: f.id, authorize?: false)
       assert reloaded.total_cents == 10_000
     end
+
+    test "state machine rejects an illegal transition" do
+      %{forening: f, membership: m, event: e} = setup_buyer!()
+      order = create_order!(f, m, e)
+      {:ok, cancelled} = Events.cancel_order(order, tenant: f.id, authorize?: false)
+
+      # :cancelled is terminal — re-checking out is not a permitted transition.
+      assert {:error, %Ash.Error.Invalid{}} =
+               Events.begin_order_checkout(
+                 cancelled,
+                 %{stripe_checkout_session_id: "cs_x", held_until: DateTime.utc_now()},
+                 tenant: f.id,
+                 authorize?: false
+               )
+    end
   end
 
   describe "order item validation" do
