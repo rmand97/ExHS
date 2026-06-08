@@ -158,9 +158,11 @@ defmodule Exhs.MixProject do
         "compile --warnings-as-errors",
         "deps.unlock --check-unused",
         "format --check-formatted",
-        "usage_rules.sync --yes",
+        # precommit runs in :test; usage_rules is :dev-only, so sync in a :dev subprocess.
+        "cmd env MIX_ENV=dev mix usage_rules.sync --yes",
         "cmd git diff --exit-code .claude/skills/",
-        "credo --strict",
+        # credo in a subprocess so its started :credo app doesn't clash with the test boot.
+        "cmd mix credo --strict",
         "test"
       ]
     ]
