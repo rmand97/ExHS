@@ -310,6 +310,7 @@ defmodule ExhsWeb.PublicLive.Events.Show do
           <select
             :if={q.field_type == :select}
             name={"responses[#{q.id}]"}
+            required={q.required}
             class="select select-bordered select-sm w-full"
           >
             <option value="">Vælg…</option>
@@ -319,6 +320,7 @@ defmodule ExhsWeb.PublicLive.Events.Show do
             :if={q.field_type != :select}
             type={if q.field_type == :number, do: "number", else: "text"}
             name={"responses[#{q.id}]"}
+            required={q.required}
             class="input input-bordered input-sm w-full"
           />
         </div>
@@ -348,7 +350,11 @@ defmodule ExhsWeb.PublicLive.Events.Show do
           </span>
         </div>
 
-        <button type="submit" class="btn btn-block btn-primary">
+        <button
+          type="submit"
+          class="btn btn-block btn-primary"
+          phx-disable-with="Behandler…"
+        >
           {if preview_total(assigns) == 0, do: "Bekræft tilmelding", else: "Fortsæt til betaling"}
         </button>
       </form>

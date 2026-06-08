@@ -50,4 +50,43 @@ defmodule ExhsWeb.Labels do
   def reg_status_variant(:cancelled), do: "error"
   def reg_status_variant(:pending_payment), do: "default"
   def reg_status_variant(_), do: "default"
+
+  def order_status_label(:paid), do: "Betalt"
+  def order_status_label(:pending_payment), do: "Afventer betaling"
+  def order_status_label(:building), do: "Kladde"
+  def order_status_label(:cancelled), do: "Annulleret"
+  def order_status_label(:expired), do: "Udløbet"
+  def order_status_label(other), do: to_string(other)
+
+  def order_status_variant(:paid), do: "success"
+  def order_status_variant(:pending_payment), do: "warning"
+  def order_status_variant(:cancelled), do: "error"
+  def order_status_variant(:expired), do: "error"
+  def order_status_variant(_), do: "default"
+
+  @action_labels %{
+    create: "Oprettet",
+    update: "Opdateret",
+    destroy: "Slettet",
+    invite: "Inviteret",
+    set_role: "Rolle ændret",
+    activate: "Aktiveret",
+    deactivate: "Deaktiveret",
+    join: "Tilmeldt",
+    leave: "Forladt",
+    publish: "Publiceret",
+    register: "Tilmeldt",
+    record: "Registreret",
+    set_stripe_account: "Stripe tilsluttet",
+    set_stripe_customer: "Stripe-kunde sat"
+  }
+
+  @doc "Danish label for an audit-log action, falling back to a humanized atom."
+  def action_label(action) do
+    Map.get(
+      @action_labels,
+      action,
+      action |> to_string() |> String.replace("_", " ") |> String.capitalize()
+    )
+  end
 end

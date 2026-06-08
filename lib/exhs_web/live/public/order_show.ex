@@ -2,8 +2,12 @@ defmodule ExhsWeb.PublicLive.OrderShow do
   @moduledoc false
   use ExhsWeb, :live_view
 
+  import ExhsWeb.Labels, only: [order_status_label: 1, order_status_variant: 1]
+
   alias Exhs.Events
-  alias Exhs.Events.Availability
+  alias Exhs.Events.OrderUpdates
+
+  @order_load [items: [:ticket_type, :add_on], payment: []]
 
   @impl true
   def mount(%{"id" => id}, _session, socket) do
@@ -22,9 +26,9 @@ defmodule ExhsWeb.PublicLive.OrderShow do
   defp load(id, socket) do
     scope = socket.assigns.current_scope
 
-    case Events.get_order(id, scope: scope, load: [items: [:ticket_type, :add_on], payment: []]) do
+    case Events.get_order(id, scope: scope, load: @order_load) do
       {:ok, order} ->
-        if connected?(socket), do: Availability.subscribe(order.event_id)
+        if connected?(socket), do: OrderUpdates.subscribe(order.id)
         {:ok, assign(socket, order: order, page_title: "Ordre")}
 
       {:error, _} ->
@@ -33,10 +37,10 @@ defmodule ExhsWeb.PublicLive.OrderShow do
   end
 
   @impl true
-  def handle_info({:availability_changed, _event_id}, socket) do
+  def handle_info({:order_updated, _order_id}, socket) do
     case Events.get_order(socket.assigns.order.id,
            scope: socket.assigns.current_scope,
-           load: [items: [:ticket_type, :add_on], payment: []]
+           load: @order_load
          ) do
       {:ok, order} -> {:noreply, assign(socket, order: order)}
       _ -> {:noreply, socket}
@@ -92,32 +96,14 @@ defmodule ExhsWeb.PublicLive.OrderShow do
     """
   end
 
-  defp status_badge(%{status: :paid} = assigns) do
+  defp status_badge(assigns) do
     ~H"""
-    <span class="badge badge-success gap-1">
-      <.icon name="hero-check-circle-micro" class="size-4" /> Bekræftet
-    </span>
+    <.badge variant={order_status_variant(@status)}>
+      <.icon :if={@status == :paid} name="hero-check-circle-micro" class="size-4" />
+      {order_status_label(@status)}
+    </.badge>
     """
   end
-
-  defp status_badge(%{status: :pending_payment} = assigns) do
-    ~H"""
-    <span class="badge badge-warning">Afventer betaling</span>
-    """
-  end
-
-  defp status_badge(%{status: status} = assigns) do
-    assigns = assign(assigns, :label, label(status))
-
-    ~H"""
-    <span class="badge badge-ghost">{@label}</span>
-    """
-  end
-
-  defp label(:cancelled), do: "Annulleret"
-  defp label(:expired), do: "Udløbet"
-  defp label(:building), do: "Kladde"
-  defp label(other), do: to_string(other)
 
   defp item_name(%{item_type: :ticket, ticket_type: %{name: name}}), do: name
   defp item_name(%{item_type: :addon, add_on: %{name: name}}), do: name

@@ -2,20 +2,32 @@ defmodule ExhsWeb.PublicLive.Orders do
   @moduledoc false
   use ExhsWeb, :live_view
 
+  import ExhsWeb.Labels, only: [order_status_label: 1, order_status_variant: 1]
+
   alias Exhs.Events
+  alias Exhs.Events.OrderUpdates
 
   @impl true
   def mount(_params, _session, socket) do
     if socket.assigns[:current_user] do
-      orders =
-        case Events.list_my_orders(actor: socket.assigns.current_user) do
-          {:ok, orders} -> orders
-          _ -> []
-        end
+      orders = load_orders(socket)
+      if connected?(socket), do: Enum.each(orders, &OrderUpdates.subscribe(&1.id))
 
       {:ok, assign(socket, orders: orders, page_title: "Mine billetter")}
     else
       {:ok, redirect(socket, to: "/sign-in")}
+    end
+  end
+
+  @impl true
+  def handle_info({:order_updated, _order_id}, socket) do
+    {:noreply, assign(socket, orders: load_orders(socket))}
+  end
+
+  defp load_orders(socket) do
+    case Events.list_my_orders(actor: socket.assigns.current_user) do
+      {:ok, orders} -> orders
+      _ -> []
     end
   end
 
@@ -52,7 +64,9 @@ defmodule ExhsWeb.PublicLive.Orders do
                   <p class="text-base-content text-sm font-semibold">
                     {format_price(order.total_cents, order.currency)}
                   </p>
-                  <p class="text-base-content/50 text-xs">{order.status}</p>
+                  <.badge variant={order_status_variant(order.status)}>
+                    {order_status_label(order.status)}
+                  </.badge>
                 </div>
               </div>
             </.link>

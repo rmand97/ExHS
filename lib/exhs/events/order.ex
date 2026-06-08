@@ -60,6 +60,7 @@ defmodule Exhs.Events.Order do
     update :begin_checkout do
       accept [:stripe_checkout_session_id, :held_until]
       change transition_state(:pending_payment)
+      change Exhs.Events.Changes.BroadcastOrderStatus
     end
 
     update :mark_paid do
@@ -68,18 +69,21 @@ defmodule Exhs.Events.Order do
       change set_attribute(:paid_at, &DateTime.utc_now/0)
       change set_attribute(:held_until, nil)
       change Exhs.Events.Changes.ConfirmOrderRegistrations
+      change Exhs.Events.Changes.BroadcastOrderStatus
     end
 
     update :cancel do
       require_atomic? false
       change transition_state(:cancelled)
       change Exhs.Events.Changes.ReleaseOrderHolds
+      change Exhs.Events.Changes.BroadcastOrderStatus
     end
 
     update :expire do
       require_atomic? false
       change transition_state(:expired)
       change Exhs.Events.Changes.ReleaseOrderHolds
+      change Exhs.Events.Changes.BroadcastOrderStatus
     end
 
     read :get_by_id do
