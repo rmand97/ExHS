@@ -127,6 +127,7 @@ defmodule ExhsWeb.Layouts do
   attr :flash, :map, required: true
   attr :current_user, :map, required: true
   attr :current_path, :string, default: nil
+  attr :my_foreninger, :list, default: []
   slot :inner_block, required: true
 
   def member(assigns) do
@@ -150,8 +151,23 @@ defmodule ExhsWeb.Layouts do
             </div>
           </div>
           <div class="flex items-center gap-3">
+            <.dropdown :if={@my_foreninger != []} id="my-foreninger-menu" class="dropdown-end">
+              <:trigger>
+                <span class="btn btn-ghost btn-sm gap-1.5">
+                  <.icon name="hero-building-office-2" class="size-4" />
+                  <span class="hidden sm:inline">Dine foreninger</span>
+                  <.icon name="hero-chevron-down" class="size-3.5 opacity-60" />
+                </span>
+              </:trigger>
+              <.dropdown_item
+                :for={forening <- @my_foreninger}
+                href={forening_url(forening)}
+              >
+                <.forening_logo forening={forening} /> {forening.name}
+              </.dropdown_item>
+            </.dropdown>
             <div class="dropdown dropdown-end">
-              <div tabindex="0" role="button">
+              <div tabindex="0" role="button" aria-label="Brugermenu">
                 <.avatar initials={user_initials(@current_user)} size="sm" class="cursor-pointer" />
               </div>
               <ul
@@ -189,7 +205,7 @@ defmodule ExhsWeb.Layouts do
         </div>
       </nav>
 
-      <div class="border-base-content/5 flex flex-wrap items-center gap-1 border-b px-4 py-2 md:hidden">
+      <div class="border-base-content/5 flex items-center gap-1 overflow-x-auto border-b px-4 py-2 md:hidden">
         <.nav_link href="/dashboard" label="Dashboard" current_path={@current_path} />
         <.nav_link href="/upcoming" label="Events" current_path={@current_path} />
         <.nav_link href="/registrations" label="Mine events" current_path={@current_path} />
@@ -270,7 +286,7 @@ defmodule ExhsWeb.Layouts do
             <div class="hidden lg:block"></div>
             <div class="flex items-center gap-3">
               <div class="dropdown dropdown-end">
-                <div tabindex="0" role="button">
+                <div tabindex="0" role="button" aria-label="Brugermenu">
                   <.avatar initials={user_initials(@current_user)} size="sm" class="cursor-pointer" />
                 </div>
                 <ul

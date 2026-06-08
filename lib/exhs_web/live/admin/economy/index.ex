@@ -138,8 +138,12 @@ defmodule ExhsWeb.AdminLive.Economy.Index do
         </ul>
       </.card>
 
-      <.form for={%{}} phx-change="filter" class="mt-6 flex flex-wrap gap-3">
-        <select name="filters[status]" class="select select-bordered select-sm">
+      <.form
+        for={%{}}
+        phx-change="filter"
+        class="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3"
+      >
+        <select name="filters[status]" class="select select-bordered select-sm w-full">
           <option value="">Alle statusser</option>
           <option
             :for={s <- PaymentStatus.values()}
@@ -149,7 +153,7 @@ defmodule ExhsWeb.AdminLive.Economy.Index do
             {payment_status_label(s)}
           </option>
         </select>
-        <select name="filters[type]" class="select select-bordered select-sm">
+        <select name="filters[type]" class="select select-bordered select-sm w-full">
           <option value="">Alle typer</option>
           <option
             :for={t <- PayableType.values()}
@@ -159,7 +163,7 @@ defmodule ExhsWeb.AdminLive.Economy.Index do
             {payable_type_label(t)}
           </option>
         </select>
-        <select name="filters[month]" class="select select-bordered select-sm">
+        <select name="filters[month]" class="select select-bordered select-sm w-full">
           <option value="">Alle måneder</option>
           <option
             :for={{key, label} <- month_options(@summary.by_month)}
@@ -169,7 +173,7 @@ defmodule ExhsWeb.AdminLive.Economy.Index do
             {label}
           </option>
         </select>
-        <select name="filters[sort]" class="select select-bordered select-sm">
+        <select name="filters[sort]" class="select select-bordered select-sm w-full">
           <option value="">Nyeste først</option>
           <option value="oldest" selected={@filters[:sort] == "oldest"}>Ældste først</option>
           <option value="amount_desc" selected={@filters[:sort] == "amount_desc"}>
@@ -184,7 +188,7 @@ defmodule ExhsWeb.AdminLive.Economy.Index do
           name="filters[q]"
           value={@filters[:q]}
           placeholder="Søg beskrivelse"
-          class="input input-bordered input-sm"
+          class="input input-bordered input-sm w-full sm:col-span-2 lg:col-span-1"
         />
       </.form>
 
@@ -194,47 +198,40 @@ defmodule ExhsWeb.AdminLive.Economy.Index do
         </.empty_state>
       </div>
 
-      <div :if={@row_count > 0} class="mt-4 overflow-x-auto">
-        <table class="table">
-          <thead>
-            <tr>
-              <th>Dato</th>
-              <th>Beskrivelse</th>
-              <th>Type</th>
-              <th>Beløb</th>
-              <th>Status</th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody id="payments" phx-update="stream">
-            <tr :for={{dom_id, p} <- @streams.payments} id={dom_id}>
-              <td class="whitespace-nowrap">{format_date(p.paid_at)}</td>
-              <td>{p.description || payable_type_label(p.payable_type)}</td>
-              <td>
-                <.badge variant="default">{payable_type_label(p.payable_type)}</.badge>
-              </td>
-              <td class="font-medium whitespace-nowrap">
-                {format_amount(p.amount_cents, p.currency)}
-              </td>
-              <td>
-                <.badge variant={payment_status_variant(p.status)}>
-                  {payment_status_label(p.status)}
-                </.badge>
-              </td>
-              <td class="text-right">
-                <.button
-                  :if={@can_write? and p.status == :succeeded}
-                  variant="ghost"
-                  phx-click="refund"
-                  phx-value-id={p.id}
-                  data-confirm="Markér betalingen som refunderet? (udløser ikke en Stripe-refundering)"
-                >
-                  Markér refunderet
-                </.button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+      <div :if={@row_count > 0} id="payments" phx-update="stream" class="mt-4 space-y-2">
+        <div
+          :for={{dom_id, p} <- @streams.payments}
+          id={dom_id}
+          class="border-base-content/5 flex flex-wrap items-center justify-between gap-x-4 gap-y-2 rounded-xl border p-3"
+        >
+          <div class="min-w-0 flex-1">
+            <p class="text-base-content truncate text-sm font-medium">
+              {p.description || payable_type_label(p.payable_type)}
+            </p>
+            <p class="text-base-content/50 mt-0.5 flex items-center gap-2 text-xs">
+              {format_date(p.paid_at)}
+              <.badge variant="default">{payable_type_label(p.payable_type)}</.badge>
+            </p>
+          </div>
+          <div class="flex items-center gap-3">
+            <span class="text-base-content text-sm font-semibold whitespace-nowrap">
+              {format_amount(p.amount_cents, p.currency)}
+            </span>
+            <.badge variant={payment_status_variant(p.status)}>
+              {payment_status_label(p.status)}
+            </.badge>
+            <.button
+              :if={@can_write? and p.status == :succeeded}
+              variant="ghost"
+              class="btn btn-ghost btn-xs"
+              phx-click="refund"
+              phx-value-id={p.id}
+              data-confirm="Markér betalingen som refunderet? (udløser ikke en Stripe-refundering)"
+            >
+              Refundér
+            </.button>
+          </div>
+        </div>
       </div>
     </Layouts.admin>
     """

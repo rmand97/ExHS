@@ -48,7 +48,7 @@ defmodule ExhsWeb.AdminLive.Dashboard do
       <div class="mt-8 grid gap-4 sm:grid-cols-2">
         <.link
           navigate={~p"/admin/members"}
-          class="bg-base-100 border-base-content/5 card hover:border-primary/40 border p-5 transition"
+          class="border-base-content/5 glass-surface hover:border-primary/40 rounded-2xl border p-5 transition"
         >
           <div class="flex items-center gap-3">
             <.icon name="hero-users" class="text-primary size-6" />
@@ -61,7 +61,7 @@ defmodule ExhsWeb.AdminLive.Dashboard do
 
         <.link
           navigate={~p"/admin/groups"}
-          class="bg-base-100 border-base-content/5 card hover:border-primary/40 border p-5 transition"
+          class="border-base-content/5 glass-surface hover:border-primary/40 rounded-2xl border p-5 transition"
         >
           <div class="flex items-center gap-3">
             <.icon name="hero-tag" class="text-primary size-6" />
