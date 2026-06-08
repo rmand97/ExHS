@@ -98,6 +98,12 @@ defmodule Exhs.Events.Registration do
       get_by :id
     end
 
+    read :for_event do
+      argument :event_id, :uuid, allow_nil?: false
+      filter expr(ticket_type.event_id == ^arg(:event_id))
+      prepare build(sort: [registered_at: :desc], load: [:ticket_type, membership: [:user]])
+    end
+
     read :my_registrations do
       multitenancy :bypass_all
       filter expr(membership.user_id == ^actor(:id))

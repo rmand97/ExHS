@@ -253,14 +253,10 @@ defmodule ExhsWeb.AdminLive.Events.Show do
 
   defp load_registrations(socket) do
     {:ok, regs} =
-      Events.list_registrations(
+      Events.list_registrations_for_event(socket.assigns.event.id,
         scope: socket.assigns.current_scope,
-        load: [:ticket_type, membership: [:user]],
         authorize?: false
       )
-
-    ticket_ids = MapSet.new(socket.assigns.event.ticket_types, & &1.id)
-    regs = Enum.filter(regs, &MapSet.member?(ticket_ids, &1.ticket_type_id))
 
     socket
     |> assign(:registrations, regs)

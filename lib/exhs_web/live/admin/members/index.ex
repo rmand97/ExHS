@@ -115,14 +115,15 @@ defmodule ExhsWeb.AdminLive.Members.Index do
   def handle_event("bulk_assign_group", %{"group_id" => group_id}, socket) do
     scope = socket.assigns.current_scope
 
-    Enum.each(socket.assigns.selected, fn membership_id ->
-      Organizations.add_member_to_group(
-        %{membership_id: membership_id, group_id: group_id},
-        scope: scope
-      )
-    end)
+    failures =
+      count_failures(socket.assigns.selected, fn membership_id ->
+        Organizations.add_member_to_group(
+          %{membership_id: membership_id, group_id: group_id},
+          scope: scope
+        )
+      end)
 
-    {:noreply, finish_bulk(socket, "Tildelt gruppe.")}
+    {:noreply, finish_bulk(socket, "Tildelt gruppe.", failures)}
   end
 
   def handle_event("bulk_activate", _params, socket) do
@@ -137,26 +138,45 @@ defmodule ExhsWeb.AdminLive.Members.Index do
     scope = socket.assigns.current_scope
     by_id = Map.new(socket.assigns.members, &{&1.id, &1})
 
-    Enum.each(socket.assigns.selected, fn id ->
-      case by_id[id] do
-        nil -> :ok
-        membership -> apply_status(action, membership, scope)
-      end
-    end)
+    failures =
+      count_failures(socket.assigns.selected, fn id ->
+        case by_id[id] do
+          nil -> {:error, :not_found}
+          membership -> apply_status(action, membership, scope)
+        end
+      end)
 
-    {:noreply, finish_bulk(socket, message)}
+    {:noreply, finish_bulk(socket, message, failures)}
   end
 
   defp apply_status(:activate, m, scope), do: Organizations.activate_member(m, scope: scope)
   defp apply_status(:deactivate, m, scope), do: Organizations.deactivate_member(m, scope: scope)
 
-  defp finish_bulk(socket, message) do
+  # Runs `fun` per selected id, returning how many returned a non-`:ok`/`{:ok, _}`
+  # result so a partial bulk failure is surfaced instead of silently swallowed.
+  defp count_failures(selected, fun) do
+    Enum.reduce(selected, 0, fn item, acc ->
+      case fun.(item) do
+        :ok -> acc
+        {:ok, _} -> acc
+        _ -> acc + 1
+      end
+    end)
+  end
+
+  defp finish_bulk(socket, message, failures) do
     MembersPubSub.broadcast(socket.assigns.current_forening.id)
 
-    socket
-    |> assign(:selected, MapSet.new())
-    |> put_flash(:info, message)
-    |> load_members()
+    socket =
+      socket
+      |> assign(:selected, MapSet.new())
+      |> load_members()
+
+    if failures > 0 do
+      put_flash(socket, :error, "#{message} #{failures} kunne ikke opdateres.")
+    else
+      put_flash(socket, :info, message)
+    end
   end
 
   # ── Loading ────────────────────────────────────
@@ -234,7 +254,7 @@ defmodule ExhsWeb.AdminLive.Members.Index do
         <input type="hidden" name="sort" value={@filters.sort} />
       </.form>
 
-      <div class="mt-3 flex items-center justify-between gap-3">
+      <div class="mt-3 flex flex-wrap items-center justify-between gap-2">
         <select
           name="sort"
           class="select select-bordered select-sm"
@@ -297,11 +317,11 @@ defmodule ExhsWeb.AdminLive.Members.Index do
                 />
               </th>
               <th>Navn</th>
-              <th>Email</th>
+              <th class="hidden md:table-cell">Email</th>
               <th>Rolle</th>
               <th>Status</th>
-              <th>Grupper</th>
-              <th>Medlem siden</th>
+              <th class="hidden lg:table-cell">Grupper</th>
+              <th class="hidden sm:table-cell">Medlem siden</th>
             </tr>
           </thead>
           <tbody>
@@ -322,20 +342,23 @@ defmodule ExhsWeb.AdminLive.Members.Index do
                 >
                   {member_name(m)}
                 </.link>
+                <p class="text-base-content/50 truncate text-xs md:hidden">{m.user.email}</p>
               </td>
-              <td class="text-base-content/60 text-sm">{m.user.email}</td>
+              <td class="text-base-content/60 hidden text-sm md:table-cell">{m.user.email}</td>
               <td>
                 <.badge variant={role_variant(m.role)}>{role_label(m.role)}</.badge>
               </td>
               <td>
                 <.badge variant={status_variant(m.status)}>{status_label(m.status)}</.badge>
               </td>
-              <td>
+              <td class="hidden lg:table-cell">
                 <div class="flex flex-wrap gap-1">
                   <.badge :for={g <- m.groups} variant="default">{g.name}</.badge>
                 </div>
               </td>
-              <td class="text-base-content/50 text-sm">{format_date(m.joined_at)}</td>
+              <td class="text-base-content/50 hidden text-sm sm:table-cell">
+                {format_date(m.joined_at)}
+              </td>
             </tr>
           </tbody>
         </table>

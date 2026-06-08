@@ -274,7 +274,7 @@ defmodule ExhsWeb.AdminLive.Members.Show do
             <ul :if={@registrations != []} class="divide-base-content/5 mt-2 divide-y">
               <li :for={r <- @registrations} class="flex items-center justify-between py-2 text-sm">
                 <span class="text-base-content/70">{r.ticket_type.event.title}</span>
-                <.badge variant="default">{r.status}</.badge>
+                <.badge variant={reg_status_variant(r.status)}>{reg_status_label(r.status)}</.badge>
               </li>
             </ul>
           </.card>
@@ -284,7 +284,7 @@ defmodule ExhsWeb.AdminLive.Members.Show do
             <p :if={@events == []} class="text-base-content/40 mt-2 text-sm">Ingen hændelser</p>
             <ul :if={@events != []} class="divide-base-content/5 mt-2 divide-y">
               <li :for={e <- @events} class="flex items-center justify-between py-2 text-sm">
-                <span class="text-base-content/70">{e.action}</span>
+                <span class="text-base-content/70">{action_label(e.action)}</span>
                 <span class="text-base-content/40">{format_datetime(e.occurred_at)}</span>
               </li>
             </ul>

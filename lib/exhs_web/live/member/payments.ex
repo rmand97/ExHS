@@ -2,6 +2,14 @@ defmodule ExhsWeb.MemberLive.Payments do
   @moduledoc false
   use ExhsWeb, :live_view
 
+  import ExhsWeb.Labels,
+    only: [
+      format_amount: 2,
+      payment_status_label: 1,
+      payment_status_variant: 1,
+      payable_type_label: 1
+    ]
+
   alias LiveFilter.Params.Serializer
 
   @impl true
@@ -39,7 +47,12 @@ defmodule ExhsWeb.MemberLive.Payments do
   @impl true
   def render(assigns) do
     ~H"""
-    <Layouts.member flash={@flash} current_user={@current_user} current_path={@current_path}>
+    <Layouts.member
+      flash={@flash}
+      current_user={@current_user}
+      current_path={@current_path}
+      my_foreninger={@my_foreninger}
+    >
       <.header>
         Betalinger
         <:subtitle>Din betalingshistorik på tværs af foreninger</:subtitle>
@@ -64,7 +77,7 @@ defmodule ExhsWeb.MemberLive.Payments do
         <div :if={@payments != []} class="mt-6">
           <.table id="payments" rows={@payments}>
             <:col :let={pay} label="Beskrivelse">
-              {pay.description || type_label(pay.payable_type)}
+              {pay.description || payable_type_label(pay.payable_type)}
             </:col>
             <:col :let={pay} label="Beløb">{format_amount(pay.amount_cents, pay.currency)}</:col>
             <:col :let={pay} label="Status">
@@ -73,7 +86,7 @@ defmodule ExhsWeb.MemberLive.Payments do
               </.badge>
             </:col>
             <:col :let={pay} label="Type">
-              <.badge variant="default">{type_label(pay.payable_type)}</.badge>
+              <.badge variant="default">{payable_type_label(pay.payable_type)}</.badge>
             </:col>
             <:col :let={pay} label="Dato">{format_date(pay.paid_at)}</:col>
           </.table>
@@ -163,22 +176,4 @@ defmodule ExhsWeb.MemberLive.Payments do
   end
 
   defp apply_filter(payments, _filter), do: payments
-
-  defp format_amount(cents, currency) do
-    "#{div(cents, 100)} #{currency}"
-  end
-
-  defp payment_status_variant(:succeeded), do: "success"
-  defp payment_status_variant(:pending), do: "warning"
-  defp payment_status_variant(:failed), do: "error"
-  defp payment_status_variant(:refunded), do: "default"
-
-  defp payment_status_label(:succeeded), do: "Betalt"
-  defp payment_status_label(:pending), do: "Afventer"
-  defp payment_status_label(:failed), do: "Fejlet"
-  defp payment_status_label(:refunded), do: "Refunderet"
-
-  defp type_label(:subscription), do: "Kontingent"
-  defp type_label(:registration), do: "Event"
-  defp type_label(:order), do: "Ordre"
 end

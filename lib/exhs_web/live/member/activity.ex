@@ -2,6 +2,8 @@ defmodule ExhsWeb.MemberLive.Activity do
   @moduledoc false
   use ExhsWeb, :live_view
 
+  import ExhsWeb.Labels, only: [action_label: 1]
+
   alias LiveFilter.Params.Serializer
 
   @resource_options [
@@ -50,7 +52,12 @@ defmodule ExhsWeb.MemberLive.Activity do
   @impl true
   def render(assigns) do
     ~H"""
-    <Layouts.member flash={@flash} current_user={@current_user} current_path={@current_path}>
+    <Layouts.member
+      flash={@flash}
+      current_user={@current_user}
+      current_path={@current_path}
+      my_foreninger={@my_foreninger}
+    >
       <.header>
         Aktivitet
         <:subtitle>Din aktivitetshistorik på tværs af foreninger</:subtitle>
@@ -177,31 +184,6 @@ defmodule ExhsWeb.MemberLive.Activity do
   defp action_type_icon(:destroy), do: "hero-trash"
   defp action_type_icon(_), do: "hero-bolt"
 
-  @action_labels %{
-    create: "Oprettet",
-    update: "Opdateret",
-    destroy: "Slettet",
-    invite: "Inviteret",
-    set_role: "Rolle ændret",
-    activate: "Aktiveret",
-    deactivate: "Deaktiveret",
-    join: "Tilmeldt",
-    leave: "Forladt",
-    publish: "Publiceret",
-    register: "Tilmeldt",
-    record: "Registreret",
-    set_stripe_account: "Stripe tilsluttet",
-    set_stripe_customer: "Stripe-kunde sat"
-  }
-
-  defp action_label(action) do
-    Map.get(
-      @action_labels,
-      action,
-      action |> to_string() |> String.replace("_", " ") |> String.capitalize()
-    )
-  end
-
   @resource_labels %{
     Exhs.Organizations.Forening => "Forening",
     Exhs.Organizations.Membership => "Medlemskab",
@@ -230,7 +212,13 @@ defmodule ExhsWeb.MemberLive.Activity do
 
   defp humanize_key(key), do: to_string(key)
 
-  defp format_value(value) when is_map(value), do: Jason.encode!(value)
+  defp format_value(value) when is_map(value) do
+    case Jason.encode(value) do
+      {:ok, json} -> json
+      _ -> inspect(value)
+    end
+  end
+
   defp format_value(value) when is_list(value), do: Enum.join(value, ", ")
   defp format_value(nil), do: "—"
   defp format_value(value), do: to_string(value)
