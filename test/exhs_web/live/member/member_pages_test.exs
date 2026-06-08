@@ -106,6 +106,22 @@ defmodule ExhsWeb.MemberLive.MemberPagesTest do
       {:ok, _view, html2} = conn |> log_in_user(regular) |> live("/dashboard")
       refute html2 =~ "/superadmin"
     end
+
+    test "Dine foreninger nav dropdown links to each member forening", %{conn: conn} do
+      {:ok, _view, html} = live(conn, "/dashboard")
+
+      assert html =~ ~s(id="my-foreninger-menu")
+      assert html =~ "/go/forening/fodbold"
+      assert html =~ "/go/forening/skak"
+    end
+
+    test "Dine foreninger dropdown is hidden with no memberships", %{conn: conn} do
+      user = register_user!()
+
+      {:ok, _view, html} = conn |> log_in_user(user) |> live("/dashboard")
+
+      refute html =~ ~s(id="my-foreninger-menu")
+    end
   end
 
   describe "profile" do
@@ -319,28 +335,30 @@ defmodule ExhsWeb.MemberLive.MemberPagesTest do
       f3 = create_forening!(%{name: "Medlemsforening", subdomain: "member_club"})
       m1 = join_forening!(f1, user)
       m2 = join_forening!(f2, user)
-      _m3 = join_forening!(f3, user)
+      m3 = join_forening!(f3, user)
 
       Exhs.Organizations.set_member_role!(m1, %{role: :admin}, tenant: f1.id, authorize?: false)
       Exhs.Organizations.set_member_role!(m2, %{role: :board}, tenant: f2.id, authorize?: false)
 
-      %{conn: log_in_user(conn, user), f1: f1, f2: f2, f3: f3}
+      # Membership detail links are unique to the filtered list (the nav
+      # "Dine foreninger" dropdown always lists every forening by name).
+      %{conn: log_in_user(conn, user), m1: m1, m2: m2, m3: m3}
     end
 
-    test "role filter shows only matching membership", %{conn: conn, f1: f1, f2: f2, f3: f3} do
+    test "role filter shows only matching membership", %{conn: conn, m1: m1, m2: m2, m3: m3} do
       {:ok, _view, html} = live(conn, "/dashboard?role=admin")
 
-      assert html =~ f1.name
-      refute html =~ f2.name
-      refute html =~ f3.name
+      assert html =~ "/memberships/#{m1.id}"
+      refute html =~ "/memberships/#{m2.id}"
+      refute html =~ "/memberships/#{m3.id}"
     end
 
-    test "role filter board shows only board membership", %{conn: conn, f1: f1, f2: f2, f3: f3} do
+    test "role filter board shows only board membership", %{conn: conn, m1: m1, m2: m2, m3: m3} do
       {:ok, _view, html} = live(conn, "/dashboard?role=board")
 
-      assert html =~ f2.name
-      refute html =~ f1.name
-      refute html =~ f3.name
+      assert html =~ "/memberships/#{m2.id}"
+      refute html =~ "/memberships/#{m1.id}"
+      refute html =~ "/memberships/#{m3.id}"
     end
   end
 

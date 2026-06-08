@@ -33,6 +33,31 @@ defmodule ExhsWeb.LiveUserAuth do
     end
   end
 
+  # Loads the foreninger the current user is a member of, for the
+  # "Dine foreninger" nav dropdown. Assigns [] when signed out or on error.
+  def on_mount(:assign_my_foreninger, _params, _session, socket) do
+    foreninger =
+      case socket.assigns[:current_user] do
+        nil ->
+          []
+
+        user ->
+          case Exhs.Organizations.list_my_memberships(actor: user) do
+            {:ok, memberships} ->
+              memberships
+              |> Enum.map(& &1.forening)
+              |> Enum.reject(&is_nil/1)
+              |> Enum.uniq_by(& &1.id)
+              |> Enum.sort_by(& &1.name)
+
+            _ ->
+              []
+          end
+      end
+
+    {:cont, assign(socket, :my_foreninger, foreninger)}
+  end
+
   def on_mount(:require_superadmin, _params, _session, socket) do
     case socket.assigns[:current_user] do
       %{is_superadmin: true} -> {:cont, socket}

@@ -41,7 +41,12 @@ defmodule ExhsWeb.MemberLive.Registrations do
   @impl true
   def render(assigns) do
     ~H"""
-    <Layouts.member flash={@flash} current_user={@current_user} current_path={@current_path}>
+    <Layouts.member
+      flash={@flash}
+      current_user={@current_user}
+      current_path={@current_path}
+      my_foreninger={@my_foreninger}
+    >
       <.header>
         Mine events
         <:subtitle>Dine tilmeldinger på tværs af foreninger</:subtitle>

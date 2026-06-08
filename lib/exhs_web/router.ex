@@ -69,7 +69,11 @@ defmodule ExhsWeb.Router do
           do: [{ExhsWeb.LiveSandbox, :default}],
           else: []
         ),
-      on_mount: [{ExhsWeb.LiveCurrentPath, :default}, {ExhsWeb.LiveUserAuth, :live_user_required}] do
+      on_mount: [
+        {ExhsWeb.LiveCurrentPath, :default},
+        {ExhsWeb.LiveUserAuth, :live_user_required},
+        {ExhsWeb.LiveUserAuth, :assign_my_foreninger}
+      ] do
       live "/dashboard", MemberLive.Dashboard
       live "/upcoming", MemberLive.Events
       live "/profile", MemberLive.Profile
@@ -100,7 +104,8 @@ defmodule ExhsWeb.Router do
       on_mount: [
         {ExhsWeb.LiveCurrentPath, :default},
         {ExhsWeb.LiveUserAuth, :live_user_required},
-        {ExhsWeb.LiveUserAuth, :require_superadmin}
+        {ExhsWeb.LiveUserAuth, :require_superadmin},
+        {ExhsWeb.LiveUserAuth, :assign_my_foreninger}
       ] do
       live "/superadmin", SuperadminLive.Dashboard
     end
