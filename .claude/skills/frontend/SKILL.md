@@ -111,13 +111,14 @@ Use `.text-gradient` for primary-to-secondary gradient text effects (marketing p
 
 ### Layout components
 
-Three layout variants, used as the outermost wrapper in LiveView templates:
+Layout variants, used as the outermost wrapper in LiveView templates:
 
 | Layout | Usage | File |
 |--------|-------|------|
 | `<Layouts.marketing>` | Landing page (no forening) | `layouts.ex` |
 | `<Layouts.public>` | Public forening pages (events, join, home) | `layouts.ex` |
 | `<Layouts.member>` | Authenticated member area | `layouts.ex` |
+| `<Layouts.admin>` | Forening command center: sidebar + mobile slide-over, used by all `/admin` pages | `layouts.ex` |
 
 Always wrap template content in the appropriate layout. Pass required assigns:
 ```heex

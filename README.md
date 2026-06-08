@@ -40,15 +40,15 @@ Visit [`localhost:4000`](http://localhost:4000).
 
 - `tasks/00-plan.md` — task index and global open decisions
 - `CLAUDE.md` — project-specific agent rules
-- `AGENTS.md` — dep usage rules (synced via `mix usage_rules.sync`)
+- `.claude/skills/` — dep usage rules (synced via `mix usage_rules.sync`)
 
 ## Tooling
 
 - Elixir 1.19 / OTP 28 (see `mise.toml`)
 - Phoenix 1.8 with LiveView 1.1
-- Ash 3.x + ash_postgres + ash_authentication + ash_paper_trail + ash_oban
+- Ash 3.x + ash_postgres + ash_authentication + ash_events (~> 0.7) + ash_oban
 - Postgres 17 (Docker)
 - Minio (Docker) — S3-compatible local storage
 - Stripe for payments
 - Oban for background jobs
-- Tailwind CSS 4 (no DaisyUI)
+- Tailwind CSS 4 + DaisyUI v5

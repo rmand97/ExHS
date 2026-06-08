@@ -120,7 +120,7 @@ Both plugins and all their checks are explicitly listed in `.credo.exs` under `c
 
 ## Phoenix 1.8 specifics for this codebase
 
-- Always begin LiveView templates with `<Layouts.app flash={@flash} ...>` (the `ExhsWeb.Layouts` module is aliased in `exhs_web.ex`).
+- Always begin LiveView templates with the appropriate layout wrapper — `<Layouts.member>`, `<Layouts.admin>`, `<Layouts.public>`, or `<Layouts.marketing>` — passing `flash={@flash}` and the layout's required assigns (the `ExhsWeb.Layouts` module is aliased in `exhs_web.ex`). `Layouts.app` is dev-showcase only; do not use it for real pages.
 - `<.flash_group>` lives only in `layouts.ex` — do not call it elsewhere.
 - Use `<.icon name="hero-x-mark" class="w-5 h-5"/>` from `core_components.ex`. Never import `Heroicons` modules.
 - Use the imported `<.input>` from `core_components.ex` for form inputs.
@@ -144,6 +144,8 @@ Tailwind v4 — no `tailwind.config.js`. CSS uses this import syntax in `assets/
 @source "../js";
 @source "../../lib/exhs_web";
 ```
+
+DaisyUI v5 is the component layer, loaded via `@plugin "../vendor/daisyui"` in `app.css`.
 
 Maintain this syntax. Do not introduce `tailwind.config.js`.
 
