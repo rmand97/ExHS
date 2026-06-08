@@ -10,7 +10,7 @@ defmodule ExhsWeb.MemberLive.Profile do
       Exhs.Accounts.form_to_update_profile(user, actor: user)
       |> to_form()
 
-    {:ok, assign(socket, form: form, page_title: "Profil")}
+    {:ok, assign(socket, form: form, page_title: gettext("Profile"))}
   end
 
   @impl true
@@ -22,9 +22,11 @@ defmodule ExhsWeb.MemberLive.Profile do
   def handle_event("submit", %{"form" => params}, socket) do
     case AshPhoenix.Form.submit(socket.assigns.form, params: params) do
       {:ok, _user} ->
+        # The saved locale preference is applied by ExhsWeb.Plugs.UserLocale on the
+        # next full request; the footer locale switcher provides instant switching.
         {:noreply,
          socket
-         |> put_flash(:info, "Profil opdateret")
+         |> put_flash(:info, gettext("Profile updated"))
          |> push_navigate(to: ~p"/profile")}
 
       {:error, form} ->
@@ -42,30 +44,37 @@ defmodule ExhsWeb.MemberLive.Profile do
       my_foreninger={@my_foreninger}
     >
       <.header>
-        Profil
-        <:subtitle>Opdater dine personlige oplysninger</:subtitle>
+        {gettext("Profile")}
+        <:subtitle>{gettext("Update your personal details")}</:subtitle>
       </.header>
 
       <div class="mx-auto mt-8 max-w-2xl">
         <.card class="sm:p-8">
           <.form for={@form} phx-change="validate" phx-submit="submit" class="space-y-6">
             <div class="grid gap-4 sm:grid-cols-2">
-              <.input field={@form[:first_name]} label="Fornavn" />
-              <.input field={@form[:last_name]} label="Efternavn" />
+              <.input field={@form[:first_name]} label={gettext("First name")} />
+              <.input field={@form[:last_name]} label={gettext("Last name")} />
             </div>
 
-            <.input field={@form[:phone]} label="Telefon" type="tel" />
+            <.input field={@form[:phone]} label={gettext("Phone")} type="tel" />
 
-            <.input field={@form[:address_line_1]} label="Adresse" />
-            <.input field={@form[:address_line_2]} label="Adresse 2" />
+            <.input field={@form[:address_line_1]} label={gettext("Address")} />
+            <.input field={@form[:address_line_2]} label={gettext("Address 2")} />
 
             <div class="grid gap-4 sm:grid-cols-2">
-              <.input field={@form[:postal_code]} label="Postnummer" />
-              <.input field={@form[:city]} label="By" />
+              <.input field={@form[:postal_code]} label={gettext("Postal code")} />
+              <.input field={@form[:city]} label={gettext("City")} />
             </div>
 
+            <.input
+              field={@form[:locale]}
+              type="select"
+              label={gettext("Language")}
+              options={[{gettext("Danish"), :da}, {gettext("English"), :en}]}
+            />
+
             <div class="flex justify-end pt-4">
-              <.button type="submit" variant="primary">Gem ændringer</.button>
+              <.button type="submit" variant="primary">{gettext("Save changes")}</.button>
             </div>
           </.form>
         </.card>
@@ -73,9 +82,11 @@ defmodule ExhsWeb.MemberLive.Profile do
         <.card class="mt-6 p-6 sm:p-8">
           <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <h3 class="text-base-content font-semibold">Udseende</h3>
+              <h3 class="text-base-content font-semibold">{gettext("Appearance")}</h3>
               <p class="text-base-content/50 mt-0.5 text-sm">
-                Vælg lyst, mørkt eller følg systemets indstilling. Gælder på tværs af alle sider.
+                {gettext(
+                  "Choose light, dark or follow your system setting. Applies across all pages."
+                )}
               </p>
             </div>
             <Layouts.theme_toggle />

@@ -54,8 +54,8 @@ defmodule ExhsWeb.MemberLive.Payments do
       my_foreninger={@my_foreninger}
     >
       <.header>
-        Betalinger
-        <:subtitle>Din betalingshistorik på tværs af foreninger</:subtitle>
+        {gettext("Payments")}
+        <:subtitle>{gettext("Your payment history across associations")}</:subtitle>
       </.header>
 
       <div :if={@loading} class="mt-6 space-y-4">
@@ -69,26 +69,28 @@ defmodule ExhsWeb.MemberLive.Payments do
         </div>
 
         <div :if={@payments == []} class="mt-8">
-          <.empty_state icon="hero-banknotes" title="Ingen betalinger endnu">
-            Dine betalinger vises her.
+          <.empty_state icon="hero-banknotes" title={gettext("No payments yet")}>
+            {gettext("Your payments appear here.")}
           </.empty_state>
         </div>
 
         <div :if={@payments != []} class="mt-6">
           <.table id="payments" rows={@payments}>
-            <:col :let={pay} label="Beskrivelse">
+            <:col :let={pay} label={gettext("Description")}>
               {pay.description || payable_type_label(pay.payable_type)}
             </:col>
-            <:col :let={pay} label="Beløb">{format_amount(pay.amount_cents, pay.currency)}</:col>
-            <:col :let={pay} label="Status">
+            <:col :let={pay} label={gettext("Amount")}>
+              {format_amount(pay.amount_cents, pay.currency)}
+            </:col>
+            <:col :let={pay} label={gettext("Status")}>
               <.badge variant={payment_status_variant(pay.status)}>
                 {payment_status_label(pay.status)}
               </.badge>
             </:col>
-            <:col :let={pay} label="Type">
+            <:col :let={pay} label={gettext("Type")}>
               <.badge variant="default">{payable_type_label(pay.payable_type)}</.badge>
             </:col>
-            <:col :let={pay} label="Dato">{format_date(pay.paid_at)}</:col>
+            <:col :let={pay} label={gettext("Date")}>{format_date(pay.paid_at)}</:col>
           </.table>
         </div>
 
@@ -102,22 +104,26 @@ defmodule ExhsWeb.MemberLive.Payments do
 
   defp filter_config do
     [
-      LiveFilter.text(:search, label: "Søg", always_on: true, placeholder: "Søg..."),
+      LiveFilter.text(:search,
+        label: gettext("Search"),
+        always_on: true,
+        placeholder: gettext("Search...")
+      ),
       LiveFilter.select(:status,
-        label: "Status",
+        label: gettext("Status"),
         options: [
-          {"Gennemført", "succeeded"},
-          {"Afventer", "pending"},
-          {"Fejlet", "failed"},
-          {"Refunderet", "refunded"}
+          {gettext("Completed"), "succeeded"},
+          {gettext("Pending"), "pending"},
+          {gettext("Failed"), "failed"},
+          {gettext("Refunded"), "refunded"}
         ]
       ),
       LiveFilter.select(:payable_type,
-        label: "Type",
+        label: gettext("Type"),
         options: [
-          {"Abonnement", "subscription"},
-          {"Tilmelding", "registration"},
-          {"Ordre", "order"}
+          {gettext("Subscription"), "subscription"},
+          {gettext("Registration"), "registration"},
+          {gettext("Order"), "order"}
         ]
       )
     ]

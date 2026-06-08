@@ -3,7 +3,6 @@ defmodule Exhs.Billing.MembershipDeactivatorTest do
 
   import Exhs.Test.Builders
 
-  alias Exhs.Billing
   alias Exhs.Billing.MembershipDeactivator
   alias Exhs.Organizations
 

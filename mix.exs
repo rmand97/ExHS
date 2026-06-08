@@ -119,7 +119,12 @@ defmodule Exhs.MixProject do
       {:credo, "~> 1.7", only: [:dev, :test], runtime: false},
       {:dialyxir, "~> 1.4", only: [:dev, :test], runtime: false},
       {:canonical_tailwind, "~> 0.1", only: [:dev, :test], runtime: false},
-      {:livefilter, "~> 0.1.8"}
+      {:livefilter, "~> 0.1.8"},
+      {:localize, "~> 0.41"},
+      {:localize_web, "~> 0.7"},
+      {:localize_datetime_inputs, "~> 0.1"},
+      {:localize_number_inputs, "~> 0.1"},
+      {:localize_person_names, "~> 0.1"}
     ]
   end
 
@@ -131,10 +136,17 @@ defmodule Exhs.MixProject do
   # See the documentation for `Mix` for more info on aliases.
   defp aliases do
     [
-      setup: ["deps.get", "ash.setup", "assets.setup", "assets.build", "run priv/repo/seeds.exs"],
+      setup: [
+        "deps.get",
+        "ash.setup",
+        "localize.download_locales da en",
+        "assets.setup",
+        "assets.build",
+        "run priv/repo/seeds.exs"
+      ],
       "ecto.setup": ["ecto.create", "ecto.migrate", "run priv/repo/seeds.exs"],
       "ecto.reset": ["ecto.drop", "ecto.setup"],
-      test: ["ash.setup --quiet", "test"],
+      test: ["ash.setup --quiet", "localize.download_locales da en", "test"],
       "assets.setup": ["tailwind.install --if-missing", "esbuild.install --if-missing"],
       "assets.build": ["compile", "tailwind exhs", "esbuild exhs"],
       "assets.deploy": [

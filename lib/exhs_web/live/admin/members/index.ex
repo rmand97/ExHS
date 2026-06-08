@@ -24,7 +24,7 @@ defmodule ExhsWeb.AdminLive.Members.Index do
      |> assign(:groups, groups)
      |> assign(:selected, MapSet.new())
      |> assign(:invite_form, to_form(%{"email" => "", "role" => "member"}, as: :invite))
-     |> assign(:page_title, "Medlemmer")}
+     |> assign(:page_title, gettext("Members"))}
   end
 
   @impl true
@@ -99,7 +99,10 @@ defmodule ExhsWeb.AdminLive.Members.Index do
 
         {:noreply,
          socket
-         |> put_flash(:info, "#{email} er inviteret. En log-ind-mail er på vej.")
+         |> put_flash(
+           :info,
+           gettext("%{email} has been invited. A sign-in email is on its way.", email: email)
+         )
          |> assign(:invite_form, to_form(%{"email" => "", "role" => "member"}, as: :invite))
          |> load_members()}
 
@@ -123,15 +126,15 @@ defmodule ExhsWeb.AdminLive.Members.Index do
         )
       end)
 
-    {:noreply, finish_bulk(socket, "Tildelt gruppe.", failures)}
+    {:noreply, finish_bulk(socket, gettext("Assigned to group."), failures)}
   end
 
   def handle_event("bulk_activate", _params, socket) do
-    bulk_status(socket, :activate, "Aktiveret.")
+    bulk_status(socket, :activate, gettext("Activated."))
   end
 
   def handle_event("bulk_deactivate", _params, socket) do
-    bulk_status(socket, :deactivate, "Deaktiveret.")
+    bulk_status(socket, :deactivate, gettext("Deactivated."))
   end
 
   defp bulk_status(socket, action, message) do
@@ -173,7 +176,11 @@ defmodule ExhsWeb.AdminLive.Members.Index do
       |> load_members()
 
     if failures > 0 do
-      put_flash(socket, :error, "#{message} #{failures} kunne ikke opdateres.")
+      put_flash(
+        socket,
+        :error,
+        gettext("%{message} %{count} could not be updated.", message: message, count: failures)
+      )
     else
       put_flash(socket, :info, message)
     end
@@ -213,11 +220,11 @@ defmodule ExhsWeb.AdminLive.Members.Index do
       current_path={@current_path}
     >
       <.header>
-        Medlemmer
-        <:subtitle>{@total} medlemmer</:subtitle>
+        {gettext("Members")}
+        <:subtitle>{gettext("%{count} members", count: @total)}</:subtitle>
         <:actions>
           <.button :if={@can_write?} phx-click={show_modal("invite-modal")} variant="primary">
-            <.icon name="hero-user-plus" class="size-4" /> Inviter medlem
+            <.icon name="hero-user-plus" class="size-4" /> {gettext("Invite member")}
           </.button>
         </:actions>
       </.header>
@@ -233,22 +240,24 @@ defmodule ExhsWeb.AdminLive.Members.Index do
           type="search"
           name="q"
           value={@filters.q}
-          placeholder="Søg navn eller email…"
+          placeholder={gettext("Search name or email…")}
           class="input input-bordered input-sm w-full lg:col-span-2"
         />
         <select name="status" class="select select-bordered select-sm">
-          <option value="" selected={@filters.status == ""}>Alle statusser</option>
-          <option value="active" selected={@filters.status == "active"}>Aktiv</option>
-          <option value="inactive" selected={@filters.status == "inactive"}>Inaktiv</option>
+          <option value="" selected={@filters.status == ""}>{gettext("All statuses")}</option>
+          <option value="active" selected={@filters.status == "active"}>{gettext("Active")}</option>
+          <option value="inactive" selected={@filters.status == "inactive"}>
+            {gettext("Inactive")}
+          </option>
         </select>
         <select name="role" class="select select-bordered select-sm">
-          <option value="" selected={@filters.role == ""}>Alle roller</option>
+          <option value="" selected={@filters.role == ""}>{gettext("All roles")}</option>
           <option value="admin" selected={@filters.role == "admin"}>Admin</option>
-          <option value="board" selected={@filters.role == "board"}>Bestyrelse</option>
-          <option value="member" selected={@filters.role == "member"}>Medlem</option>
+          <option value="board" selected={@filters.role == "board"}>{gettext("Board")}</option>
+          <option value="member" selected={@filters.role == "member"}>{gettext("Member")}</option>
         </select>
         <select name="group" class="select select-bordered select-sm">
-          <option value="" selected={@filters.group == ""}>Alle grupper</option>
+          <option value="" selected={@filters.group == ""}>{gettext("All groups")}</option>
           <option :for={g <- @groups} value={g.id} selected={@filters.group == g.id}>{g.name}</option>
         </select>
         <input type="hidden" name="sort" value={@filters.sort} />
@@ -261,16 +270,20 @@ defmodule ExhsWeb.AdminLive.Members.Index do
           phx-change="filter"
           form="sort-form"
         >
-          <option value="joined_desc" selected={@filters.sort == "joined_desc"}>Nyeste først</option>
-          <option value="joined_asc" selected={@filters.sort == "joined_asc"}>Ældste først</option>
-          <option value="name" selected={@filters.sort == "name"}>Navn (A–Å)</option>
+          <option value="joined_desc" selected={@filters.sort == "joined_desc"}>
+            {gettext("Newest first")}
+          </option>
+          <option value="joined_asc" selected={@filters.sort == "joined_asc"}>
+            {gettext("Oldest first")}
+          </option>
+          <option value="name" selected={@filters.sort == "name"}>{gettext("Name (A–Z)")}</option>
         </select>
         <.link
           href={export_path(@filters)}
           class="btn btn-ghost btn-sm"
           download
         >
-          <.icon name="hero-arrow-down-tray" class="size-4" /> Eksporter CSV
+          <.icon name="hero-arrow-down-tray" class="size-4" /> {gettext("Export CSV")}
         </.link>
       </div>
 
@@ -283,21 +296,21 @@ defmodule ExhsWeb.AdminLive.Members.Index do
         class="bg-base-100 border-base-content/10 mt-4 flex flex-wrap items-center gap-3 rounded-xl border p-3"
       >
         <span class="text-base-content/70 text-sm font-medium">
-          {MapSet.size(@selected)} valgt
+          {gettext("%{count} selected", count: MapSet.size(@selected))}
         </span>
         <form phx-change="bulk_assign_group" class="flex items-center gap-2">
           <select name="group_id" class="select select-bordered select-sm">
-            <option value="">Tildel gruppe…</option>
+            <option value="">{gettext("Assign group…")}</option>
             <option :for={g <- @groups} value={g.id}>{g.name}</option>
           </select>
         </form>
-        <.button phx-click="bulk_activate" variant="ghost">Aktiver</.button>
-        <.button phx-click="bulk_deactivate" variant="ghost">Deaktiver</.button>
+        <.button phx-click="bulk_activate" variant="ghost">{gettext("Activate")}</.button>
+        <.button phx-click="bulk_deactivate" variant="ghost">{gettext("Deactivate")}</.button>
       </div>
 
       <div :if={@members == []} class="mt-8">
-        <.empty_state icon="hero-users" title="Ingen medlemmer">
-          Ingen medlemmer matcher dine filtre.
+        <.empty_state icon="hero-users" title={gettext("No members")}>
+          {gettext("No members match your filters.")}
         </.empty_state>
       </div>
 
@@ -316,12 +329,12 @@ defmodule ExhsWeb.AdminLive.Members.Index do
                   }
                 />
               </th>
-              <th>Navn</th>
+              <th>{gettext("Name")}</th>
               <th class="hidden md:table-cell">Email</th>
-              <th>Rolle</th>
-              <th>Status</th>
-              <th class="hidden lg:table-cell">Grupper</th>
-              <th class="hidden sm:table-cell">Medlem siden</th>
+              <th>{gettext("Role")}</th>
+              <th>{gettext("Status")}</th>
+              <th class="hidden lg:table-cell">{gettext("Groups")}</th>
+              <th class="hidden sm:table-cell">{gettext("Member since")}</th>
             </tr>
           </thead>
           <tbody>
@@ -370,36 +383,42 @@ defmodule ExhsWeb.AdminLive.Members.Index do
           patch={page_path(@filters, @page - 1)}
           class="btn btn-ghost btn-sm"
         >
-          ← Forrige
+          ← {gettext("Previous")}
         </.link>
-        <span class="text-base-content/50 text-sm">Side {@page} af {@pages}</span>
+        <span class="text-base-content/50 text-sm">
+          {gettext("Page %{page} of %{pages}", page: @page, pages: @pages)}
+        </span>
         <.link
           :if={@page < @pages}
           patch={page_path(@filters, @page + 1)}
           class="btn btn-ghost btn-sm"
         >
-          Næste →
+          {gettext("Next")} →
         </.link>
       </div>
 
       <.modal id="invite-modal">
-        <h3 class="text-base-content text-lg font-semibold">Inviter nyt medlem</h3>
+        <h3 class="text-base-content text-lg font-semibold">{gettext("Invite new member")}</h3>
         <p class="text-base-content/60 mt-1 text-sm">
-          Vi opretter en konto og sender et log-ind-link på email.
+          {gettext("We create an account and send a sign-in link by email.")}
         </p>
         <.form for={@invite_form} phx-submit="invite" class="mt-4 space-y-4">
           <.input field={@invite_form[:email]} type="email" label="Email" required />
           <.input
             field={@invite_form[:role]}
             type="select"
-            label="Rolle"
-            options={[{"Medlem", "member"}, {"Bestyrelse", "board"}, {"Admin", "admin"}]}
+            label={gettext("Role")}
+            options={[
+              {gettext("Member"), "member"},
+              {gettext("Board"), "board"},
+              {"Admin", "admin"}
+            ]}
           />
           <div class="flex justify-end gap-2">
             <.button type="button" variant="ghost" phx-click={hide_modal("invite-modal")}>
-              Annuller
+              {gettext("Cancel")}
             </.button>
-            <.button type="submit" variant="primary">Send invitation</.button>
+            <.button type="submit" variant="primary">{gettext("Send invitation")}</.button>
           </div>
         </.form>
       </.modal>
@@ -441,11 +460,11 @@ defmodule ExhsWeb.AdminLive.Members.Index do
 
   defp invite_error_message(%Ash.Error.Invalid{errors: errors}) do
     if Enum.any?(errors, &match?(%{field: :user_id}, &1)) do
-      "Personen er allerede medlem."
+      gettext("The person is already a member.")
     else
-      "Kunne ikke invitere. Tjek emailadressen."
+      gettext("Could not invite. Check the email address.")
     end
   end
 
-  defp invite_error_message(_), do: "Kunne ikke invitere."
+  defp invite_error_message(_), do: gettext("Could not invite.")
 end

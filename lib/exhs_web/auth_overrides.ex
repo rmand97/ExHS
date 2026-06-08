@@ -68,9 +68,9 @@ defmodule ExhsWeb.AuthOverrides do
     set :root_class, "mt-4 mb-2"
     set :interstitial_class, "flex flex-row flex-wrap justify-between gap-2 text-sm font-medium"
     set :toggler_class, "text-primary hover:text-primary/80 transition"
-    set :sign_in_toggle_text, "Har du allerede en konto?"
-    set :register_toggle_text, "Har du ikke en konto?"
-    set :reset_toggle_text, "Glemt din adgangskode?"
+    set :sign_in_toggle_text, "Already have an account?"
+    set :register_toggle_text, "Don't have an account?"
+    set :reset_toggle_text, "Forgot your password?"
     set :show_first, :sign_in
     set :hide_class, "hidden"
   end
@@ -80,8 +80,8 @@ defmodule ExhsWeb.AuthOverrides do
     set :label_class, @heading
     set :form_class, nil
     set :slot_class, "my-4"
-    set :button_text, "Log ind"
-    set :disable_button_text, "Logger ind ..."
+    set :button_text, "Sign in"
+    set :disable_button_text, "Signing in ..."
   end
 
   override Components.Password.RegisterForm do
@@ -89,8 +89,8 @@ defmodule ExhsWeb.AuthOverrides do
     set :label_class, @heading
     set :form_class, nil
     set :slot_class, "my-4"
-    set :button_text, "Opret konto"
-    set :disable_button_text, "Opretter konto ..."
+    set :button_text, "Create account"
+    set :disable_button_text, "Creating account ..."
   end
 
   override Components.Password.ResetForm do
@@ -98,11 +98,11 @@ defmodule ExhsWeb.AuthOverrides do
     set :label_class, @heading
     set :form_class, nil
     set :slot_class, "my-4"
-    set :button_text, "Nulstil adgangskode"
-    set :disable_button_text, "Sender ..."
+    set :button_text, "Reset password"
+    set :disable_button_text, "Sending ..."
 
     set :reset_flash_text,
-        "Hvis denne bruger findes i vores system, vil du modtage en e-mail med instruktioner til nulstilling af adgangskode."
+        "If this user exists in our system, you will receive an email with instructions to reset your password."
   end
 
   override Components.Password.Input do
@@ -114,14 +114,14 @@ defmodule ExhsWeb.AuthOverrides do
     set :input_class, @base_input
     set :input_class_with_error, @base_input <> " input-error"
     set :submit_class, "btn btn-primary btn-block mt-6 mb-2"
-    set :identity_input_label, "E-mail"
-    set :password_input_label, "Adgangskode"
-    set :password_confirmation_input_label, "Bekræft adgangskode"
+    set :identity_input_label, "Email"
+    set :password_input_label, "Password"
+    set :password_confirmation_input_label, "Confirm password"
     set :error_ul, "text-error text-sm mt-1"
     set :error_li, nil
     set :input_debounce, 350
     set :remember_me_class, "flex items-center gap-2 mt-4"
-    set :remember_me_input_label, "Husk mig"
+    set :remember_me_input_label, "Remember me"
     set :checkbox_class, "checkbox checkbox-sm checkbox-primary"
     set :checkbox_label_class, "text-sm text-base-content/70"
   end
@@ -132,25 +132,25 @@ defmodule ExhsWeb.AuthOverrides do
     set :hr_inner_class, "hidden"
     set :text_outer_class, "contents"
     set :text_inner_class, "contents"
-    set :text, "eller"
+    set :text, "or"
   end
 
   override Components.MagicLink do
     set :root_class, "mt-4 mb-2"
     set :label_class, @heading
     set :form_class, nil
-    set :disable_button_text, "Sender ..."
+    set :disable_button_text, "Sending ..."
 
     set :request_flash_text,
-        "Hvis denne bruger findes i vores system, vil du modtage et link til at logge ind."
+        "If this user exists in our system, you will receive a link to sign in."
   end
 
   override Components.MagicLink.Input do
     set :submit_class, "btn btn-primary btn-block mt-6 mb-2"
-    set :submit_label, "Send login-link"
+    set :submit_label, "Send login link"
     set :input_debounce, 350
     set :remember_me_class, "flex items-center gap-2 mt-4"
-    set :remember_me_input_label, "Husk mig"
+    set :remember_me_input_label, "Remember me"
     set :checkbox_class, "checkbox checkbox-sm checkbox-primary"
     set :checkbox_label_class, "text-sm text-base-content/70"
   end
@@ -158,11 +158,11 @@ defmodule ExhsWeb.AuthOverrides do
   override Components.SignOut do
     set :root_class, @card_root
     set :h2_class, @heading <> " mb-2"
-    set :h2_text, "Log ud"
-    set :info_text, "Er du sikker på, at du vil logge ud?"
+    set :h2_text, "Sign out"
+    set :info_text, "Are you sure you want to sign out?"
     set :info_text_class, "text-sm text-base-content/60 mb-6"
     set :form_class, nil
-    set :button_text, "Log ud"
+    set :button_text, "Sign out"
     set :button_class, "btn btn-primary btn-block"
   end
 
@@ -185,8 +185,8 @@ defmodule ExhsWeb.AuthOverrides do
     set :label_class, @heading
     set :form_class, nil
     set :spacer_class, "py-1"
-    set :button_text, "Skift adgangskode"
-    set :disable_button_text, "Skifter adgangskode ..."
+    set :button_text, "Change password"
+    set :disable_button_text, "Changing password ..."
   end
 
   override Components.OAuth2 do

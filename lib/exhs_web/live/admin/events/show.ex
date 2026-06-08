@@ -31,7 +31,7 @@ defmodule ExhsWeb.AdminLive.Events.Show do
       _ ->
         {:ok,
          socket
-         |> put_flash(:error, "Event ikke fundet.")
+         |> put_flash(:error, gettext("Event not found."))
          |> push_navigate(to: ~p"/admin/events")}
     end
   end
@@ -50,21 +50,21 @@ defmodule ExhsWeb.AdminLive.Events.Show do
          ) do
       {:ok, _} ->
         {:noreply,
-         socket |> assign(:modal, nil) |> put_flash(:info, "Event opdateret.") |> reload()}
+         socket |> assign(:modal, nil) |> put_flash(:info, gettext("Event updated.")) |> reload()}
 
       {:error, _} ->
-        {:noreply, put_flash(socket, :error, "Kunne ikke gemme. Tjek titel og dato.")}
+        {:noreply, put_flash(socket, :error, gettext("Could not save. Check title and date."))}
     end
   end
 
   def handle_event("publish", _params, socket) do
     Events.publish_event(socket.assigns.event, scope: socket.assigns.current_scope)
-    {:noreply, socket |> put_flash(:info, "Event publiceret.") |> reload()}
+    {:noreply, socket |> put_flash(:info, gettext("Event published.")) |> reload()}
   end
 
   def handle_event("unpublish", _params, socket) do
     Events.unpublish_event(socket.assigns.event, scope: socket.assigns.current_scope)
-    {:noreply, socket |> put_flash(:info, "Event afpubliceret.") |> reload()}
+    {:noreply, socket |> put_flash(:info, gettext("Event unpublished.")) |> reload()}
   end
 
   # ── Ticket types ───────────────────────────────
@@ -116,10 +116,14 @@ defmodule ExhsWeb.AdminLive.Events.Show do
         Events.set_ticket_type_groups(tt, group_ids, scope: scope)
 
         {:noreply,
-         socket |> assign(:modal, nil) |> put_flash(:info, "Billettype gemt.") |> reload()}
+         socket
+         |> assign(:modal, nil)
+         |> put_flash(:info, gettext("Ticket type saved."))
+         |> reload()}
 
       {:error, _} ->
-        {:noreply, put_flash(socket, :error, "Kunne ikke gemme billettypen. Navn er påkrævet.")}
+        {:noreply,
+         put_flash(socket, :error, gettext("Could not save the ticket type. Name is required."))}
     end
   end
 
@@ -141,17 +145,19 @@ defmodule ExhsWeb.AdminLive.Events.Show do
 
     case Events.create_add_on(attrs, scope: socket.assigns.current_scope) do
       {:ok, _} ->
-        {:noreply, socket |> assign(:modal, nil) |> put_flash(:info, "Tilkøb gemt.") |> reload()}
+        {:noreply,
+         socket |> assign(:modal, nil) |> put_flash(:info, gettext("Add-on saved.")) |> reload()}
 
       {:error, _} ->
-        {:noreply, put_flash(socket, :error, "Kunne ikke gemme tilkøb. Navn er påkrævet.")}
+        {:noreply,
+         put_flash(socket, :error, gettext("Could not save the add-on. Name is required."))}
     end
   end
 
   def handle_event("delete_addon", %{"id" => id}, socket) do
     addon = Enum.find(socket.assigns.add_ons, &(&1.id == id))
     if addon, do: Events.destroy_add_on(addon, scope: socket.assigns.current_scope)
-    {:noreply, socket |> put_flash(:info, "Tilkøb slettet.") |> reload()}
+    {:noreply, socket |> put_flash(:info, gettext("Add-on deleted.")) |> reload()}
   end
 
   # ── Questions ──────────────────────────────────
@@ -185,7 +191,8 @@ defmodule ExhsWeb.AdminLive.Events.Show do
          |> assign(:questions, list_questions(socket, tt.id))}
 
       {:error, _} ->
-        {:noreply, put_flash(socket, :error, "Kunne ikke gemme spørgsmål. Tekst er påkrævet.")}
+        {:noreply,
+         put_flash(socket, :error, gettext("Could not save the question. Text is required."))}
     end
   end
 
@@ -202,7 +209,7 @@ defmodule ExhsWeb.AdminLive.Events.Show do
   def handle_event("delete_ticket", %{"id" => id}, socket) do
     tt = Enum.find(socket.assigns.event.ticket_types, &(&1.id == id))
     if tt, do: Events.destroy_ticket_type(tt, scope: socket.assigns.current_scope)
-    {:noreply, socket |> put_flash(:info, "Billettype slettet.") |> reload()}
+    {:noreply, socket |> put_flash(:info, gettext("Ticket type deleted.")) |> reload()}
   end
 
   # ── Registrations ──────────────────────────────
@@ -210,13 +217,13 @@ defmodule ExhsWeb.AdminLive.Events.Show do
   def handle_event("cancel_reg", %{"id" => id}, socket) do
     reg = Enum.find(socket.assigns.registrations, &(&1.id == id))
     if reg, do: Events.cancel_registration(reg, scope: socket.assigns.current_scope)
-    {:noreply, socket |> put_flash(:info, "Tilmelding annulleret.") |> reload()}
+    {:noreply, socket |> put_flash(:info, gettext("Registration cancelled.")) |> reload()}
   end
 
   def handle_event("promote_reg", %{"id" => id}, socket) do
     reg = Enum.find(socket.assigns.registrations, &(&1.id == id))
     if reg, do: Events.promote_registration(reg, scope: socket.assigns.current_scope)
-    {:noreply, socket |> put_flash(:info, "Flyttet fra venteliste.") |> reload()}
+    {:noreply, socket |> put_flash(:info, gettext("Moved from waitlist.")) |> reload()}
   end
 
   def handle_event("close", _params, socket), do: {:noreply, assign(socket, :modal, nil)}
@@ -394,7 +401,7 @@ defmodule ExhsWeb.AdminLive.Events.Show do
     >
       <div class="mb-4">
         <.link navigate={~p"/admin/events"} class="text-base-content/50 text-sm hover:underline">
-          ← Tilbage til events
+          ← {gettext("Back to events")}
         </.link>
       </div>
 
@@ -403,14 +410,16 @@ defmodule ExhsWeb.AdminLive.Events.Show do
         <:subtitle>{format_datetime(@event.starts_at)}</:subtitle>
         <:actions>
           <.badge variant={if @event.published, do: "success", else: "default"}>
-            {if @event.published, do: "Publiceret", else: "Kladde"}
+            {if @event.published, do: gettext("Published"), else: gettext("Draft")}
           </.badge>
-          <.button :if={@can_write?} phx-click="edit_event" variant="ghost">Rediger</.button>
+          <.button :if={@can_write?} phx-click="edit_event" variant="ghost">
+            {gettext("Edit")}
+          </.button>
           <.button :if={@can_write? and not @event.published} phx-click="publish" variant="primary">
-            Publicér
+            {gettext("Publish")}
           </.button>
           <.button :if={@can_write? and @event.published} phx-click="unpublish" variant="ghost">
-            Afpublicér
+            {gettext("Unpublish")}
           </.button>
         </:actions>
       </.header>
@@ -419,14 +428,14 @@ defmodule ExhsWeb.AdminLive.Events.Show do
         <%!-- Details + ticket types --%>
         <div class="space-y-6 lg:col-span-1">
           <.card class="p-5">
-            <h3 class="text-base-content font-semibold">Detaljer</h3>
+            <h3 class="text-base-content font-semibold">{gettext("Details")}</h3>
             <dl class="mt-3 space-y-2 text-sm">
-              <.detail_row label="Sted" value={@event.location || "—"} />
-              <.detail_row label="Start" value={format_datetime(@event.starts_at)} />
-              <.detail_row label="Slut" value={format_datetime(@event.ends_at)} />
+              <.detail_row label={gettext("Location")} value={@event.location || "—"} />
+              <.detail_row label={gettext("Start")} value={format_datetime(@event.starts_at)} />
+              <.detail_row label={gettext("End")} value={format_datetime(@event.ends_at)} />
               <.detail_row
-                label="Kræver medlemskab"
-                value={if @event.membership_required, do: "Ja", else: "Nej"}
+                label={gettext("Requires membership")}
+                value={if @event.membership_required, do: gettext("Yes"), else: gettext("No")}
               />
             </dl>
             <p :if={@event.description} class="text-base-content/70 mt-3 text-sm">
@@ -436,13 +445,13 @@ defmodule ExhsWeb.AdminLive.Events.Show do
 
           <.card class="p-5">
             <div class="flex items-center justify-between">
-              <h3 class="text-base-content font-semibold">Billettyper</h3>
+              <h3 class="text-base-content font-semibold">{gettext("Ticket types")}</h3>
               <.button :if={@can_write?} phx-click="new_ticket" variant="ghost">
                 <.icon name="hero-plus" class="size-4" />
               </.button>
             </div>
             <p :if={@event.ticket_types == []} class="text-base-content/40 mt-2 text-sm">
-              Ingen billettyper endnu.
+              {gettext("No ticket types yet.")}
             </p>
             <ul class="divide-base-content/10 mt-2 divide-y">
               <li :for={tt <- @event.ticket_types} class="flex items-center justify-between py-2">
@@ -456,16 +465,21 @@ defmodule ExhsWeb.AdminLive.Events.Show do
                   <p class="text-base-content/50 text-xs">
                     {format_amount(tt.price_cents, tt.currency)}
                     <span :if={tt.capacity}>
-                      · {tt.seats_taken} solgt · {tt.seats_left} tilbage
+                      · {gettext("%{count} sold", count: tt.seats_taken)} · {gettext(
+                        "%{count} left",
+                        count: tt.seats_left
+                      )}
                     </span>
-                    <span :if={is_nil(tt.capacity)}>· {tt.seats_taken} solgt · ubegrænset</span>
+                    <span :if={is_nil(tt.capacity)}>
+                      · {gettext("%{count} sold", count: tt.seats_taken)} · {gettext("unlimited")}
+                    </span>
                   </p>
                 </div>
                 <div :if={@can_write?} class="flex gap-1">
                   <button
                     phx-click="manage_questions"
                     phx-value-id={tt.id}
-                    aria-label="Spørgsmål"
+                    aria-label={gettext("Questions")}
                     class="hover:text-base-content text-base-content/40"
                   >
                     <.icon name="hero-question-mark-circle" class="size-4" />
@@ -473,7 +487,7 @@ defmodule ExhsWeb.AdminLive.Events.Show do
                   <button
                     phx-click="edit_ticket"
                     phx-value-id={tt.id}
-                    aria-label="Rediger"
+                    aria-label={gettext("Edit")}
                     class="hover:text-base-content text-base-content/40"
                   >
                     <.icon name="hero-pencil-square" class="size-4" />
@@ -481,8 +495,8 @@ defmodule ExhsWeb.AdminLive.Events.Show do
                   <button
                     phx-click="delete_ticket"
                     phx-value-id={tt.id}
-                    data-confirm={"Slet \"#{tt.name}\"?"}
-                    aria-label="Slet"
+                    data-confirm={gettext("Delete \"%{name}\"?", name: tt.name)}
+                    aria-label={gettext("Delete")}
                     class="hover:text-error text-base-content/40"
                   >
                     <.icon name="hero-trash" class="size-4" />
@@ -494,13 +508,13 @@ defmodule ExhsWeb.AdminLive.Events.Show do
 
           <.card class="p-5">
             <div class="flex items-center justify-between">
-              <h3 class="text-base-content font-semibold">Tilkøb</h3>
+              <h3 class="text-base-content font-semibold">{gettext("Add-ons")}</h3>
               <.button :if={@can_write?} phx-click="new_addon" variant="ghost">
                 <.icon name="hero-plus" class="size-4" />
               </.button>
             </div>
             <p :if={@add_ons == []} class="text-base-content/40 mt-2 text-sm">
-              Ingen tilkøb endnu.
+              {gettext("No add-ons yet.")}
             </p>
             <ul class="divide-base-content/10 mt-2 divide-y">
               <li :for={a <- @add_ons} class="flex items-center justify-between py-2">
@@ -514,8 +528,8 @@ defmodule ExhsWeb.AdminLive.Events.Show do
                   :if={@can_write?}
                   phx-click="delete_addon"
                   phx-value-id={a.id}
-                  data-confirm={"Slet \"#{a.name}\"?"}
-                  aria-label="Slet"
+                  data-confirm={gettext("Delete \"%{name}\"?", name: a.name)}
+                  aria-label={gettext("Delete")}
                   class="hover:text-error text-base-content/40"
                 >
                   <.icon name="hero-trash" class="size-4" />
@@ -530,7 +544,7 @@ defmodule ExhsWeb.AdminLive.Events.Show do
           <.card class="p-5">
             <div class="flex items-center justify-between">
               <h3 class="text-base-content font-semibold">
-                Tilmeldte ({length(@confirmed)})
+                {gettext("Registered (%{count})", count: length(@confirmed))}
               </h3>
               <.link
                 href={~p"/admin/export/events/#{@event.id}/registrations.csv"}
@@ -540,88 +554,111 @@ defmodule ExhsWeb.AdminLive.Events.Show do
               </.link>
             </div>
             <p :if={@confirmed == []} class="text-base-content/40 mt-2 text-sm">
-              Ingen bekræftede tilmeldinger.
+              {gettext("No confirmed registrations.")}
             </p>
             <.reg_row :for={reg <- @confirmed} reg={reg} can_write={@can_write?} waitlist={false} />
           </.card>
 
           <.card :if={@waitlisted != []} class="p-5">
-            <h3 class="text-base-content font-semibold">Venteliste ({length(@waitlisted)})</h3>
+            <h3 class="text-base-content font-semibold">
+              {gettext("Waitlist (%{count})", count: length(@waitlisted))}
+            </h3>
             <.reg_row :for={reg <- @waitlisted} reg={reg} can_write={@can_write?} waitlist={true} />
           </.card>
         </div>
       </div>
 
       <.modal :if={@modal == :event} id="event-edit-modal" show on_cancel={JS.push("close")}>
-        <h3 class="text-base-content text-lg font-semibold">Rediger event</h3>
+        <h3 class="text-base-content text-lg font-semibold">{gettext("Edit event")}</h3>
         <.form for={@event_form} phx-submit="save_event" class="mt-4 space-y-4">
-          <.input field={@event_form[:title]} label="Titel" required />
-          <.input field={@event_form[:description]} type="textarea" label="Beskrivelse" />
-          <.input field={@event_form[:location]} label="Sted" />
-          <.input field={@event_form[:cover_image_url]} label="Cover-billede URL" />
+          <.input field={@event_form[:title]} label={gettext("Title")} required />
+          <.input field={@event_form[:description]} type="textarea" label={gettext("Description")} />
+          <.input field={@event_form[:location]} label={gettext("Location")} />
+          <.input field={@event_form[:cover_image_url]} label={gettext("Cover image URL")} />
           <div class="grid gap-4 sm:grid-cols-2">
-            <.input field={@event_form[:starts_at]} type="datetime-local" label="Start" required />
-            <.input field={@event_form[:ends_at]} type="datetime-local" label="Slut" />
+            <.input
+              field={@event_form[:starts_at]}
+              type="datetime-local"
+              label={gettext("Start")}
+              required
+            />
+            <.input field={@event_form[:ends_at]} type="datetime-local" label={gettext("End")} />
           </div>
           <.input
             field={@event_form[:membership_required]}
             type="select"
-            label="Kræver medlemskab"
-            options={[{"Ja", "true"}, {"Nej", "false"}]}
+            label={gettext("Requires membership")}
+            options={[{gettext("Yes"), "true"}, {gettext("No"), "false"}]}
           />
           <div class="flex justify-end gap-2">
-            <.button type="button" variant="ghost" phx-click="close">Annuller</.button>
-            <.button type="submit" variant="primary">Gem</.button>
+            <.button type="button" variant="ghost" phx-click="close">{gettext("Cancel")}</.button>
+            <.button type="submit" variant="primary">{gettext("Save")}</.button>
           </div>
         </.form>
       </.modal>
 
       <.modal :if={match?({:ticket, _}, @modal)} id="ticket-modal" show on_cancel={JS.push("close")}>
-        <h3 class="text-base-content text-lg font-semibold">Billettype</h3>
+        <h3 class="text-base-content text-lg font-semibold">{gettext("Ticket type")}</h3>
         <.form for={@ticket_form} phx-submit="save_ticket" class="mt-4 space-y-4">
-          <.input field={@ticket_form[:name]} label="Navn" required />
+          <.input field={@ticket_form[:name]} label={gettext("Name")} required />
           <div class="grid gap-4 sm:grid-cols-2">
-            <.input field={@ticket_form[:price_kr]} type="number" label="Pris (kr)" />
-            <.input field={@ticket_form[:capacity]} type="number" label="Kapacitet (valgfri)" />
+            <.input field={@ticket_form[:price_kr]} type="number" label={gettext("Price (kr)")} />
+            <.input
+              field={@ticket_form[:capacity]}
+              type="number"
+              label={gettext("Capacity (optional)")}
+            />
           </div>
-          <.input field={@ticket_form[:description]} label="Beskrivelse" />
+          <.input field={@ticket_form[:description]} label={gettext("Description")} />
           <div class="grid gap-4 sm:grid-cols-2">
-            <.input field={@ticket_form[:sales_starts_at]} type="datetime-local" label="Salg åbner" />
-            <.input field={@ticket_form[:sales_ends_at]} type="datetime-local" label="Salg lukker" />
+            <.input
+              field={@ticket_form[:sales_starts_at]}
+              type="datetime-local"
+              label={gettext("Sales opens")}
+            />
+            <.input
+              field={@ticket_form[:sales_ends_at]}
+              type="datetime-local"
+              label={gettext("Sales closes")}
+            />
           </div>
           <.input
             field={@ticket_form[:allow_multiple]}
             type="select"
-            label="Tillad flere pr. medlem"
-            options={[{"Nej", "false"}, {"Ja", "true"}]}
+            label={gettext("Allow multiple per member")}
+            options={[{gettext("No"), "false"}, {gettext("Yes"), "true"}]}
           />
           <.input
             :if={@groups != []}
             field={@ticket_form[:group_ids]}
             type="select"
             multiple
-            label="Begræns til grupper (presale)"
+            label={gettext("Restrict to groups (presale)")}
             options={Enum.map(@groups, &{&1.name, &1.id})}
           />
           <div class="flex justify-end gap-2">
-            <.button type="button" variant="ghost" phx-click="close">Annuller</.button>
-            <.button type="submit" variant="primary">Gem</.button>
+            <.button type="button" variant="ghost" phx-click="close">{gettext("Cancel")}</.button>
+            <.button type="submit" variant="primary">{gettext("Save")}</.button>
           </div>
         </.form>
       </.modal>
 
       <.modal :if={@modal == :addon} id="addon-modal" show on_cancel={JS.push("close")}>
-        <h3 class="text-base-content text-lg font-semibold">Tilkøb</h3>
+        <h3 class="text-base-content text-lg font-semibold">{gettext("Add-on")}</h3>
         <.form for={@addon_form} phx-submit="save_addon" class="mt-4 space-y-4">
-          <.input field={@addon_form[:name]} label="Navn" required />
+          <.input field={@addon_form[:name]} label={gettext("Name")} required />
           <div class="grid gap-4 sm:grid-cols-2">
-            <.input field={@addon_form[:price_kr]} type="number" label="Pris (kr)" />
-            <.input field={@addon_form[:capacity]} type="number" label="Kapacitet (valgfri)" />
+            <.input field={@addon_form[:price_kr]} type="number" label={gettext("Price (kr)")} />
+            <.input
+              field={@addon_form[:capacity]}
+              type="number"
+              label={gettext("Capacity (optional)")}
+            />
           </div>
-          <.input field={@addon_form[:description]} label="Beskrivelse" />
+          <.input field={@addon_form[:description]} label={gettext("Description")} />
           <div class="flex justify-end gap-2">
-            <.button type="button" variant="ghost" phx-click="close">Annuller</.button>
-            <.button type="submit" variant="primary">Gem</.button>
+            <.button type="button" variant="ghost" phx-click="close">{gettext("Cancel")}</.button>
+            <.button type="submit" variant="primary">{gettext("Save")}</.button>
           </div>
         </.form>
       </.modal>
@@ -632,19 +669,19 @@ defmodule ExhsWeb.AdminLive.Events.Show do
         show
         on_cancel={JS.push("close")}
       >
-        <h3 class="text-base-content text-lg font-semibold">Spørgsmål</h3>
+        <h3 class="text-base-content text-lg font-semibold">{gettext("Questions")}</h3>
         <ul class="divide-base-content/10 mt-3 divide-y">
           <li :for={q <- @questions} class="flex items-center justify-between py-2">
             <div>
               <p class="text-base-content text-sm">{q.label}</p>
               <p class="text-base-content/50 text-xs">
-                {q.field_type}{if q.required, do: " · påkrævet"}
+                {q.field_type}{if q.required, do: " · " <> gettext("required")}
               </p>
             </div>
             <button
               phx-click="delete_question"
               phx-value-id={q.id}
-              aria-label="Slet"
+              aria-label={gettext("Delete")}
               class="hover:text-error text-base-content/40"
             >
               <.icon name="hero-trash" class="size-4" />
@@ -652,23 +689,27 @@ defmodule ExhsWeb.AdminLive.Events.Show do
           </li>
         </ul>
         <.form for={@question_form} phx-submit="save_question" class="mt-4 space-y-3">
-          <.input field={@question_form[:label]} label="Spørgsmål" required />
+          <.input field={@question_form[:label]} label={gettext("Question")} required />
           <.input
             field={@question_form[:field_type]}
             type="select"
-            label="Type"
-            options={[{"Tekst", "text"}, {"Valg", "select"}, {"Tal", "number"}]}
+            label={gettext("Type")}
+            options={[
+              {gettext("Text"), "text"},
+              {gettext("Choice"), "select"},
+              {gettext("Number"), "number"}
+            ]}
           />
-          <.input field={@question_form[:options]} label="Valgmuligheder (komma-adskilt)" />
+          <.input field={@question_form[:options]} label={gettext("Options (comma-separated)")} />
           <.input
             field={@question_form[:required]}
             type="select"
-            label="Påkrævet"
-            options={[{"Ja", "true"}, {"Nej", "false"}]}
+            label={gettext("Required")}
+            options={[{gettext("Yes"), "true"}, {gettext("No"), "false"}]}
           />
           <div class="flex justify-end gap-2">
-            <.button type="button" variant="ghost" phx-click="close">Luk</.button>
-            <.button type="submit" variant="primary">Tilføj</.button>
+            <.button type="button" variant="ghost" phx-click="close">{gettext("Close")}</.button>
+            <.button type="submit" variant="primary">{gettext("Add")}</.button>
           </div>
         </.form>
       </.modal>
@@ -709,16 +750,16 @@ defmodule ExhsWeb.AdminLive.Events.Show do
           phx-value-id={@reg.id}
           variant="ghost"
         >
-          Bekræft
+          {gettext("Confirm")}
         </.button>
         <.button
           :if={@can_write}
           phx-click="cancel_reg"
           phx-value-id={@reg.id}
-          data-confirm="Annullér tilmeldingen?"
+          data-confirm={gettext("Cancel the registration?")}
           variant="ghost"
         >
-          Annullér
+          {gettext("Cancel")}
         </.button>
       </div>
     </div>

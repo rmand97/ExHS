@@ -29,7 +29,7 @@ defmodule ExhsWeb.PublicLive.OrderShow do
     case Events.get_order(id, scope: scope, load: @order_load) do
       {:ok, order} ->
         if connected?(socket), do: OrderUpdates.subscribe(order.id)
-        {:ok, assign(socket, order: order, page_title: "Ordre")}
+        {:ok, assign(socket, order: order, page_title: gettext("Order"))}
 
       {:error, _} ->
         {:ok, redirect(socket, to: "/events")}
@@ -63,12 +63,12 @@ defmodule ExhsWeb.PublicLive.OrderShow do
             navigate={~p"/orders"}
             class="text-base-content/50 mb-6 inline-flex items-center gap-1 text-sm"
           >
-            <.icon name="hero-arrow-left-micro" class="size-4" /> Mine billetter
+            <.icon name="hero-arrow-left-micro" class="size-4" /> {gettext("My tickets")}
           </.link>
 
           <.card class="p-6">
             <.status_badge status={@order.status} />
-            <h1 class="text-base-content mt-3 text-2xl font-bold">Din ordre</h1>
+            <h1 class="text-base-content mt-3 text-2xl font-bold">{gettext("Your order")}</h1>
 
             <div class="border-base-content/5 mt-6 divide-y">
               <div :for={item <- @order.items} class="flex items-center justify-between py-3">
@@ -80,14 +80,16 @@ defmodule ExhsWeb.PublicLive.OrderShow do
             </div>
 
             <div class="border-base-content/5 mt-3 flex items-center justify-between border-t pt-3">
-              <span class="text-base-content font-medium">I alt</span>
+              <span class="text-base-content font-medium">{gettext("Total")}</span>
               <span class="text-base-content font-bold">
                 {format_price(@order.total_cents, @order.currency)}
               </span>
             </div>
 
             <p :if={@order.payment} class="text-base-content/50 mt-4 text-xs">
-              Betalt {format_datetime(@order.paid_at)} · kvittering sendt på e-mail.
+              {gettext("Paid %{datetime} · receipt sent by email.",
+                datetime: format_datetime(@order.paid_at)
+              )}
             </p>
           </.card>
         </div>
@@ -107,5 +109,5 @@ defmodule ExhsWeb.PublicLive.OrderShow do
 
   defp item_name(%{item_type: :ticket, ticket_type: %{name: name}}), do: name
   defp item_name(%{item_type: :addon, add_on: %{name: name}}), do: name
-  defp item_name(_), do: "Vare"
+  defp item_name(_), do: gettext("Item")
 end

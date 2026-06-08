@@ -13,7 +13,7 @@ defmodule ExhsWeb.PublicLive.Orders do
       orders = load_orders(socket)
       if connected?(socket), do: Enum.each(orders, &OrderUpdates.subscribe(&1.id))
 
-      {:ok, assign(socket, orders: orders, page_title: "Mine billetter")}
+      {:ok, assign(socket, orders: orders, page_title: gettext("My tickets"))}
     else
       {:ok, redirect(socket, to: "/sign-in")}
     end
@@ -43,10 +43,10 @@ defmodule ExhsWeb.PublicLive.Orders do
     >
       <div class="px-4 py-8 sm:px-6">
         <div class="mx-auto max-w-2xl">
-          <h1 class="text-base-content mb-6 text-2xl font-bold">Mine billetter</h1>
+          <h1 class="text-base-content mb-6 text-2xl font-bold">{gettext("My tickets")}</h1>
 
           <div :if={@orders == []} class="text-base-content/50 text-sm">
-            Du har ingen ordrer endnu.
+            {gettext("You have no orders yet.")}
           </div>
 
           <div class="space-y-3">

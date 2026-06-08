@@ -214,7 +214,10 @@ defmodule Exhs.Billing.Webhook do
             status: :succeeded,
             stripe_payment_intent_id: intent_id,
             stripe_charge_id: session["charge"],
-            description: "Billetkøb — ordre #{order.id}",
+            description:
+              Gettext.dgettext(ExhsWeb.Gettext, "default", "Ticket purchase — order %{id}",
+                id: order.id
+              ),
             paid_at: DateTime.utc_now()
           },
           tenant: forening_id,

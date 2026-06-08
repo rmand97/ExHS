@@ -47,3 +47,6 @@ npm-debug.log
 .DS_Store
 .idea/
 .vscode/
+
+# Localize CLDR locale cache (re-downloaded via mix localize.download_locales)
+/priv/localize/

@@ -130,7 +130,7 @@ defmodule ExhsWeb.PublicLive.Events.Show do
   defp finish_purchase(socket, %{checkout_url: nil, order: order}) do
     {:noreply,
      socket
-     |> put_flash(:info, "Din tilmelding er bekræftet!")
+     |> put_flash(:info, gettext("Your registration is confirmed!"))
      |> redirect(to: ~p"/orders/#{order.id}")}
   end
 
@@ -188,7 +188,7 @@ defmodule ExhsWeb.PublicLive.Events.Show do
             navigate={~p"/events"}
             class="hover:text-base-content text-base-content/50 mb-6 inline-flex items-center gap-1 text-sm transition"
           >
-            <.icon name="hero-arrow-left-micro" class="size-4" /> Alle events
+            <.icon name="hero-arrow-left-micro" class="size-4" /> {gettext("All events")}
           </.link>
 
           <div :if={@event.cover_image_url} class="mb-8 overflow-hidden rounded-2xl">
@@ -226,10 +226,10 @@ defmodule ExhsWeb.PublicLive.Events.Show do
   defp purchase_panel(assigns) do
     ~H"""
     <.card class="p-5">
-      <h3 class="text-base-content mb-4 font-semibold">Billetter</h3>
+      <h3 class="text-base-content mb-4 font-semibold">{gettext("Tickets")}</h3>
 
       <div :if={@tickets == []} class="text-base-content/50 text-sm">
-        Ingen billettyper tilgængelige.
+        {gettext("No ticket types available.")}
       </div>
 
       <div class="space-y-3">
@@ -247,7 +247,7 @@ defmodule ExhsWeb.PublicLive.Events.Show do
                 {t.ticket_type.description}
               </p>
               <p :if={t.seats_left} class="text-warning mt-1 text-xs font-medium">
-                kun {t.seats_left} tilbage
+                {gettext("only %{count} left", count: t.seats_left)}
               </p>
             </div>
             <p class="text-primary text-sm font-semibold whitespace-nowrap">
@@ -263,13 +263,16 @@ defmodule ExhsWeb.PublicLive.Events.Show do
               phx-value-id={t.ticket_type.id}
               class="btn btn-block btn-primary btn-sm"
             >
-              Vælg
+              {gettext("Choose")}
             </button>
             <div
               :if={t.waitlist}
               class="bg-info/10 text-info rounded-lg px-3 py-2 text-center text-xs font-medium"
             >
-              På venteliste — plads {t.waitlist.position} af {t.waitlist.total}
+              {gettext("On waitlist — position %{position} of %{total}",
+                position: t.waitlist.position,
+                total: t.waitlist.total
+              )}
             </div>
             <p
               :if={@current_user && !t.waitlist && t.status != :available}
@@ -282,7 +285,7 @@ defmodule ExhsWeb.PublicLive.Events.Show do
       </div>
 
       <.link :if={!@current_user} navigate={~p"/sign-in"} class="btn btn-block btn-primary mt-4">
-        Log ind for at tilmelde
+        {gettext("Sign in to register")}
       </.link>
     </.card>
     """
@@ -294,7 +297,7 @@ defmodule ExhsWeb.PublicLive.Events.Show do
       <div class="mb-4 flex items-center justify-between">
         <h3 class="text-base-content font-semibold">{@selected.ticket_type.name}</h3>
         <button type="button" phx-click="cancel_purchase" class="text-base-content/40 text-xs">
-          Annullér
+          {gettext("Cancel")}
         </button>
       </div>
 
@@ -313,7 +316,7 @@ defmodule ExhsWeb.PublicLive.Events.Show do
             required={q.required}
             class="select select-bordered select-sm w-full"
           >
-            <option value="">Vælg…</option>
+            <option value="">{gettext("Choose…")}</option>
             <option :for={opt <- q.options} value={opt}>{opt}</option>
           </select>
           <input
@@ -326,7 +329,7 @@ defmodule ExhsWeb.PublicLive.Events.Show do
         </div>
 
         <div :if={@addons != []} class="space-y-2">
-          <p class="text-base-content text-sm font-medium">Tilkøb</p>
+          <p class="text-base-content text-sm font-medium">{gettext("Add-ons")}</p>
           <label
             :for={a <- @addons}
             class="border-base-content/5 flex items-center gap-3 rounded-lg border p-2"
@@ -344,7 +347,7 @@ defmodule ExhsWeb.PublicLive.Events.Show do
         </div>
 
         <div class="border-base-content/5 flex items-center justify-between border-t pt-3">
-          <span class="text-base-content/60 text-sm">I alt</span>
+          <span class="text-base-content/60 text-sm">{gettext("Total")}</span>
           <span class="text-base-content font-semibold">
             {format_price(preview_total(assigns), @selected.ticket_type.currency)}
           </span>
@@ -353,9 +356,11 @@ defmodule ExhsWeb.PublicLive.Events.Show do
         <button
           type="submit"
           class="btn btn-block btn-primary"
-          phx-disable-with="Behandler…"
+          phx-disable-with={gettext("Processing…")}
         >
-          {if preview_total(assigns) == 0, do: "Bekræft tilmelding", else: "Fortsæt til betaling"}
+          {if preview_total(assigns) == 0,
+            do: gettext("Confirm registration"),
+            else: gettext("Continue to payment")}
         </button>
       </form>
     </.card>
@@ -365,12 +370,12 @@ defmodule ExhsWeb.PublicLive.Events.Show do
   defp pending_banner(assigns) do
     ~H"""
     <.card class="border-warning/40 border p-4">
-      <p class="text-base-content text-sm font-medium">Reservation afventer betaling</p>
+      <p class="text-base-content text-sm font-medium">{gettext("Reservation awaiting payment")}</p>
       <p class="text-warning mt-1 text-2xl font-bold tabular-nums">
         {format_countdown(@countdown)}
       </p>
       <.link navigate={~p"/orders/#{@order.id}"} class="btn btn-block btn-sm btn-warning mt-3">
-        Fortsæt
+        {gettext("Continue")}
       </.link>
     </.card>
     """
@@ -379,21 +384,30 @@ defmodule ExhsWeb.PublicLive.Events.Show do
   defp event_details(assigns) do
     ~H"""
     <.card class="p-5">
-      <h3 class="text-base-content mb-4 font-semibold">Detaljer</h3>
+      <h3 class="text-base-content mb-4 font-semibold">{gettext("Details")}</h3>
       <div class="space-y-3">
-        <.detail_row icon="hero-calendar-days" label="Dato" value={format_datetime(@event.starts_at)} />
+        <.detail_row
+          icon="hero-calendar-days"
+          label={gettext("Date")}
+          value={format_datetime(@event.starts_at)}
+        />
         <.detail_row
           :if={@event.ends_at}
           icon="hero-clock"
-          label="Slut"
+          label={gettext("End")}
           value={format_datetime(@event.ends_at)}
         />
-        <.detail_row :if={@event.location} icon="hero-map-pin" label="Sted" value={@event.location} />
+        <.detail_row
+          :if={@event.location}
+          icon="hero-map-pin"
+          label={gettext("Location")}
+          value={@event.location}
+        />
         <.detail_row
           :if={@event.membership_required}
           icon="hero-user-group"
-          label="Krav"
-          value="Kun for medlemmer"
+          label={gettext("Requirement")}
+          value={gettext("Members only")}
         />
       </div>
     </.card>
@@ -571,14 +585,17 @@ defmodule ExhsWeb.PublicLive.Events.Show do
     "#{minutes}:#{String.pad_leading(Integer.to_string(secs), 2, "0")}"
   end
 
-  defp reason(:sold_out), do: "Udsolgt"
-  defp reason(:not_open), do: "Salg ikke åbnet endnu"
-  defp reason(:closed), do: "Salg lukket"
-  defp reason(:ineligible), do: "Kun for berettigede grupper"
+  defp reason(:sold_out), do: gettext("Sold out")
+  defp reason(:not_open), do: gettext("Sales not open yet")
+  defp reason(:closed), do: gettext("Sales closed")
+  defp reason(:ineligible), do: gettext("Only for eligible groups")
   defp reason(_), do: ""
 
-  defp humanize(:order_requires_ticket), do: "Vælg mindst én billet."
-  defp humanize(:forening_billing_not_ready), do: "Betaling er ikke klar for denne forening."
-  defp humanize(%Ash.Error.Invalid{}), do: "Tjek dine svar og prøv igen."
-  defp humanize(_), do: "Noget gik galt. Prøv igen."
+  defp humanize(:order_requires_ticket), do: gettext("Choose at least one ticket.")
+
+  defp humanize(:forening_billing_not_ready),
+    do: gettext("Payment is not ready for this association.")
+
+  defp humanize(%Ash.Error.Invalid{}), do: gettext("Check your answers and try again.")
+  defp humanize(_), do: gettext("Something went wrong. Please try again.")
 end

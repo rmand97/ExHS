@@ -36,16 +36,17 @@ defmodule ExhsWeb.AdminLive.Events.Index do
         {:noreply, push_navigate(socket, to: ~p"/admin/events/#{event.id}")}
 
       {:error, _} ->
-        {:noreply, put_flash(socket, :error, "Kunne ikke oprette eventet. Tjek titel og dato.")}
+        {:noreply,
+         put_flash(socket, :error, gettext("Could not create the event. Check title and date."))}
     end
   end
 
   def handle_event("publish", %{"id" => id}, socket) do
-    toggle_publish(socket, id, &Events.publish_event/2, "Event publiceret.")
+    toggle_publish(socket, id, &Events.publish_event/2, gettext("Event published."))
   end
 
   def handle_event("unpublish", %{"id" => id}, socket) do
-    toggle_publish(socket, id, &Events.unpublish_event/2, "Event afpubliceret.")
+    toggle_publish(socket, id, &Events.unpublish_event/2, gettext("Event unpublished."))
   end
 
   defp toggle_publish(socket, id, fun, message) do
@@ -56,7 +57,7 @@ defmodule ExhsWeb.AdminLive.Events.Index do
            {:ok, _} <- fun.(event, scope: socket.assigns.current_scope) do
         put_flash(socket, :info, message)
       else
-        _ -> put_flash(socket, :error, "Handlingen kunne ikke gennemføres.")
+        _ -> put_flash(socket, :error, gettext("The action could not be completed."))
       end
 
     {:noreply, socket |> load_events() |> stream_tab(socket.assigns.tab)}
@@ -164,17 +165,23 @@ defmodule ExhsWeb.AdminLive.Events.Index do
     >
       <.header>
         Events
-        <:subtitle>Opret og administrer arrangementer</:subtitle>
+        <:subtitle>{gettext("Create and manage events")}</:subtitle>
         <:actions>
           <.button :if={@can_write?} phx-click="new" variant="primary">
-            <.icon name="hero-plus" class="size-4" /> Nyt event
+            <.icon name="hero-plus" class="size-4" /> {gettext("New event")}
           </.button>
         </:actions>
       </.header>
 
       <div role="tablist" class="tabs tabs-bordered mt-6">
         <.link
-          :for={{key, label} <- [{:upcoming, "Kommende"}, {:past, "Tidligere"}, {:drafts, "Kladder"}]}
+          :for={
+            {key, label} <- [
+              {:upcoming, gettext("Upcoming")},
+              {:past, gettext("Past")},
+              {:drafts, gettext("Drafts")}
+            ]
+          }
           patch={~p"/admin/events?tab=#{key}"}
           role="tab"
           class={["tab", @tab == key && "tab-active"]}
@@ -184,7 +191,7 @@ defmodule ExhsWeb.AdminLive.Events.Index do
       </div>
 
       <div :if={@row_count == 0} class="mt-8">
-        <.empty_state icon="hero-calendar-days" title="Ingen events her">
+        <.empty_state icon="hero-calendar-days" title={gettext("No events here")}>
           {empty_copy(@tab)}
         </.empty_state>
       </div>
@@ -198,7 +205,7 @@ defmodule ExhsWeb.AdminLive.Events.Index do
           <div class="flex items-start justify-between gap-2">
             <h3 class="text-base-content font-semibold">{e.title}</h3>
             <.badge variant={if e.published, do: "success", else: "default"}>
-              {if e.published, do: "Publiceret", else: "Kladde"}
+              {if e.published, do: gettext("Published"), else: gettext("Draft")}
             </.badge>
           </div>
           <p class="text-base-content/50 mt-1 text-sm">
@@ -208,11 +215,14 @@ defmodule ExhsWeb.AdminLive.Events.Index do
             <.icon name="hero-map-pin" class="size-3.5" /> {e.location}
           </p>
           <p class="text-base-content/40 mt-2 text-xs">
-            {length(e.ticket_types)} billettype(r) · {Map.get(@counts, e.id, 0)} tilmeldte
+            {gettext("%{tickets} ticket type(s) · %{count} registered",
+              tickets: length(e.ticket_types),
+              count: Map.get(@counts, e.id, 0)
+            )}
           </p>
           <div class="border-base-content/10 mt-4 flex items-center gap-2 border-t pt-3">
             <.link navigate={~p"/admin/events/#{e.id}"} class="btn btn-outline btn-sm">
-              Åbn
+              {gettext("Open")}
             </.link>
             <.button
               :if={@can_write? and not e.published}
@@ -220,7 +230,7 @@ defmodule ExhsWeb.AdminLive.Events.Index do
               phx-value-id={e.id}
               variant="ghost"
             >
-              Publicér
+              {gettext("Publish")}
             </.button>
             <.button
               :if={@can_write? and e.published}
@@ -228,31 +238,36 @@ defmodule ExhsWeb.AdminLive.Events.Index do
               phx-value-id={e.id}
               variant="ghost"
             >
-              Afpublicér
+              {gettext("Unpublish")}
             </.button>
           </div>
         </div>
       </div>
 
       <.modal :if={@creating} id="event-modal" show on_cancel={JS.push("cancel")}>
-        <h3 class="text-base-content text-lg font-semibold">Nyt event</h3>
+        <h3 class="text-base-content text-lg font-semibold">{gettext("New event")}</h3>
         <.form for={@form} phx-submit="save" class="mt-4 space-y-4">
-          <.input field={@form[:title]} label="Titel" required />
-          <.input field={@form[:description]} type="textarea" label="Beskrivelse" />
-          <.input field={@form[:location]} label="Sted" />
+          <.input field={@form[:title]} label={gettext("Title")} required />
+          <.input field={@form[:description]} type="textarea" label={gettext("Description")} />
+          <.input field={@form[:location]} label={gettext("Location")} />
           <div class="grid gap-4 sm:grid-cols-2">
-            <.input field={@form[:starts_at]} type="datetime-local" label="Starttidspunkt" required />
-            <.input field={@form[:ends_at]} type="datetime-local" label="Sluttidspunkt" />
+            <.input
+              field={@form[:starts_at]}
+              type="datetime-local"
+              label={gettext("Start time")}
+              required
+            />
+            <.input field={@form[:ends_at]} type="datetime-local" label={gettext("End time")} />
           </div>
           <.input
             field={@form[:membership_required]}
             type="select"
-            label="Kræver medlemskab"
-            options={[{"Ja", "true"}, {"Nej", "false"}]}
+            label={gettext("Requires membership")}
+            options={[{gettext("Yes"), "true"}, {gettext("No"), "false"}]}
           />
           <div class="flex justify-end gap-2">
-            <.button type="button" variant="ghost" phx-click="cancel">Annuller</.button>
-            <.button type="submit" variant="primary">Opret</.button>
+            <.button type="button" variant="ghost" phx-click="cancel">{gettext("Cancel")}</.button>
+            <.button type="submit" variant="primary">{gettext("Create")}</.button>
           </div>
         </.form>
       </.modal>
@@ -260,7 +275,7 @@ defmodule ExhsWeb.AdminLive.Events.Index do
     """
   end
 
-  defp empty_copy(:drafts), do: "Ingen kladder. Opret et event for at komme i gang."
-  defp empty_copy(:past), do: "Ingen tidligere events endnu."
-  defp empty_copy(_), do: "Ingen kommende events. Opret et nyt event."
+  defp empty_copy(:drafts), do: gettext("No drafts. Create an event to get started.")
+  defp empty_copy(:past), do: gettext("No past events yet.")
+  defp empty_copy(_), do: gettext("No upcoming events. Create a new event.")
 end

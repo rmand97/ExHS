@@ -257,7 +257,7 @@ defmodule ExhsWeb.MemberLive.MemberPagesTest do
       {:ok, _view, html} = live(conn, "/payments")
 
       assert html =~ "Kontingent 2026"
-      assert html =~ "300 DKK"
+      assert html =~ "300,00"
       assert html =~ "Betalt"
     end
 
@@ -391,7 +391,7 @@ defmodule ExhsWeb.MemberLive.MemberPagesTest do
       {:ok, _view, html} = conn |> log_in_user(user) |> live("/memberships/#{membership.id}")
 
       assert html =~ "Løbende abonnement"
-      assert html =~ "300 DKK"
+      assert html =~ "300,00"
     end
 
     test "shows Enkeltbetaling when forening has amount but no stripe price", %{conn: conn} do
@@ -409,7 +409,7 @@ defmodule ExhsWeb.MemberLive.MemberPagesTest do
       {:ok, _view, html} = conn |> log_in_user(user) |> live("/memberships/#{membership.id}")
 
       assert html =~ "Enkeltbetaling"
-      assert html =~ "150 DKK"
+      assert html =~ "150,00"
     end
   end
 

@@ -35,14 +35,14 @@ defmodule ExhsWeb.AdminLive.Dashboard do
     >
       <.header>
         {@current_forening.name}
-        <:subtitle>Oversigt over din forening</:subtitle>
+        <:subtitle>{gettext("Overview of your association")}</:subtitle>
       </.header>
 
       <div class="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <.stat_card label="Medlemmer" value={@stats.members} icon="hero-users" />
-        <.stat_card label="Aktive" value={@stats.active} icon="hero-check-badge" />
-        <.stat_card label="Bestyrelse/admin" value={@stats.admins} icon="hero-shield-check" />
-        <.stat_card label="Grupper" value={@stats.groups} icon="hero-tag" />
+        <.stat_card label={gettext("Members")} value={@stats.members} icon="hero-users" />
+        <.stat_card label={gettext("Active")} value={@stats.active} icon="hero-check-badge" />
+        <.stat_card label={gettext("Board/admin")} value={@stats.admins} icon="hero-shield-check" />
+        <.stat_card label={gettext("Groups")} value={@stats.groups} icon="hero-tag" />
       </div>
 
       <div class="mt-8 grid gap-4 sm:grid-cols-2">
@@ -53,8 +53,10 @@ defmodule ExhsWeb.AdminLive.Dashboard do
           <div class="flex items-center gap-3">
             <.icon name="hero-users" class="text-primary size-6" />
             <div>
-              <p class="text-base-content font-semibold">Medlemmer</p>
-              <p class="text-base-content/50 text-sm">Administrer, inviter og rolleadministration</p>
+              <p class="text-base-content font-semibold">{gettext("Members")}</p>
+              <p class="text-base-content/50 text-sm">
+                {gettext("Manage, invite and role administration")}
+              </p>
             </div>
           </div>
         </.link>
@@ -66,8 +68,10 @@ defmodule ExhsWeb.AdminLive.Dashboard do
           <div class="flex items-center gap-3">
             <.icon name="hero-tag" class="text-primary size-6" />
             <div>
-              <p class="text-base-content font-semibold">Grupper</p>
-              <p class="text-base-content/50 text-sm">Opret grupper og tildel medlemmer</p>
+              <p class="text-base-content font-semibold">{gettext("Groups")}</p>
+              <p class="text-base-content/50 text-sm">
+                {gettext("Create groups and assign members")}
+              </p>
             </div>
           </div>
         </.link>

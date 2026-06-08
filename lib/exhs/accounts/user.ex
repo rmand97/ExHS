@@ -303,7 +303,8 @@ defmodule Exhs.Accounts.User do
         :address_line_2,
         :postal_code,
         :city,
-        :avatar_url
+        :avatar_url,
+        :locale
       ]
     end
   end
@@ -357,6 +358,13 @@ defmodule Exhs.Accounts.User do
     attribute :postal_code, :string, public?: true
     attribute :city, :string, public?: true
     attribute :avatar_url, :string, public?: true
+
+    attribute :locale, :atom do
+      public? true
+      allow_nil? false
+      default :da
+      constraints one_of: [:da, :en]
+    end
 
     attribute :is_superadmin, :boolean do
       default false

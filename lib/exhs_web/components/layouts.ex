@@ -23,13 +23,13 @@ defmodule ExhsWeb.Layouts do
           </.link>
           <div class="flex items-center gap-3">
             <.link :if={!@current_user} navigate={~p"/sign-in"} class="btn btn-ghost btn-sm">
-              Log ind
+              {gettext("Sign in")}
             </.link>
             <.link :if={!@current_user} navigate={~p"/register"} class="btn btn-primary btn-sm">
-              Opret konto
+              {gettext("Create account")}
             </.link>
             <.link :if={@current_user} navigate={~p"/dashboard"} class="btn btn-ghost btn-sm">
-              Din side
+              {gettext("Your page")}
             </.link>
           </div>
         </div>
@@ -40,12 +40,30 @@ defmodule ExhsWeb.Layouts do
       </main>
 
       <footer class="border-base-content/5 border-t px-4 py-8 sm:px-6">
-        <div class="text-base-content/40 mx-auto max-w-7xl text-center text-sm">
+        <div class="text-base-content/40 mx-auto max-w-7xl space-y-3 text-center text-sm">
           <p>&copy; {DateTime.utc_now().year} Exhs</p>
+          <.locale_switcher />
         </div>
       </footer>
 
       <.flash_group flash={@flash} />
+    </div>
+    """
+  end
+
+  @doc "Language switcher linking to the locale controller, returning to the given path."
+  attr :return_to, :string, default: "/"
+
+  def locale_switcher(assigns) do
+    ~H"""
+    <div class="text-base-content/40 flex items-center justify-center gap-2 text-xs">
+      <.link href={~p"/locale/da?#{[return_to: @return_to]}"} class="hover:text-base-content">
+        Dansk
+      </.link>
+      <span class="text-base-content/20">·</span>
+      <.link href={~p"/locale/en?#{[return_to: @return_to]}"} class="hover:text-base-content">
+        English
+      </.link>
     </div>
     """
   end
@@ -74,9 +92,9 @@ defmodule ExhsWeb.Layouts do
               </span>
             </.link>
             <div class="hidden items-center gap-1 sm:flex">
-              <.nav_link href="/" label="Hjem" current_path={@current_path} />
+              <.nav_link href="/" label={gettext("Home")} current_path={@current_path} />
               <.nav_link href="/events" label="Events" current_path={@current_path} />
-              <.nav_link href="/join" label="Bliv medlem" current_path={@current_path} />
+              <.nav_link href="/join" label={gettext("Become a member")} current_path={@current_path} />
             </div>
           </div>
           <div class="flex items-center gap-3">
@@ -88,17 +106,17 @@ defmodule ExhsWeb.Layouts do
               <.icon name="hero-cog-6-tooth" class="size-4" /> Admin
             </.link>
             <.link :if={!@current_user} navigate={~p"/sign-in"} class="btn btn-ghost btn-sm">
-              Log ind
+              {gettext("Sign in")}
             </.link>
             <.link :if={@current_user} navigate={~p"/dashboard"} class="btn btn-ghost btn-sm">
-              <.icon name="hero-squares-2x2" class="size-4" /> Din side
+              <.icon name="hero-squares-2x2" class="size-4" /> {gettext("Your page")}
             </.link>
           </div>
         </div>
         <div class="border-base-content/5 flex items-center gap-1 border-t px-4 py-2 sm:hidden">
-          <.nav_link href="/" label="Hjem" current_path={@current_path} />
+          <.nav_link href="/" label={gettext("Home")} current_path={@current_path} />
           <.nav_link href="/events" label="Events" current_path={@current_path} />
-          <.nav_link href="/join" label="Bliv medlem" current_path={@current_path} />
+          <.nav_link href="/join" label={gettext("Become a member")} current_path={@current_path} />
         </div>
       </nav>
 
@@ -111,7 +129,10 @@ defmodule ExhsWeb.Layouts do
           <p class="text-base-content/40 text-sm">
             &copy; {DateTime.utc_now().year} {@current_forening.name}
           </p>
-          <p class="text-base-content/30 mt-1 text-xs">Drevet af Exhs</p>
+          <p class="text-base-content/30 mt-1 text-xs">{gettext("Powered by Exhs")}</p>
+          <div class="mt-3">
+            <.locale_switcher return_to={@current_path || "/"} />
+          </div>
         </div>
       </footer>
 
@@ -144,10 +165,18 @@ defmodule ExhsWeb.Layouts do
             </.link>
             <div class="hidden items-center gap-1 md:flex">
               <.nav_link href="/dashboard" label="Dashboard" current_path={@current_path} />
-              <.nav_link href="/upcoming" label="Kommende events" current_path={@current_path} />
-              <.nav_link href="/registrations" label="Mine events" current_path={@current_path} />
-              <.nav_link href="/payments" label="Betalinger" current_path={@current_path} />
-              <.nav_link href="/activity" label="Aktivitet" current_path={@current_path} />
+              <.nav_link
+                href="/upcoming"
+                label={gettext("Upcoming events")}
+                current_path={@current_path}
+              />
+              <.nav_link
+                href="/registrations"
+                label={gettext("My events")}
+                current_path={@current_path}
+              />
+              <.nav_link href="/payments" label={gettext("Payments")} current_path={@current_path} />
+              <.nav_link href="/activity" label={gettext("Activity")} current_path={@current_path} />
             </div>
           </div>
           <div class="flex items-center gap-3">
@@ -155,7 +184,7 @@ defmodule ExhsWeb.Layouts do
               <:trigger>
                 <span class="btn btn-ghost btn-sm gap-1.5">
                   <.icon name="hero-building-office-2" class="size-4" />
-                  <span class="hidden sm:inline">Dine foreninger</span>
+                  <span class="hidden sm:inline">{gettext("Your associations")}</span>
                   <.icon name="hero-chevron-down" class="size-3.5 opacity-60" />
                 </span>
               </:trigger>
@@ -167,7 +196,7 @@ defmodule ExhsWeb.Layouts do
               </.dropdown_item>
             </.dropdown>
             <div class="dropdown dropdown-end">
-              <div tabindex="0" role="button" aria-label="Brugermenu">
+              <div tabindex="0" role="button" aria-label={gettext("User menu")}>
                 <.avatar initials={user_initials(@current_user)} size="sm" class="cursor-pointer" />
               </div>
               <ul
@@ -179,7 +208,7 @@ defmodule ExhsWeb.Layouts do
                     navigate="/profile"
                     class="hover:bg-base-content/5 hover:text-base-content text-base-content/70 flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm"
                   >
-                    <.icon name="hero-user" class="size-4" /> Profil
+                    <.icon name="hero-user" class="size-4" /> {gettext("Profile")}
                   </.link>
                 </li>
                 <li :if={@current_user && @current_user.is_superadmin}>
@@ -196,7 +225,9 @@ defmodule ExhsWeb.Layouts do
                     method="delete"
                     class="hover:bg-base-content/5 hover:text-base-content text-base-content/70 flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm"
                   >
-                    <.icon name="hero-arrow-right-start-on-rectangle" class="size-4" /> Log ud
+                    <.icon name="hero-arrow-right-start-on-rectangle" class="size-4" /> {gettext(
+                      "Sign out"
+                    )}
                   </.link>
                 </li>
               </ul>
@@ -208,10 +239,10 @@ defmodule ExhsWeb.Layouts do
       <div class="border-base-content/5 flex items-center gap-1 overflow-x-auto border-b px-4 py-2 md:hidden">
         <.nav_link href="/dashboard" label="Dashboard" current_path={@current_path} />
         <.nav_link href="/upcoming" label="Events" current_path={@current_path} />
-        <.nav_link href="/registrations" label="Mine events" current_path={@current_path} />
-        <.nav_link href="/payments" label="Betalinger" current_path={@current_path} />
-        <.nav_link href="/activity" label="Aktivitet" current_path={@current_path} />
-        <.nav_link href="/profile" label="Profil" current_path={@current_path} />
+        <.nav_link href="/registrations" label={gettext("My events")} current_path={@current_path} />
+        <.nav_link href="/payments" label={gettext("Payments")} current_path={@current_path} />
+        <.nav_link href="/activity" label={gettext("Activity")} current_path={@current_path} />
+        <.nav_link href="/profile" label={gettext("Profile")} current_path={@current_path} />
       </div>
 
       <main class="px-4 py-6 sm:px-6 lg:px-8">
@@ -229,17 +260,19 @@ defmodule ExhsWeb.Layouts do
   # Admin layout (forening command center)
   # ──────────────────────────────────────────────
 
-  @admin_nav [
-    {"Dashboard", "/admin", "hero-squares-2x2", true},
-    {"Medlemmer", "/admin/members", "hero-users", true},
-    {"Grupper", "/admin/groups", "hero-tag", true},
-    {"Events", "/admin/events", "hero-calendar-days", true},
-    {"Shop", "/admin/shop", "hero-shopping-bag", false},
-    {"Nyhedsbreve", "/admin/newsletters", "hero-envelope", false},
-    {"Økonomi", "/admin/economy", "hero-banknotes", true},
-    {"Audit", "/admin/audit", "hero-clipboard-document-list", false},
-    {"Indstillinger", "/admin/settings", "hero-cog-6-tooth", true}
-  ]
+  defp admin_nav do
+    [
+      {"Dashboard", "/admin", "hero-squares-2x2", true},
+      {gettext("Members"), "/admin/members", "hero-users", true},
+      {gettext("Groups"), "/admin/groups", "hero-tag", true},
+      {gettext("Events"), "/admin/events", "hero-calendar-days", true},
+      {gettext("Shop"), "/admin/shop", "hero-shopping-bag", false},
+      {gettext("Newsletters"), "/admin/newsletters", "hero-envelope", false},
+      {gettext("Economy"), "/admin/economy", "hero-banknotes", true},
+      {gettext("Audit"), "/admin/audit", "hero-clipboard-document-list", false},
+      {gettext("Settings"), "/admin/settings", "hero-cog-6-tooth", true}
+    ]
+  end
 
   attr :flash, :map, required: true
   attr :current_forening, :map, required: true
@@ -249,7 +282,7 @@ defmodule ExhsWeb.Layouts do
   slot :inner_block, required: true
 
   def admin(assigns) do
-    assigns = assign(assigns, :nav, @admin_nav)
+    assigns = assign(assigns, :nav, admin_nav())
 
     ~H"""
     <div class="bg-base-200 min-h-screen lg:grid lg:grid-cols-[16rem_1fr]">
@@ -276,7 +309,7 @@ defmodule ExhsWeb.Layouts do
             <button
               class="btn btn-ghost btn-sm btn-square lg:hidden"
               phx-click={show_mobile_sidebar()}
-              aria-label="Åbn menu"
+              aria-label={gettext("Open menu")}
             >
               <.icon name="hero-bars-3" class="size-5" />
             </button>
@@ -286,7 +319,7 @@ defmodule ExhsWeb.Layouts do
             <div class="hidden lg:block"></div>
             <div class="flex items-center gap-3">
               <div class="dropdown dropdown-end">
-                <div tabindex="0" role="button" aria-label="Brugermenu">
+                <div tabindex="0" role="button" aria-label={gettext("User menu")}>
                   <.avatar initials={user_initials(@current_user)} size="sm" class="cursor-pointer" />
                 </div>
                 <ul
@@ -294,7 +327,7 @@ defmodule ExhsWeb.Layouts do
                   class="bg-base-100 border-base-content/10 dropdown-content z-50 mt-2 w-52 rounded-xl border p-1 shadow-lg"
                 >
                   <li class="border-base-content/5 mb-1 border-b px-3 py-2">
-                    <p class="text-base-content/40 text-xs">Logget ind som</p>
+                    <p class="text-base-content/40 text-xs">{gettext("Signed in as")}</p>
                     <p class="text-base-content truncate text-sm font-medium">
                       {@current_user.email}
                     </p>
@@ -305,7 +338,7 @@ defmodule ExhsWeb.Layouts do
                       class="hover:bg-base-content/5 hover:text-base-content text-base-content/70 flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm"
                     >
                       <.icon name="hero-arrow-left-on-rectangle" class="size-4" />
-                      Tilbage til Din side
+                      {gettext("Back to your page")}
                     </.link>
                   </li>
                   <li>
@@ -314,7 +347,9 @@ defmodule ExhsWeb.Layouts do
                       method="delete"
                       class="hover:bg-base-content/5 hover:text-base-content text-base-content/70 flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm"
                     >
-                      <.icon name="hero-arrow-right-start-on-rectangle" class="size-4" /> Log ud
+                      <.icon name="hero-arrow-right-start-on-rectangle" class="size-4" /> {gettext(
+                        "Sign out"
+                      )}
                     </.link>
                   </li>
                 </ul>
@@ -386,8 +421,9 @@ defmodule ExhsWeb.Layouts do
     ~H"""
     <div class="border-base-content/5 border-t px-5 py-3">
       <span class="text-base-content/40 text-xs">
-        Rolle: <span class="text-base-content/70 font-medium">{role_label(@current_role)}</span>
-        <span :if={@current_role == :board}>(skrivebeskyttet)</span>
+        {gettext("Role:")}
+        <span class="text-base-content/70 font-medium">{role_label(@current_role)}</span>
+        <span :if={@current_role == :board}>{gettext("(read-only)")}</span>
       </span>
     </div>
     """
@@ -405,7 +441,7 @@ defmodule ExhsWeb.Layouts do
       <.icon name={@icon} class="size-5" />
       {@label}
       <span class="bg-base-content/5 text-base-content/40 ml-auto rounded px-1.5 py-0.5 text-[10px]">
-        snart
+        {gettext("soon")}
       </span>
     </span>
     """

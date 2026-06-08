@@ -31,7 +31,7 @@ defmodule ExhsWeb.AdminExportController do
         Organizations.list_memberships(scope: scope, load: [:user, :groups], authorize?: false)
 
       csv = all |> MemberFilter.apply(filters) |> build_members_csv()
-      download(conn, "medlemmer.csv", csv)
+      download(conn, gettext("members.csv"), csv)
     end)
   end
 
@@ -47,7 +47,7 @@ defmodule ExhsWeb.AdminExportController do
 
       {:ok, all} = Billing.list_payments(scope: scope, authorize?: false)
       csv = all |> PaymentFilter.apply(filters) |> build_payments_csv()
-      download(conn, "betalinger.csv", csv)
+      download(conn, gettext("payments.csv"), csv)
     end)
   end
 
@@ -73,7 +73,7 @@ defmodule ExhsWeb.AdminExportController do
             |> Enum.filter(&MapSet.member?(ticket_ids, &1.ticket_type_id))
             |> build_registrations_csv()
 
-          download(conn, "tilmeldinger.csv", csv)
+          download(conn, gettext("registrations.csv"), csv)
 
         _ ->
           conn |> put_status(:not_found) |> text("Not found")
@@ -100,7 +100,15 @@ defmodule ExhsWeb.AdminExportController do
   end
 
   defp build_payments_csv(payments) do
-    header = ["Dato", "Beskrivelse", "Type", "Beløb", "Valuta", "Status", "Stripe Payment Intent"]
+    header = [
+      gettext("Date"),
+      gettext("Description"),
+      gettext("Type"),
+      gettext("Amount"),
+      gettext("Currency"),
+      gettext("Status"),
+      "Stripe Payment Intent"
+    ]
 
     rows =
       Enum.map(payments, fn p ->
@@ -119,7 +127,14 @@ defmodule ExhsWeb.AdminExportController do
   end
 
   defp build_members_csv(memberships) do
-    header = ["Navn", "Email", "Rolle", "Status", "Grupper", "Medlem siden"]
+    header = [
+      gettext("Name"),
+      "Email",
+      gettext("Role"),
+      gettext("Status"),
+      gettext("Groups"),
+      gettext("Member since")
+    ]
 
     rows =
       Enum.map(memberships, fn m ->
@@ -137,7 +152,13 @@ defmodule ExhsWeb.AdminExportController do
   end
 
   defp build_registrations_csv(registrations) do
-    header = ["Navn", "Email", "Billettype", "Status", "Tilmeldt"]
+    header = [
+      gettext("Name"),
+      "Email",
+      gettext("Ticket type"),
+      gettext("Status"),
+      gettext("Registered")
+    ]
 
     rows =
       Enum.map(registrations, fn r ->

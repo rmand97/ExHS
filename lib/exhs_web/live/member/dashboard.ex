@@ -47,7 +47,7 @@ defmodule ExhsWeb.MemberLive.Dashboard do
     >
       <.header>
         Dashboard
-        <:subtitle>Dine foreninger og medlemskaber</:subtitle>
+        <:subtitle>{gettext("Your associations and memberships")}</:subtitle>
       </.header>
 
       <div :if={@loading} class="mt-6 space-y-4">
@@ -63,17 +63,17 @@ defmodule ExhsWeb.MemberLive.Dashboard do
       <div :if={!@loading}>
         <div class="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           <.stat_card
-            label="Foreninger"
+            label={gettext("Associations")}
             value={@stats.foreninger}
             icon="hero-building-library"
           />
           <.stat_card
-            label="Aktive medlemskaber"
+            label={gettext("Active memberships")}
             value={@stats.active}
             icon="hero-check-badge"
           />
           <.stat_card
-            label="Medlemskaber i alt"
+            label={gettext("Memberships in total")}
             value={@stats.total}
             icon="hero-user-group"
           />
@@ -84,8 +84,8 @@ defmodule ExhsWeb.MemberLive.Dashboard do
         </div>
 
         <div :if={@memberships == []} class="mt-8">
-          <.empty_state icon="hero-building-library" title="Ingen medlemskaber endnu">
-            Du er ikke medlem af nogen foreninger.
+          <.empty_state icon="hero-building-library" title={gettext("No memberships yet")}>
+            {gettext("You are not a member of any associations.")}
           </.empty_state>
         </div>
 
@@ -119,7 +119,7 @@ defmodule ExhsWeb.MemberLive.Dashboard do
             </.badge>
           </div>
           <p class="text-base-content/50 mt-2 text-xs">
-            Medlem siden {format_date(@membership.joined_at)}
+            {gettext("Member since %{date}", date: format_date(@membership.joined_at))}
           </p>
         </div>
       </div>
@@ -128,13 +128,13 @@ defmodule ExhsWeb.MemberLive.Dashboard do
           navigate={~p"/memberships/#{@membership.id}"}
           class="text-primary text-sm font-medium hover:underline"
         >
-          Detaljer
+          {gettext("Details")}
         </.link>
         <.link
           href={forening_url(@membership.forening)}
           class="text-base-content/40 text-sm hover:underline"
         >
-          Besøg forening →
+          {gettext("Visit association")} →
         </.link>
         <.link
           :if={@membership.role in [:admin, :board]}
@@ -164,14 +164,18 @@ defmodule ExhsWeb.MemberLive.Dashboard do
 
   defp filter_config do
     [
-      LiveFilter.text(:search, label: "Søg forening", always_on: true, placeholder: "Søg..."),
+      LiveFilter.text(:search,
+        label: gettext("Search association"),
+        always_on: true,
+        placeholder: gettext("Search...")
+      ),
       LiveFilter.select(:role,
-        label: "Rolle",
-        options: [{"Admin", "admin"}, {"Bestyrelse", "board"}, {"Medlem", "member"}]
+        label: gettext("Role"),
+        options: [{"Admin", "admin"}, {gettext("Board"), "board"}, {gettext("Member"), "member"}]
       ),
       LiveFilter.select(:status,
-        label: "Status",
-        options: [{"Aktiv", "active"}, {"Inaktiv", "inactive"}]
+        label: gettext("Status"),
+        options: [{gettext("Active"), "active"}, {gettext("Inactive"), "inactive"}]
       )
     ]
   end

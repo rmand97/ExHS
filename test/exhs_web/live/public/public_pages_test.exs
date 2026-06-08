@@ -79,7 +79,7 @@ defmodule ExhsWeb.PublicLive.PublicPagesTest do
 
       assert html =~ "Fodboldturnering"
       assert html =~ "Standard"
-      assert html =~ "50 DKK"
+      assert html =~ "50,00"
     end
 
     test "redirects for nonexistent event", %{conn: conn, forening: forening} do

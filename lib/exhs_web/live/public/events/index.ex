@@ -11,7 +11,8 @@ defmodule ExhsWeb.PublicLive.Events.Index do
        assign(socket,
          events: events,
          page_title: "Events",
-         page_description: "Kommende events hos #{socket.assigns.current_forening.name}"
+         page_description:
+           gettext("Upcoming events at %{name}", name: socket.assigns.current_forening.name)
        )}
     else
       {:ok, redirect(socket, to: "/")}
@@ -33,12 +34,12 @@ defmodule ExhsWeb.PublicLive.Events.Index do
           <div class="mb-8">
             <h1 class="text-base-content text-3xl font-bold">Events</h1>
             <p class="text-base-content/60 mt-2">
-              Kommende events hos {@current_forening.name}
+              {gettext("Upcoming events at %{name}", name: @current_forening.name)}
             </p>
           </div>
 
           <div :if={@events == []} class="py-16">
-            <.empty_state icon="hero-calendar-days" title="Ingen kommende events lige nu" />
+            <.empty_state icon="hero-calendar-days" title={gettext("No upcoming events right now")} />
           </div>
 
           <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">

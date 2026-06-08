@@ -68,7 +68,7 @@ defmodule ExhsWeb.AdminLive.AdminEconomyTest do
       {:ok, _view, html} = live(conn, "/admin/economy")
       assert html =~ "Økonomi"
       assert html =~ "Realiseret omsætning"
-      assert html =~ "300 DKK"
+      assert html =~ "300,00"
       assert html =~ "Kontingent 2026"
     end
 

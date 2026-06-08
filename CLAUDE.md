@@ -76,6 +76,13 @@ AshAI MCP tools provide code generation and resource introspection.
 
 ## Project conventions
 
+### Localization (i18n)
+The app is localized. **No hard-coded display strings** — every user-facing string is an **English msgid** wrapped in `gettext("…")` (interpolate with bindings: `gettext("Welcome %{name}", name: x)`). Danish translations live in `priv/gettext/da/LC_MESSAGES/default.po`; run `mix gettext.extract && mix gettext.merge priv/gettext` after adding strings, then fill the `da` msgstr. Default locale is `:da` (`config :gettext`/`config :localize`).
+
+**Formatting** (dates, numbers, currency) goes through **Localize**, never hard-coded — use `ExhsWeb.DisplayHelpers.format_date/format_datetime/format_money` and `ExhsWeb.Labels.format_amount`. Never write `Calendar.strftime` with literal month names or `"#{div(cents,100)} DKK"`.
+
+Locale resolution: `Localize.Plug.PutLocale`/`PutSession` (router `:browser` pipeline) + `ExhsWeb.Plugs.UserLocale` (applies signed-in `user.locale`) + `ExhsWeb.LiveLocale` on_mount. Locales must be present on disk (`mix localize.download_locales da en`, wired into `mix setup`/`mix test`). Module attributes can't call `gettext/1` — use a function instead (e.g. `defp admin_nav`). `AshAuthentication` override strings (`auth_overrides.ex`) are compile-time and English-only (framework limit).
+
 ### Multitenancy
 Most resources are tenant-scoped to a `Forening`. Use Ash's attribute multitenancy strategy on `:forening_id`. Pass tenant + actor via `Exhs.Scope` (`%Exhs.Scope{tenant: forening_id, actor: user}`) to every action. Code interface calls take `scope: socket.assigns.current_scope` from LiveViews; inside action hooks use the `context` parameter as the scope.
 

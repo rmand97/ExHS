@@ -63,7 +63,11 @@ defmodule ExhsWeb.PublicLive.OrderPagesTest do
                live(conn, "/orders/#{Ash.UUID.generate()}")
     end
 
-    test "another tenant's order id is not found (redirects)", %{conn: conn, forening: f, event: e} do
+    test "another tenant's order id is not found (redirects)", %{
+      conn: conn,
+      forening: f,
+      event: e
+    } do
       # An order living in a different forening must never resolve on this one.
       other = create_forening!(%{subdomain: "ord_other#{System.unique_integer([:positive])}"})
       other_user = register_user!()

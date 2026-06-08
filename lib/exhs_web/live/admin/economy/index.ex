@@ -14,7 +14,7 @@ defmodule ExhsWeb.AdminLive.Economy.Index do
   def mount(_params, _session, socket) do
     {:ok,
      socket
-     |> assign(:page_title, "Økonomi")
+     |> assign(:page_title, gettext("Economy"))
      |> assign(:filters, %{})
      |> load_payments()}
   end
@@ -48,9 +48,9 @@ defmodule ExhsWeb.AdminLive.Economy.Index do
     socket =
       with %{} <- payment,
            {:ok, _} <- Billing.mark_payment_refunded(payment, scope: socket.assigns.current_scope) do
-        put_flash(socket, :info, "Betaling markeret som refunderet.")
+        put_flash(socket, :info, gettext("Payment marked as refunded."))
       else
-        _ -> put_flash(socket, :error, "Kunne ikke opdatere betalingen.")
+        _ -> put_flash(socket, :error, gettext("Could not update the payment."))
       end
 
     {:noreply, socket |> load_payments() |> stream_filtered()}
@@ -95,8 +95,8 @@ defmodule ExhsWeb.AdminLive.Economy.Index do
       current_path={@current_path}
     >
       <.header>
-        Økonomi
-        <:subtitle>Indtægter, betalinger og bogføring</:subtitle>
+        {gettext("Economy")}
+        <:subtitle>{gettext("Revenue, payments and bookkeeping")}</:subtitle>
         <:actions>
           <.link
             href={
@@ -104,20 +104,20 @@ defmodule ExhsWeb.AdminLive.Economy.Index do
             }
             class="btn btn-outline btn-sm"
           >
-            <.icon name="hero-arrow-down-tray" class="size-4" /> Eksportér CSV
+            <.icon name="hero-arrow-down-tray" class="size-4" /> {gettext("Export CSV")}
           </.link>
         </:actions>
       </.header>
 
       <div class="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <.card class="p-5">
-          <p class="text-base-content/50 text-sm">Realiseret omsætning</p>
+          <p class="text-base-content/50 text-sm">{gettext("Realised revenue")}</p>
           <p class="text-base-content mt-1 text-2xl font-bold">
             {format_amount(@summary.total_cents)}
           </p>
         </.card>
         <.card class="p-5">
-          <p class="text-base-content/50 text-sm">Udestående</p>
+          <p class="text-base-content/50 text-sm">{gettext("Outstanding")}</p>
           <p class="text-base-content mt-1 text-2xl font-bold">
             {format_amount(@summary.outstanding_cents)}
           </p>
@@ -129,7 +129,7 @@ defmodule ExhsWeb.AdminLive.Economy.Index do
       </div>
 
       <.card :if={@summary.by_month != []} class="mt-4 p-5">
-        <h3 class="text-base-content mb-3 font-semibold">Omsætning pr. måned</h3>
+        <h3 class="text-base-content mb-3 font-semibold">{gettext("Revenue per month")}</h3>
         <ul class="divide-base-content/10 divide-y">
           <li :for={{month, cents} <- @summary.by_month} class="flex justify-between py-2 text-sm">
             <span class="text-base-content/70">{month_label(month)}</span>
@@ -144,7 +144,7 @@ defmodule ExhsWeb.AdminLive.Economy.Index do
         class="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3"
       >
         <select name="filters[status]" class="select select-bordered select-sm w-full">
-          <option value="">Alle statusser</option>
+          <option value="">{gettext("All statuses")}</option>
           <option
             :for={s <- PaymentStatus.values()}
             value={s}
@@ -154,7 +154,7 @@ defmodule ExhsWeb.AdminLive.Economy.Index do
           </option>
         </select>
         <select name="filters[type]" class="select select-bordered select-sm w-full">
-          <option value="">Alle typer</option>
+          <option value="">{gettext("All types")}</option>
           <option
             :for={t <- PayableType.values()}
             value={t}
@@ -164,7 +164,7 @@ defmodule ExhsWeb.AdminLive.Economy.Index do
           </option>
         </select>
         <select name="filters[month]" class="select select-bordered select-sm w-full">
-          <option value="">Alle måneder</option>
+          <option value="">{gettext("All months")}</option>
           <option
             :for={{key, label} <- month_options(@summary.by_month)}
             value={key}
@@ -174,27 +174,29 @@ defmodule ExhsWeb.AdminLive.Economy.Index do
           </option>
         </select>
         <select name="filters[sort]" class="select select-bordered select-sm w-full">
-          <option value="">Nyeste først</option>
-          <option value="oldest" selected={@filters[:sort] == "oldest"}>Ældste først</option>
+          <option value="">{gettext("Newest first")}</option>
+          <option value="oldest" selected={@filters[:sort] == "oldest"}>
+            {gettext("Oldest first")}
+          </option>
           <option value="amount_desc" selected={@filters[:sort] == "amount_desc"}>
-            Beløb (høj→lav)
+            {gettext("Amount (high→low)")}
           </option>
           <option value="amount_asc" selected={@filters[:sort] == "amount_asc"}>
-            Beløb (lav→høj)
+            {gettext("Amount (low→high)")}
           </option>
         </select>
         <input
           type="search"
           name="filters[q]"
           value={@filters[:q]}
-          placeholder="Søg beskrivelse"
+          placeholder={gettext("Search description")}
           class="input input-bordered input-sm w-full sm:col-span-2 lg:col-span-1"
         />
       </.form>
 
       <div :if={@row_count == 0} class="mt-8">
-        <.empty_state icon="hero-banknotes" title="Ingen betalinger">
-          Der er ingen betalinger, der matcher dine filtre.
+        <.empty_state icon="hero-banknotes" title={gettext("No payments")}>
+          {gettext("There are no payments matching your filters.")}
         </.empty_state>
       </div>
 
@@ -226,9 +228,11 @@ defmodule ExhsWeb.AdminLive.Economy.Index do
               class="btn btn-ghost btn-xs"
               phx-click="refund"
               phx-value-id={p.id}
-              data-confirm="Markér betalingen som refunderet? (udløser ikke en Stripe-refundering)"
+              data-confirm={
+                gettext("Mark the payment as refunded? (does not trigger a Stripe refund)")
+              }
             >
-              Refundér
+              {gettext("Refund")}
             </.button>
           </div>
         </div>

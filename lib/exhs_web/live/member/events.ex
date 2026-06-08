@@ -47,8 +47,8 @@ defmodule ExhsWeb.MemberLive.Events do
       my_foreninger={@my_foreninger}
     >
       <.header>
-        Kommende events
-        <:subtitle>Events fra dine foreninger</:subtitle>
+        {gettext("Upcoming events")}
+        <:subtitle>{gettext("Events from your associations")}</:subtitle>
       </.header>
 
       <div :if={@loading} class="mt-6 space-y-4">
@@ -62,8 +62,8 @@ defmodule ExhsWeb.MemberLive.Events do
         </div>
 
         <div :if={@events == []} class="mt-8">
-          <.empty_state icon="hero-calendar-days" title="Ingen kommende events">
-            Der er ingen kommende events fra dine foreninger.
+          <.empty_state icon="hero-calendar-days" title={gettext("No upcoming events")}>
+            {gettext("There are no upcoming events from your associations.")}
           </.empty_state>
         </div>
 
@@ -103,8 +103,12 @@ defmodule ExhsWeb.MemberLive.Events do
     forening_options = Enum.map(memberships, & &1.forening.name)
 
     [
-      LiveFilter.text(:search, label: "Søg event", always_on: true, placeholder: "Søg..."),
-      LiveFilter.select(:forening, label: "Forening", options: forening_options)
+      LiveFilter.text(:search,
+        label: gettext("Search event"),
+        always_on: true,
+        placeholder: gettext("Search...")
+      ),
+      LiveFilter.select(:forening, label: gettext("Association"), options: forening_options)
     ]
   end
 
@@ -138,7 +142,7 @@ defmodule ExhsWeb.MemberLive.Events do
     socket
     |> assign(:events, page)
     |> assign(:pagination, pagination)
-    |> assign(:page_title, "Kommende events")
+    |> assign(:page_title, gettext("Upcoming events"))
     |> assign(:loading, false)
   end
 

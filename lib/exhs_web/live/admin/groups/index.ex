@@ -10,7 +10,7 @@ defmodule ExhsWeb.AdminLive.Groups.Index do
      socket
      |> assign(:editing, nil)
      |> assign(:form, blank_form())
-     |> assign(:page_title, "Grupper")
+     |> assign(:page_title, gettext("Groups"))
      |> load_groups()}
   end
 
@@ -57,11 +57,12 @@ defmodule ExhsWeb.AdminLive.Groups.Index do
         {:noreply,
          socket
          |> assign(:editing, nil)
-         |> put_flash(:info, "Gruppe gemt.")
+         |> put_flash(:info, gettext("Group saved."))
          |> load_groups()}
 
       {:error, _} ->
-        {:noreply, put_flash(socket, :error, "Kunne ikke gemme gruppen. Navn er påkrævet.")}
+        {:noreply,
+         put_flash(socket, :error, gettext("Could not save the group. Name is required."))}
     end
   end
 
@@ -72,7 +73,7 @@ defmodule ExhsWeb.AdminLive.Groups.Index do
       Organizations.destroy_group(group, scope: socket.assigns.current_scope)
     end
 
-    {:noreply, socket |> put_flash(:info, "Gruppe slettet.") |> load_groups()}
+    {:noreply, socket |> put_flash(:info, gettext("Group deleted.")) |> load_groups()}
   end
 
   defp load_groups(socket) do
@@ -97,18 +98,18 @@ defmodule ExhsWeb.AdminLive.Groups.Index do
       current_path={@current_path}
     >
       <.header>
-        Grupper
-        <:subtitle>{length(@groups)} grupper</:subtitle>
+        {gettext("Groups")}
+        <:subtitle>{gettext("%{count} groups", count: length(@groups))}</:subtitle>
         <:actions>
           <.button :if={@can_write?} phx-click="new" variant="primary">
-            <.icon name="hero-plus" class="size-4" /> Ny gruppe
+            <.icon name="hero-plus" class="size-4" /> {gettext("New group")}
           </.button>
         </:actions>
       </.header>
 
       <div :if={@groups == []} class="mt-8">
-        <.empty_state icon="hero-tag" title="Ingen grupper endnu">
-          Opret en gruppe for at organisere dine medlemmer.
+        <.empty_state icon="hero-tag" title={gettext("No groups yet")}>
+          {gettext("Create a group to organise your members.")}
         </.empty_state>
       </div>
 
@@ -129,16 +130,16 @@ defmodule ExhsWeb.AdminLive.Groups.Index do
                 phx-click="edit"
                 phx-value-id={g.id}
                 class="hover:text-base-content text-base-content/40"
-                aria-label="Rediger"
+                aria-label={gettext("Edit")}
               >
                 <.icon name="hero-pencil-square" class="size-4" />
               </button>
               <button
                 phx-click="delete"
                 phx-value-id={g.id}
-                data-confirm={"Slet gruppen \"#{g.name}\"?"}
+                data-confirm={gettext("Delete the group \"%{name}\"?", name: g.name)}
                 class="hover:text-error text-base-content/40"
-                aria-label="Slet"
+                aria-label={gettext("Delete")}
               >
                 <.icon name="hero-trash" class="size-4" />
               </button>
@@ -149,15 +150,15 @@ defmodule ExhsWeb.AdminLive.Groups.Index do
 
       <.modal :if={@editing} id="group-modal" show on_cancel={JS.push("cancel")}>
         <h3 class="text-base-content text-lg font-semibold">
-          {if @editing == :new, do: "Ny gruppe", else: "Rediger gruppe"}
+          {if @editing == :new, do: gettext("New group"), else: gettext("Edit group")}
         </h3>
         <.form for={@form} phx-submit="save" class="mt-4 space-y-4">
-          <.input field={@form[:name]} label="Navn" required />
-          <.input field={@form[:description]} label="Beskrivelse" />
-          <.input field={@form[:color]} type="color" label="Farve" />
+          <.input field={@form[:name]} label={gettext("Name")} required />
+          <.input field={@form[:description]} label={gettext("Description")} />
+          <.input field={@form[:color]} type="color" label={gettext("Colour")} />
           <div class="flex justify-end gap-2">
-            <.button type="button" variant="ghost" phx-click="cancel">Annuller</.button>
-            <.button type="submit" variant="primary">Gem</.button>
+            <.button type="button" variant="ghost" phx-click="cancel">{gettext("Cancel")}</.button>
+            <.button type="submit" variant="primary">{gettext("Save")}</.button>
           </div>
         </.form>
       </.modal>

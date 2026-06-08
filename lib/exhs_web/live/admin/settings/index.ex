@@ -11,7 +11,7 @@ defmodule ExhsWeb.AdminLive.Settings.Index do
     {:ok,
      socket
      |> assign(:tab, :general)
-     |> assign(:page_title, "Indstillinger")
+     |> assign(:page_title, gettext("Settings"))
      |> assign_general_form()
      |> load_admins()}
   end
@@ -43,10 +43,10 @@ defmodule ExhsWeb.AdminLive.Settings.Index do
          socket
          |> assign(:current_forening, updated)
          |> assign_general_form()
-         |> put_flash(:info, "Indstillinger gemt.")}
+         |> put_flash(:info, gettext("Settings saved."))}
 
       {:error, _} ->
-        {:noreply, put_flash(socket, :error, "Kunne ikke gemme. Navn er påkrævet.")}
+        {:noreply, put_flash(socket, :error, gettext("Could not save. Name is required."))}
     end
   end
 
@@ -60,9 +60,14 @@ defmodule ExhsWeb.AdminLive.Settings.Index do
              Organizations.set_member_role(membership, %{role: role},
                scope: socket.assigns.current_scope
              ) do
-        put_flash(socket, :info, "Rolle opdateret.")
+        put_flash(socket, :info, gettext("Role updated."))
       else
-        _ -> put_flash(socket, :error, "Kunne ikke ændre rolle (mindst én admin kræves).")
+        _ ->
+          put_flash(
+            socket,
+            :error,
+            gettext("Could not change role (at least one admin required).")
+          )
       end
 
     {:noreply, load_admins(socket)}
@@ -162,8 +167,8 @@ defmodule ExhsWeb.AdminLive.Settings.Index do
       current_path={@current_path}
     >
       <.header>
-        Indstillinger
-        <:subtitle>Administrer din forenings profil og administratorer</:subtitle>
+        {gettext("Settings")}
+        <:subtitle>{gettext("Manage your association's profile and administrators")}</:subtitle>
       </.header>
 
       <div role="tablist" class="tabs tabs-bordered mt-6">
@@ -173,7 +178,7 @@ defmodule ExhsWeb.AdminLive.Settings.Index do
           phx-click="tab"
           phx-value-tab="general"
         >
-          Generelt
+          {gettext("General")}
         </button>
         <button
           role="tab"
@@ -181,33 +186,33 @@ defmodule ExhsWeb.AdminLive.Settings.Index do
           phx-click="tab"
           phx-value-tab="admins"
         >
-          Administratorer
+          {gettext("Administrators")}
         </button>
       </div>
 
       <div :if={@tab == :general} class="mt-6">
         <.form for={@form} phx-submit="save" class="space-y-8">
           <.card class="space-y-4 p-5">
-            <h3 class="text-base-content font-semibold">Profil</h3>
-            <.input field={@form[:name]} label="Navn" required disabled={!@can_write?} />
-            <.input field={@form[:tagline]} label="Slogan" disabled={!@can_write?} />
+            <h3 class="text-base-content font-semibold">{gettext("Profile")}</h3>
+            <.input field={@form[:name]} label={gettext("Name")} required disabled={!@can_write?} />
+            <.input field={@form[:tagline]} label={gettext("Tagline")} disabled={!@can_write?} />
             <.input
               field={@form[:about]}
               type="textarea"
-              label="Om foreningen"
+              label={gettext("About the association")}
               disabled={!@can_write?}
             />
             <div class="grid gap-4 sm:grid-cols-2">
               <.input
                 field={@form[:primary_color]}
                 type="color"
-                label="Primærfarve"
+                label={gettext("Primary colour")}
                 disabled={!@can_write?}
               />
               <.input
                 field={@form[:accent_color]}
                 type="color"
-                label="Accentfarve"
+                label={gettext("Accent colour")}
                 disabled={!@can_write?}
               />
             </div>
@@ -215,25 +220,33 @@ defmodule ExhsWeb.AdminLive.Settings.Index do
 
           <.card class="space-y-4 p-5">
             <h3 class="text-base-content font-semibold">Email</h3>
-            <.input field={@form[:email_from_name]} label="Afsendernavn" disabled={!@can_write?} />
+            <.input
+              field={@form[:email_from_name]}
+              label={gettext("Sender name")}
+              disabled={!@can_write?}
+            />
             <.input
               field={@form[:email_reply_to]}
               type="email"
-              label="Svar-til adresse"
+              label={gettext("Reply-to address")}
               disabled={!@can_write?}
             />
           </.card>
 
           <.card class="space-y-4 p-5">
-            <h3 class="text-base-content font-semibold">Kontingent</h3>
+            <h3 class="text-base-content font-semibold">{gettext("Membership fee")}</h3>
             <div class="grid gap-4 sm:grid-cols-2">
               <.input
                 field={@form[:kontingent_kr]}
                 type="number"
-                label="Beløb (kr)"
+                label={gettext("Amount (kr)")}
                 disabled={!@can_write?}
               />
-              <.input field={@form[:kontingent_currency]} label="Valuta" disabled={!@can_write?} />
+              <.input
+                field={@form[:kontingent_currency]}
+                label={gettext("Currency")}
+                disabled={!@can_write?}
+              />
             </div>
             <.input
               field={@form[:kontingent_stripe_price_id]}
@@ -243,20 +256,20 @@ defmodule ExhsWeb.AdminLive.Settings.Index do
           </.card>
 
           <div :if={@can_write?} class="flex justify-end">
-            <.button type="submit" variant="primary">Gem ændringer</.button>
+            <.button type="submit" variant="primary">{gettext("Save changes")}</.button>
           </div>
           <p :if={!@can_write?} class="text-base-content/50 text-sm">
-            Du har skrivebeskyttet adgang (bestyrelse).
+            {gettext("You have read-only access (board).")}
           </p>
         </.form>
       </div>
 
       <div :if={@tab == :admins} class="mt-6 space-y-6">
         <.card class="p-5">
-          <h3 class="text-base-content mb-4 font-semibold">Nuværende administratorer</h3>
+          <h3 class="text-base-content mb-4 font-semibold">{gettext("Current administrators")}</h3>
           <div :if={@admins == []}>
-            <.empty_state icon="hero-shield-check" title="Ingen administratorer">
-              Forfrem et medlem til admin eller bestyrelse.
+            <.empty_state icon="hero-shield-check" title={gettext("No administrators")}>
+              {gettext("Promote a member to admin or board.")}
             </.empty_state>
           </div>
           <ul :if={@admins != []} class="divide-base-content/10 divide-y">
@@ -275,8 +288,8 @@ defmodule ExhsWeb.AdminLive.Settings.Index do
                   name="role"
                 >
                   <option value="admin" selected={m.role == :admin}>Admin</option>
-                  <option value="board" selected={m.role == :board}>Bestyrelse</option>
-                  <option value="member">Fjern (gør til medlem)</option>
+                  <option value="board" selected={m.role == :board}>{gettext("Board")}</option>
+                  <option value="member">{gettext("Remove (make member)")}</option>
                 </select>
               </div>
             </li>
@@ -284,16 +297,16 @@ defmodule ExhsWeb.AdminLive.Settings.Index do
         </.card>
 
         <.card :if={@can_write?} class="p-5">
-          <h3 class="text-base-content mb-1 font-semibold">Forfrem medlem</h3>
+          <h3 class="text-base-content mb-1 font-semibold">{gettext("Promote member")}</h3>
           <p class="text-base-content/50 mb-4 text-sm">
-            Giv et aktivt medlem admin- eller bestyrelsesrolle.
+            {gettext("Give an active member an admin or board role.")}
           </p>
           <div :if={@candidates == []} class="text-base-content/50 text-sm">
-            Ingen menige medlemmer at forfremme.
+            {gettext("No regular members to promote.")}
           </div>
           <form :if={@candidates != []} phx-submit="set_role" class="flex flex-wrap items-end gap-3">
             <div class="grow">
-              <label class="text-base-content/70 mb-1 block text-sm">Medlem</label>
+              <label class="text-base-content/70 mb-1 block text-sm">{gettext("Member")}</label>
               <select name="id" class="select select-bordered w-full">
                 <option :for={m <- @candidates} value={m.id}>
                   {member_name(m)} ({m.user.email})
@@ -301,13 +314,13 @@ defmodule ExhsWeb.AdminLive.Settings.Index do
               </select>
             </div>
             <div>
-              <label class="text-base-content/70 mb-1 block text-sm">Rolle</label>
+              <label class="text-base-content/70 mb-1 block text-sm">{gettext("Role")}</label>
               <select name="role" class="select select-bordered">
                 <option value="admin">Admin</option>
-                <option value="board">Bestyrelse</option>
+                <option value="board">{gettext("Board")}</option>
               </select>
             </div>
-            <.button type="submit" variant="primary">Forfrem</.button>
+            <.button type="submit" variant="primary">{gettext("Promote")}</.button>
           </form>
         </.card>
       </div>

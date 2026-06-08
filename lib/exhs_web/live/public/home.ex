@@ -18,7 +18,9 @@ defmodule ExhsWeb.PublicLive.Home do
         |> assign(:page_title, nil)
         |> assign(
           :page_description,
-          "Medlemmer, events, kontingent og kommunikation — alt i én moderne platform bygget til foreninger."
+          gettext(
+            "Members, events, membership fees and communication — all in one modern platform built for associations."
+          )
         )
         |> assign(:upcoming_events, [])
       end
@@ -50,7 +52,7 @@ defmodule ExhsWeb.PublicLive.Home do
 
       <section :if={@current_forening.branding["about"]} class="px-4 py-16 sm:px-6">
         <div class="mx-auto max-w-3xl">
-          <h2 class="text-base-content mb-6 text-2xl font-bold">Om os</h2>
+          <h2 class="text-base-content mb-6 text-2xl font-bold">{gettext("About us")}</h2>
           <p class="text-base-content/70 text-lg/relaxed">
             {@current_forening.branding["about"]}
           </p>
@@ -60,14 +62,14 @@ defmodule ExhsWeb.PublicLive.Home do
       <section class="px-4 py-16 sm:px-6">
         <div class="mx-auto max-w-7xl">
           <div class="mb-8 flex items-center justify-between">
-            <h2 class="text-base-content text-2xl font-bold">Kommende events</h2>
+            <h2 class="text-base-content text-2xl font-bold">{gettext("Upcoming events")}</h2>
             <.link navigate={~p"/events"} class="btn btn-ghost btn-sm gap-1">
-              Se alle <.icon name="hero-arrow-right-micro" class="size-4" />
+              {gettext("See all")} <.icon name="hero-arrow-right-micro" class="size-4" />
             </.link>
           </div>
 
           <div :if={@upcoming_events == []} class="py-12">
-            <.empty_state icon="hero-calendar-days" title="Ingen kommende events" />
+            <.empty_state icon="hero-calendar-days" title={gettext("No upcoming events")} />
           </div>
 
           <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
@@ -105,10 +107,10 @@ defmodule ExhsWeb.PublicLive.Home do
         </p>
         <div class="mt-8 flex flex-wrap items-center justify-center gap-4">
           <.link navigate={~p"/events"} class="btn btn-primary gap-2">
-            <.icon name="hero-calendar-days" class="size-5" /> Se events
+            <.icon name="hero-calendar-days" class="size-5" /> {gettext("See events")}
           </.link>
           <.link navigate={~p"/join"} class="btn btn-ghost gap-2">
-            <.icon name="hero-user-plus" class="size-5" /> Bliv medlem
+            <.icon name="hero-user-plus" class="size-5" /> {gettext("Become a member")}
           </.link>
         </div>
       </div>
@@ -152,13 +154,13 @@ defmodule ExhsWeb.PublicLive.Home do
     <section class="px-4 py-16 sm:px-6">
       <div class="glass-surface mx-auto max-w-3xl rounded-2xl px-6 py-12 text-center sm:px-12">
         <h2 class="text-base-content text-2xl font-bold">
-          Bliv en del af {@forening.name}
+          {gettext("Join %{name}", name: @forening.name)}
         </h2>
         <p class="text-base-content/60 mx-auto mt-3 max-w-lg">
-          Bliv medlem og få adgang til events, fællesskab og meget mere.
+          {gettext("Become a member and get access to events, community and much more.")}
         </p>
         <.link navigate={~p"/join"} class="btn btn-lg btn-primary mt-6">
-          Bliv medlem
+          {gettext("Become a member")}
         </.link>
       </div>
     </section>
@@ -174,15 +176,17 @@ defmodule ExhsWeb.PublicLive.Home do
 
       <div class="relative mx-auto max-w-4xl text-center">
         <h1 class="text-base-content text-4xl font-bold tracking-tight sm:text-5xl lg:text-6xl">
-          Alt du behøver til din <span class="text-gradient">forening</span>
+          {gettext("Everything you need for your")}
+          <span class="text-gradient">{gettext("association")}</span>
         </h1>
         <p class="text-base-content/60 mx-auto mt-6 max-w-2xl text-lg/relaxed sm:text-xl">
-          Medlemmer, events, kontingent og kommunikation — alt i én moderne platform
-          bygget til foreninger.
+          {gettext(
+            "Members, events, membership fees and communication — all in one modern platform built for associations."
+          )}
         </p>
         <div class="mt-10 flex flex-wrap items-center justify-center gap-4">
           <.link navigate={~p"/register"} class="btn btn-lg btn-primary gap-2">
-            <.icon name="hero-rocket-launch" class="size-5" /> Kom i gang gratis
+            <.icon name="hero-rocket-launch" class="size-5" /> {gettext("Get started for free")}
           </.link>
         </div>
       </div>
@@ -196,10 +200,10 @@ defmodule ExhsWeb.PublicLive.Home do
       <div class="mx-auto max-w-7xl">
         <div class="mb-16 text-center">
           <h2 class="text-base-content text-3xl font-bold tracking-tight sm:text-4xl">
-            Alt samlet ét sted
+            {gettext("Everything in one place")}
           </h2>
           <p class="text-base-content/60 mt-4 text-lg">
-            Værktøjerne din forening har brug for — uden kompleksiteten.
+            {gettext("The tools your association needs — without the complexity.")}
           </p>
         </div>
 
@@ -207,38 +211,38 @@ defmodule ExhsWeb.PublicLive.Home do
           <.feature_card
             icon="hero-users"
             color="primary"
-            title="Medlemshåndtering"
-            text="Overblik over alle medlemmer, roller og kontaktoplysninger."
+            title={gettext("Member management")}
+            text={gettext("An overview of all members, roles and contact details.")}
           />
           <.feature_card
             icon="hero-calendar-days"
             color="secondary"
-            title="Events & tilmelding"
-            text="Opret events med tilmelding, ventelister og automatiske påmindelser."
+            title={gettext("Events & registration")}
+            text={gettext("Create events with registration, waitlists and automatic reminders.")}
           />
           <.feature_card
             icon="hero-banknotes"
             color="accent"
-            title="Kontingent & betaling"
-            text="Automatisk opkrævning via Stripe. Hold styr på hvem der har betalt."
+            title={gettext("Membership fees & payment")}
+            text={gettext("Automatic collection via Stripe. Keep track of who has paid.")}
           />
           <.feature_card
             icon="hero-chart-bar"
             color="warning"
-            title="Dashboard & statistik"
-            text="Se din forenings nøgletal med ét blik."
+            title={gettext("Dashboard & statistics")}
+            text={gettext("See your association's key figures at a glance.")}
           />
           <.feature_card
             icon="hero-paint-brush"
             color="info"
-            title="Dit eget brand"
-            text="Eget logo, farver og subdomæne. Medlemmer ser jeres forening."
+            title={gettext("Your own brand")}
+            text={gettext("Your own logo, colours and subdomain. Members see your association.")}
           />
           <.feature_card
             icon="hero-shield-check"
             color="error"
-            title="GDPR & sikkerhed"
-            text="Europæisk hosting, krypteret data og fuld GDPR-overholdelse."
+            title={gettext("GDPR & security")}
+            text={gettext("European hosting, encrypted data and full GDPR compliance.")}
           />
         </div>
       </div>
@@ -251,14 +255,18 @@ defmodule ExhsWeb.PublicLive.Home do
     <section class="px-4 py-20 sm:px-6">
       <div class="glass-surface mx-auto max-w-4xl rounded-3xl px-6 py-12 text-center sm:px-8 sm:py-16">
         <h2 class="text-base-content text-3xl font-bold tracking-tight">
-          Klar til at komme i gang?
+          {gettext("Ready to get started?")}
         </h2>
         <p class="text-base-content/60 mx-auto mt-4 max-w-xl text-lg">
-          Opret din forening på under 5 minutter. Gratis at prøve.
+          {gettext("Create your association in under 5 minutes. Free to try.")}
         </p>
         <div class="mt-8 flex flex-wrap items-center justify-center gap-4">
-          <.link navigate={~p"/register"} class="btn btn-lg btn-primary">Opret gratis konto</.link>
-          <.link navigate={~p"/sign-in"} class="btn btn-ghost btn-lg">Har du allerede en konto</.link>
+          <.link navigate={~p"/register"} class="btn btn-lg btn-primary">
+            {gettext("Create free account")}
+          </.link>
+          <.link navigate={~p"/sign-in"} class="btn btn-ghost btn-lg">
+            {gettext("Already have an account")}
+          </.link>
         </div>
       </div>
     </section>

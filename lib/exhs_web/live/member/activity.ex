@@ -6,16 +6,18 @@ defmodule ExhsWeb.MemberLive.Activity do
 
   alias LiveFilter.Params.Serializer
 
-  @resource_options [
-    {"Forening", "Elixir.Exhs.Organizations.Forening"},
-    {"Medlemskab", "Elixir.Exhs.Organizations.Membership"},
-    {"Gruppe", "Elixir.Exhs.Organizations.Group"},
-    {"Event", "Elixir.Exhs.Events.Event"},
-    {"Tilmelding", "Elixir.Exhs.Events.Registration"},
-    {"Billettype", "Elixir.Exhs.Events.TicketType"},
-    {"Abonnement", "Elixir.Exhs.Billing.Subscription"},
-    {"Betaling", "Elixir.Exhs.Billing.Payment"}
-  ]
+  defp resource_options do
+    [
+      {gettext("Association"), "Elixir.Exhs.Organizations.Forening"},
+      {gettext("Membership"), "Elixir.Exhs.Organizations.Membership"},
+      {gettext("Group"), "Elixir.Exhs.Organizations.Group"},
+      {gettext("Event"), "Elixir.Exhs.Events.Event"},
+      {gettext("Registration"), "Elixir.Exhs.Events.Registration"},
+      {gettext("Ticket type"), "Elixir.Exhs.Events.TicketType"},
+      {gettext("Subscription"), "Elixir.Exhs.Billing.Subscription"},
+      {gettext("Payment"), "Elixir.Exhs.Billing.Payment"}
+    ]
+  end
 
   @impl true
   def mount(_params, _session, socket) do
@@ -59,8 +61,8 @@ defmodule ExhsWeb.MemberLive.Activity do
       my_foreninger={@my_foreninger}
     >
       <.header>
-        Aktivitet
-        <:subtitle>Din aktivitetshistorik på tværs af foreninger</:subtitle>
+        {gettext("Activity")}
+        <:subtitle>{gettext("Your activity history across associations")}</:subtitle>
       </.header>
 
       <div :if={@loading} class="mt-6 space-y-4">
@@ -74,14 +76,14 @@ defmodule ExhsWeb.MemberLive.Activity do
         </div>
 
         <div :if={@events == []} class="mt-8">
-          <.empty_state icon="hero-clock" title="Ingen aktivitet endnu">
-            Din aktivitet vises her, når du foretager ændringer.
+          <.empty_state icon="hero-clock" title={gettext("No activity yet")}>
+            {gettext("Your activity appears here when you make changes.")}
           </.empty_state>
         </div>
 
         <div :if={@events != []} class="mt-6">
           <.table id="activity" rows={@events}>
-            <:col :let={event} label="Handling" class="w-0 whitespace-nowrap">
+            <:col :let={event} label={gettext("Action")} class="w-0 whitespace-nowrap">
               <div class="flex items-center gap-2">
                 <span class={[
                   "inline-flex size-6 shrink-0 items-center justify-center rounded-full",
@@ -92,13 +94,13 @@ defmodule ExhsWeb.MemberLive.Activity do
                 <span class="font-medium">{action_label(event.action)}</span>
               </div>
             </:col>
-            <:col :let={event} label="Ressource" class="w-0 whitespace-nowrap">
+            <:col :let={event} label={gettext("Resource")} class="w-0 whitespace-nowrap">
               <.badge variant="default">{resource_label(event.resource)}</.badge>
             </:col>
-            <:col :let={event} label="Tidspunkt" class="w-0 whitespace-nowrap">
+            <:col :let={event} label={gettext("Time")} class="w-0 whitespace-nowrap">
               <span class="text-base-content/50 text-xs">{format_timestamp(event.occurred_at)}</span>
             </:col>
-            <:col :let={event} label="Detaljer">
+            <:col :let={event} label={gettext("Details")}>
               <.event_data :if={event.data != %{}} data={event.data} />
             </:col>
           </.table>
@@ -116,7 +118,7 @@ defmodule ExhsWeb.MemberLive.Activity do
     ~H"""
     <details class="group">
       <summary class="hover:text-base-content/60 text-base-content/40 cursor-pointer text-xs">
-        Vis
+        {gettext("Show")}
       </summary>
       <dl class="mt-1 space-y-0.5">
         <div :for={{key, value} <- @data} class="flex gap-1.5 text-xs">
@@ -131,8 +133,8 @@ defmodule ExhsWeb.MemberLive.Activity do
   defp filter_config do
     [
       LiveFilter.select(:resource,
-        label: "Ressource",
-        options: @resource_options
+        label: gettext("Resource"),
+        options: resource_options()
       )
     ]
   end
@@ -149,7 +151,7 @@ defmodule ExhsWeb.MemberLive.Activity do
         socket
         |> assign(:events, page.results)
         |> assign(:pagination, pagination)
-        |> assign(:page_title, "Aktivitet")
+        |> assign(:page_title, gettext("Activity"))
         |> assign(:loading, false)
 
       {:error, _} ->
@@ -158,7 +160,7 @@ defmodule ExhsWeb.MemberLive.Activity do
         socket
         |> assign(:events, [])
         |> assign(:pagination, pagination)
-        |> assign(:page_title, "Aktivitet")
+        |> assign(:page_title, gettext("Activity"))
         |> assign(:loading, false)
     end
   end
@@ -184,27 +186,19 @@ defmodule ExhsWeb.MemberLive.Activity do
   defp action_type_icon(:destroy), do: "hero-trash"
   defp action_type_icon(_), do: "hero-bolt"
 
-  @resource_labels %{
-    Exhs.Organizations.Forening => "Forening",
-    Exhs.Organizations.Membership => "Medlemskab",
-    Exhs.Organizations.Group => "Gruppe",
-    Exhs.Organizations.MemberGroup => "Gruppemedlemskab",
-    Exhs.Events.Event => "Event",
-    Exhs.Events.TicketType => "Billettype",
-    Exhs.Events.Registration => "Tilmelding",
-    Exhs.Billing.Subscription => "Abonnement",
-    Exhs.Billing.Payment => "Betaling"
-  }
-
-  defp resource_label(resource) do
-    Map.get(@resource_labels, resource, resource |> Module.split() |> List.last())
-  end
+  defp resource_label(Exhs.Organizations.Forening), do: gettext("Association")
+  defp resource_label(Exhs.Organizations.Membership), do: gettext("Membership")
+  defp resource_label(Exhs.Organizations.Group), do: gettext("Group")
+  defp resource_label(Exhs.Organizations.MemberGroup), do: gettext("Group membership")
+  defp resource_label(Exhs.Events.Event), do: gettext("Event")
+  defp resource_label(Exhs.Events.TicketType), do: gettext("Ticket type")
+  defp resource_label(Exhs.Events.Registration), do: gettext("Registration")
+  defp resource_label(Exhs.Billing.Subscription), do: gettext("Subscription")
+  defp resource_label(Exhs.Billing.Payment), do: gettext("Payment")
+  defp resource_label(resource), do: resource |> Module.split() |> List.last()
 
   defp format_timestamp(nil), do: "—"
-
-  defp format_timestamp(dt) do
-    Calendar.strftime(dt, "%d. %b %Y kl. %H:%M")
-  end
+  defp format_timestamp(dt), do: ExhsWeb.DisplayHelpers.format_datetime(dt)
 
   defp humanize_key(key) when is_binary(key) do
     key |> String.replace("_", " ") |> String.capitalize()

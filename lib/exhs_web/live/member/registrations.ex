@@ -48,8 +48,8 @@ defmodule ExhsWeb.MemberLive.Registrations do
       my_foreninger={@my_foreninger}
     >
       <.header>
-        Mine events
-        <:subtitle>Dine tilmeldinger på tværs af foreninger</:subtitle>
+        {gettext("My events")}
+        <:subtitle>{gettext("Your registrations across associations")}</:subtitle>
       </.header>
 
       <div :if={@loading} class="mt-6 space-y-4">
@@ -63,28 +63,28 @@ defmodule ExhsWeb.MemberLive.Registrations do
         </div>
 
         <div :if={@registrations == []} class="mt-8">
-          <.empty_state icon="hero-calendar-days" title="Ingen tilmeldinger endnu">
-            Du er ikke tilmeldt nogen events.
+          <.empty_state icon="hero-calendar-days" title={gettext("No registrations yet")}>
+            {gettext("You are not registered for any events.")}
           </.empty_state>
         </div>
 
         <div :if={@registrations != []} class="mt-6">
           <.table id="registrations" rows={@registrations}>
-            <:col :let={reg} label="Event">{reg.ticket_type.event.title}</:col>
-            <:col :let={reg} label="Forening">{reg.membership.forening.name}</:col>
-            <:col :let={reg} label="Billet">{reg.ticket_type.name}</:col>
-            <:col :let={reg} label="Status">
+            <:col :let={reg} label={gettext("Event")}>{reg.ticket_type.event.title}</:col>
+            <:col :let={reg} label={gettext("Association")}>{reg.membership.forening.name}</:col>
+            <:col :let={reg} label={gettext("Ticket")}>{reg.ticket_type.name}</:col>
+            <:col :let={reg} label={gettext("Status")}>
               <.badge variant={reg_status_variant(reg.status)}>
                 {reg_status_label(reg.status)}
               </.badge>
             </:col>
-            <:col :let={reg} label="Dato">{format_date(reg.registered_at)}</:col>
+            <:col :let={reg} label={gettext("Date")}>{format_date(reg.registered_at)}</:col>
             <:col :let={reg} label="">
               <.link
                 href={event_url(reg)}
                 class="text-primary text-sm font-medium hover:underline"
               >
-                Se event
+                {gettext("See event")}
               </.link>
             </:col>
           </.table>
@@ -100,14 +100,18 @@ defmodule ExhsWeb.MemberLive.Registrations do
 
   defp filter_config do
     [
-      LiveFilter.text(:search, label: "Søg", always_on: true, placeholder: "Søg..."),
+      LiveFilter.text(:search,
+        label: gettext("Search"),
+        always_on: true,
+        placeholder: gettext("Search...")
+      ),
       LiveFilter.select(:status,
-        label: "Status",
+        label: gettext("Status"),
         options: [
-          {"Bekræftet", "confirmed"},
-          {"Venteliste", "waitlisted"},
-          {"Annulleret", "cancelled"},
-          {"Afventer betaling", "pending_payment"}
+          {gettext("Confirmed"), "confirmed"},
+          {gettext("Waitlist"), "waitlisted"},
+          {gettext("Cancelled"), "cancelled"},
+          {gettext("Awaiting payment"), "pending_payment"}
         ]
       )
     ]
@@ -126,7 +130,7 @@ defmodule ExhsWeb.MemberLive.Registrations do
         socket
         |> assign(:registrations, page)
         |> assign(:pagination, pagination)
-        |> assign(:page_title, "Mine events")
+        |> assign(:page_title, gettext("My events"))
         |> assign(:loading, false)
 
       {:error, _} ->
@@ -135,7 +139,7 @@ defmodule ExhsWeb.MemberLive.Registrations do
         socket
         |> assign(:registrations, [])
         |> assign(:pagination, pagination)
-        |> assign(:page_title, "Mine events")
+        |> assign(:page_title, gettext("My events"))
         |> assign(:loading, false)
     end
   end

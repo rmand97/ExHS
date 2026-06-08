@@ -28,7 +28,7 @@ defmodule ExhsWeb.AdminLive.Members.Show do
       _ ->
         {:ok,
          socket
-         |> put_flash(:error, "Medlem ikke fundet.")
+         |> put_flash(:error, gettext("Member not found."))
          |> push_navigate(to: ~p"/admin/members")}
     end
   end
@@ -49,17 +49,17 @@ defmodule ExhsWeb.AdminLive.Members.Show do
          ) do
       {:ok, _} ->
         MembersPubSub.broadcast(socket.assigns.current_forening.id)
-        {:noreply, socket |> put_flash(:info, "Rolle opdateret.") |> reload()}
+        {:noreply, socket |> put_flash(:info, gettext("Role updated.")) |> reload()}
 
       {:error, _} ->
-        {:noreply, put_flash(socket, :error, "Kunne ikke ændre rolle (sidste admin?).")}
+        {:noreply, put_flash(socket, :error, gettext("Could not change role (last admin?)."))}
     end
   end
 
   def handle_event("activate", _params, socket) do
     Organizations.activate_member(socket.assigns.membership, scope: socket.assigns.current_scope)
     MembersPubSub.broadcast(socket.assigns.current_forening.id)
-    {:noreply, socket |> put_flash(:info, "Medlem aktiveret.") |> reload()}
+    {:noreply, socket |> put_flash(:info, gettext("Member activated.")) |> reload()}
   end
 
   def handle_event("deactivate", _params, socket) do
@@ -68,7 +68,7 @@ defmodule ExhsWeb.AdminLive.Members.Show do
     )
 
     MembersPubSub.broadcast(socket.assigns.current_forening.id)
-    {:noreply, socket |> put_flash(:info, "Medlem deaktiveret.") |> reload()}
+    {:noreply, socket |> put_flash(:info, gettext("Member deactivated.")) |> reload()}
   end
 
   def handle_event("add_group", %{"group_id" => ""}, socket), do: {:noreply, socket}
@@ -80,7 +80,7 @@ defmodule ExhsWeb.AdminLive.Members.Show do
     )
 
     MembersPubSub.broadcast(socket.assigns.current_forening.id)
-    {:noreply, socket |> put_flash(:info, "Tilføjet til gruppe.") |> reload()}
+    {:noreply, socket |> put_flash(:info, gettext("Added to group.")) |> reload()}
   end
 
   def handle_event("remove_group", %{"group_id" => group_id}, socket) do
@@ -91,7 +91,7 @@ defmodule ExhsWeb.AdminLive.Members.Show do
     )
 
     MembersPubSub.broadcast(socket.assigns.current_forening.id)
-    {:noreply, socket |> put_flash(:info, "Fjernet fra gruppe.") |> reload()}
+    {:noreply, socket |> put_flash(:info, gettext("Removed from group.")) |> reload()}
   end
 
   # ── Loading ────────────────────────────────────
@@ -148,7 +148,7 @@ defmodule ExhsWeb.AdminLive.Members.Show do
     >
       <div class="mb-4">
         <.link navigate={~p"/admin/members"} class="text-base-content/50 text-sm hover:underline">
-          ← Tilbage til medlemmer
+          ← {gettext("Back to members")}
         </.link>
       </div>
 
@@ -167,13 +167,13 @@ defmodule ExhsWeb.AdminLive.Members.Show do
         <%!-- Left: profile + admin controls --%>
         <div class="space-y-6 lg:col-span-1">
           <.card class="p-5">
-            <h3 class="text-base-content font-semibold">Profil</h3>
+            <h3 class="text-base-content font-semibold">{gettext("Profile")}</h3>
             <dl class="mt-3 space-y-2 text-sm">
-              <.detail label="Navn" value={member_name(@membership)} />
+              <.detail label={gettext("Name")} value={member_name(@membership)} />
               <.detail label="Email" value={to_string(@membership.user.email)} />
-              <.detail label="Telefon" value={@membership.user.phone || "—"} />
-              <.detail label="By" value={@membership.user.city || "—"} />
-              <.detail label="Medlem siden" value={format_date(@membership.joined_at)} />
+              <.detail label={gettext("Phone")} value={@membership.user.phone || "—"} />
+              <.detail label={gettext("City")} value={@membership.user.city || "—"} />
+              <.detail label={gettext("Member since")} value={format_date(@membership.joined_at)} />
             </dl>
           </.card>
 
@@ -181,11 +181,15 @@ defmodule ExhsWeb.AdminLive.Members.Show do
             <h3 class="text-base-content font-semibold">Administration</h3>
 
             <div class="mt-3">
-              <label class="text-base-content/60 text-xs">Rolle</label>
+              <label class="text-base-content/60 text-xs">{gettext("Role")}</label>
               <form phx-change="set_role" class="mt-1">
                 <select name="role" class="select select-bordered select-sm w-full">
-                  <option value="member" selected={@membership.role == :member}>Medlem</option>
-                  <option value="board" selected={@membership.role == :board}>Bestyrelse</option>
+                  <option value="member" selected={@membership.role == :member}>
+                    {gettext("Member")}
+                  </option>
+                  <option value="board" selected={@membership.role == :board}>
+                    {gettext("Board")}
+                  </option>
                   <option value="admin" selected={@membership.role == :admin}>Admin</option>
                 </select>
               </form>
@@ -198,7 +202,7 @@ defmodule ExhsWeb.AdminLive.Members.Show do
                 variant="destructive"
                 class="w-full"
               >
-                Deaktiver medlem
+                {gettext("Deactivate member")}
               </.button>
               <.button
                 :if={@membership.status == :inactive}
@@ -206,16 +210,16 @@ defmodule ExhsWeb.AdminLive.Members.Show do
                 variant="primary"
                 class="w-full"
               >
-                Aktiver medlem
+                {gettext("Activate member")}
               </.button>
             </div>
           </.card>
 
           <.card class="p-5">
-            <h3 class="text-base-content font-semibold">Grupper</h3>
+            <h3 class="text-base-content font-semibold">{gettext("Groups")}</h3>
             <div class="mt-3 flex flex-wrap gap-1.5">
               <span :if={@membership.groups == []} class="text-base-content/40 text-sm">
-                Ingen grupper
+                {gettext("No groups")}
               </span>
               <span
                 :for={g <- @membership.groups}
@@ -227,7 +231,7 @@ defmodule ExhsWeb.AdminLive.Members.Show do
                   phx-click="remove_group"
                   phx-value-group_id={g.id}
                   class="hover:text-error"
-                  aria-label="Fjern fra gruppe"
+                  aria-label={gettext("Remove from group")}
                 >
                   <.icon name="hero-x-mark" class="size-3" />
                 </button>
@@ -239,7 +243,7 @@ defmodule ExhsWeb.AdminLive.Members.Show do
               class="mt-3"
             >
               <select name="group_id" class="select select-bordered select-sm w-full">
-                <option value="">Tilføj til gruppe…</option>
+                <option value="">{gettext("Add to group…")}</option>
                 <option :for={g <- @available_groups} value={g.id}>{g.name}</option>
               </select>
             </form>
@@ -249,11 +253,13 @@ defmodule ExhsWeb.AdminLive.Members.Show do
         <%!-- Right: payments, registrations, audit --%>
         <div class="space-y-6 lg:col-span-2">
           <.card class="p-5">
-            <h3 class="text-base-content font-semibold">Betalinger</h3>
-            <p :if={@payments == []} class="text-base-content/40 mt-2 text-sm">Ingen betalinger</p>
+            <h3 class="text-base-content font-semibold">{gettext("Payments")}</h3>
+            <p :if={@payments == []} class="text-base-content/40 mt-2 text-sm">
+              {gettext("No payments")}
+            </p>
             <ul :if={@payments != []} class="divide-base-content/5 mt-2 divide-y">
               <li :for={p <- @payments} class="flex items-center justify-between py-2 text-sm">
-                <span class="text-base-content/70">{p.description || "Betaling"}</span>
+                <span class="text-base-content/70">{p.description || gettext("Payment")}</span>
                 <span class="flex items-center gap-2">
                   <span class="text-base-content font-medium">
                     {format_amount(p.amount_cents, p.currency)}
@@ -267,9 +273,9 @@ defmodule ExhsWeb.AdminLive.Members.Show do
           </.card>
 
           <.card class="p-5">
-            <h3 class="text-base-content font-semibold">Tilmeldinger</h3>
+            <h3 class="text-base-content font-semibold">{gettext("Registrations")}</h3>
             <p :if={@registrations == []} class="text-base-content/40 mt-2 text-sm">
-              Ingen tilmeldinger
+              {gettext("No registrations")}
             </p>
             <ul :if={@registrations != []} class="divide-base-content/5 mt-2 divide-y">
               <li :for={r <- @registrations} class="flex items-center justify-between py-2 text-sm">
@@ -280,8 +286,10 @@ defmodule ExhsWeb.AdminLive.Members.Show do
           </.card>
 
           <.card class="p-5">
-            <h3 class="text-base-content font-semibold">Historik</h3>
-            <p :if={@events == []} class="text-base-content/40 mt-2 text-sm">Ingen hændelser</p>
+            <h3 class="text-base-content font-semibold">{gettext("History")}</h3>
+            <p :if={@events == []} class="text-base-content/40 mt-2 text-sm">
+              {gettext("No events")}
+            </p>
             <ul :if={@events != []} class="divide-base-content/5 mt-2 divide-y">
               <li :for={e <- @events} class="flex items-center justify-between py-2 text-sm">
                 <span class="text-base-content/70">{action_label(e.action)}</span>

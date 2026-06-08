@@ -5,6 +5,8 @@ defmodule ExhsWeb.Router do
 
   import AshAuthentication.Plug.Helpers
 
+  alias Localize.Plug.PutLocale
+
   pipeline :mcp do
     plug AshAuthentication.Strategy.ApiKey.Plug,
       resource: Exhs.Accounts.User,
@@ -17,11 +19,19 @@ defmodule ExhsWeb.Router do
   pipeline :browser do
     plug :accepts, ["html"]
     plug :fetch_session
+
+    plug Localize.Plug.PutLocale,
+      from: [:session, :accept_language],
+      gettext: ExhsWeb.Gettext
+
+    plug Localize.Plug.PutSession
+
     plug :fetch_live_flash
     plug :put_root_layout, html: {ExhsWeb.Layouts, :root}
     plug :protect_from_forgery
     plug :put_secure_browser_headers
     plug :load_from_session
+    plug ExhsWeb.Plugs.UserLocale
     plug ExhsWeb.Plugs.Subdomain
   end
 
@@ -64,12 +74,14 @@ defmodule ExhsWeb.Router do
     pipe_through :browser
 
     ash_authentication_live_session :authenticated_routes,
+      session: {__MODULE__, :locale_session, []},
       on_mount_prepend:
         if(Application.compile_env(:exhs, :sql_sandbox),
           do: [{ExhsWeb.LiveSandbox, :default}],
           else: []
         ),
       on_mount: [
+        {ExhsWeb.LiveLocale, :default},
         {ExhsWeb.LiveCurrentPath, :default},
         {ExhsWeb.LiveUserAuth, :live_user_required},
         {ExhsWeb.LiveUserAuth, :assign_my_foreninger}
@@ -86,6 +98,7 @@ defmodule ExhsWeb.Router do
     ash_authentication_live_session :admin_routes,
       session: {__MODULE__, :public_session, []},
       on_mount: [
+        {ExhsWeb.LiveLocale, :default},
         {ExhsWeb.LiveCurrentPath, :default},
         {ExhsWeb.LiveUserAuth, :live_user_required},
         {ExhsWeb.LiveForeningAuth, :require_admin}
@@ -101,7 +114,9 @@ defmodule ExhsWeb.Router do
     end
 
     ash_authentication_live_session :superadmin_routes,
+      session: {__MODULE__, :locale_session, []},
       on_mount: [
+        {ExhsWeb.LiveLocale, :default},
         {ExhsWeb.LiveCurrentPath, :default},
         {ExhsWeb.LiveUserAuth, :live_user_required},
         {ExhsWeb.LiveUserAuth, :require_superadmin},
@@ -132,6 +147,7 @@ defmodule ExhsWeb.Router do
         ),
       session: {__MODULE__, :public_session, []},
       on_mount: [
+        {ExhsWeb.LiveLocale, :default},
         {ExhsWeb.LiveCurrentPath, :default},
         {ExhsWeb.LiveForeningAuth, :optional_forening}
       ] do
@@ -144,6 +160,7 @@ defmodule ExhsWeb.Router do
     end
 
     get "/go/forening/:subdomain", ForeningRedirectController, :go
+    get "/locale/:locale", LocaleController, :update
     get "/auth/handoff", HandoffController, :create
 
     auth_routes AuthController, Exhs.Accounts.User, path: "/auth"
@@ -181,11 +198,22 @@ defmodule ExhsWeb.Router do
   def public_session(conn) do
     forening = conn.assigns[:current_forening]
 
-    if forening do
-      %{"current_forening_id" => forening.id}
-    else
-      %{}
-    end
+    base =
+      if forening do
+        %{"current_forening_id" => forening.id}
+      else
+        %{}
+      end
+
+    put_locale_in_session(conn, base)
+  end
+
+  @doc false
+  def locale_session(conn), do: put_locale_in_session(conn, %{})
+
+  defp put_locale_in_session(conn, extra) do
+    key = PutLocale.session_key()
+    Map.put(extra, key, Plug.Conn.get_session(conn, key))
   end
 
   # Other scopes may use custom stacks.

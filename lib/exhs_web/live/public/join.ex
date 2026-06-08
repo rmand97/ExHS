@@ -10,9 +10,12 @@ defmodule ExhsWeb.PublicLive.Join do
 
       {:ok,
        assign(socket,
-         page_title: "Bliv medlem af #{forening.name}",
+         page_title: gettext("Become a member of %{name}", name: forening.name),
          page_description:
-           "Bliv medlem af #{forening.name} og få adgang til events, fællesskab og meget mere.",
+           gettext(
+             "Become a member of %{name} and get access to events, community and much more.",
+             name: forening.name
+           ),
          kontingent_amount: join_kontingent(forening),
          already_member?: already_member?
        )}
@@ -29,17 +32,23 @@ defmodule ExhsWeb.PublicLive.Join do
       {:ok, _membership} ->
         {:noreply,
          socket
-         |> put_flash(:info, "Velkommen som medlem af #{socket.assigns.current_forening.name}!")
+         |> put_flash(
+           :info,
+           gettext("Welcome as a member of %{name}!",
+             name: socket.assigns.current_forening.name
+           )
+         )
          |> assign(already_member?: true)}
 
       {:error, %Ash.Error.Invalid{} = error} ->
         if identity_error?(error) do
           {:noreply,
            socket
-           |> put_flash(:info, "Du er allerede medlem!")
+           |> put_flash(:info, gettext("You are already a member!"))
            |> assign(already_member?: true)}
         else
-          {:noreply, put_flash(socket, :error, "Noget gik galt. Prøv igen.")}
+          {:noreply,
+           put_flash(socket, :error, gettext("Something went wrong. Please try again."))}
         end
     end
   end
@@ -57,23 +66,23 @@ defmodule ExhsWeb.PublicLive.Join do
       <div class="px-4 py-16 sm:px-6">
         <div class="mx-auto max-w-2xl text-center">
           <h1 class="text-base-content text-3xl font-bold sm:text-4xl">
-            Bliv medlem af {@current_forening.name}
+            {gettext("Become a member of %{name}", name: @current_forening.name)}
           </h1>
           <p class="text-base-content/60 mt-4 text-lg">
-            Opret konto og få adgang til events, fællesskab og meget mere.
+            {gettext("Create an account and get access to events, community and much more.")}
           </p>
         </div>
 
         <div class="mx-auto mt-12 max-w-lg">
           <.card class="p-6 sm:p-8">
             <div class="space-y-6">
-              <.benefit icon="hero-calendar-days" text="Adgang til alle medlemsevents" />
-              <.benefit icon="hero-user-group" text="Del af fællesskabet" />
-              <.benefit icon="hero-bell" text="Nyheder og opdateringer" />
+              <.benefit icon="hero-calendar-days" text={gettext("Access to all member events")} />
+              <.benefit icon="hero-user-group" text={gettext("Part of the community")} />
+              <.benefit icon="hero-bell" text={gettext("News and updates")} />
               <.benefit
                 :if={@kontingent_amount}
                 icon="hero-banknotes"
-                text={"Kontingent: #{@kontingent_amount}"}
+                text={gettext("Membership fee: %{amount}", amount: @kontingent_amount)}
               />
             </div>
 
@@ -83,23 +92,27 @@ defmodule ExhsWeb.PublicLive.Join do
                 navigate={~p"/register"}
                 class="btn btn-block btn-lg btn-primary"
               >
-                Opret konto
+                {gettext("Create account")}
               </.link>
               <button
                 :if={@current_user && !@already_member?}
                 phx-click="join"
                 class="btn btn-block btn-lg btn-primary"
               >
-                Bliv medlem
+                {gettext("Become a member")}
               </button>
               <div :if={@already_member?} class="text-center">
                 <p class="text-success flex items-center justify-center gap-2 font-medium">
-                  <.icon name="hero-check-circle" class="size-5" /> Du er allerede medlem!
+                  <.icon name="hero-check-circle" class="size-5" /> {gettext(
+                    "You are already a member!"
+                  )}
                 </p>
               </div>
               <p :if={!@current_user} class="text-base-content/50 mt-3 text-center text-sm">
-                Har du allerede en konto?
-                <.link navigate={~p"/sign-in"} class="text-primary hover:underline">Log ind</.link>
+                {gettext("Already have an account?")}
+                <.link navigate={~p"/sign-in"} class="text-primary hover:underline">
+                  {gettext("Sign in")}
+                </.link>
               </p>
             </div>
           </.card>
@@ -121,10 +134,10 @@ defmodule ExhsWeb.PublicLive.Join do
   end
 
   defp join_kontingent(%{kontingent_amount_cents: nil}), do: nil
-  defp join_kontingent(%{kontingent_amount_cents: 0}), do: "Gratis"
+  defp join_kontingent(%{kontingent_amount_cents: 0}), do: gettext("Free")
 
   defp join_kontingent(%{kontingent_amount_cents: cents, kontingent_currency: currency}) do
-    "#{div(cents, 100)} #{currency || "DKK"}/år"
+    gettext("%{amount}/year", amount: ExhsWeb.DisplayHelpers.format_money(cents, currency))
   end
 
   defp already_member?(%{assigns: %{current_user: nil}}), do: false

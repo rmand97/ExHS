@@ -41,12 +41,16 @@ defmodule ExhsWeb.SuperadminLive.Dashboard do
         {:noreply,
          socket
          |> assign(:creating, false)
-         |> put_flash(:info, "Forening oprettet og admin inviteret.")
+         |> put_flash(:info, gettext("Association created and admin invited."))
          |> load_foreninger()}
 
       {:error, _} ->
         {:noreply,
-         put_flash(socket, :error, "Kunne ikke oprette foreningen. Subdomæne skal være unikt.")}
+         put_flash(
+           socket,
+           :error,
+           gettext("Could not create the association. Subdomain must be unique.")
+         )}
     end
   end
 
@@ -57,7 +61,7 @@ defmodule ExhsWeb.SuperadminLive.Dashboard do
       Organizations.archive_forening(forening, actor: socket.assigns.current_user)
     end
 
-    {:noreply, socket |> put_flash(:info, "Forening arkiveret.") |> load_foreninger()}
+    {:noreply, socket |> put_flash(:info, gettext("Association archived.")) |> load_foreninger()}
   end
 
   defp load_foreninger(socket) do
@@ -97,28 +101,28 @@ defmodule ExhsWeb.SuperadminLive.Dashboard do
       <div class="mx-auto max-w-7xl px-4 py-8 sm:px-6">
         <.header>
           Superadmin
-          <:subtitle>Alle foreninger på platformen</:subtitle>
+          <:subtitle>{gettext("All associations on the platform")}</:subtitle>
           <:actions>
             <.button phx-click="new" variant="primary">
-              <.icon name="hero-plus" class="size-4" /> Ny forening
+              <.icon name="hero-plus" class="size-4" /> {gettext("New association")}
             </.button>
           </:actions>
         </.header>
 
         <div class="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <.stat_card
-            label="Foreninger"
+            label={gettext("Associations")}
             value={to_string(@stats.total)}
             icon="hero-building-office-2"
           />
           <.stat_card
-            label="Aktive"
+            label={gettext("Active")}
             value={to_string(@stats.active)}
             icon="hero-check-circle"
             color="success"
           />
           <.stat_card
-            label="Medlemskaber"
+            label={gettext("Memberships")}
             value={to_string(@stats.members)}
             icon="hero-users"
             color="accent"
@@ -135,11 +139,11 @@ defmodule ExhsWeb.SuperadminLive.Dashboard do
           <table class="table">
             <thead>
               <tr>
-                <th>Navn</th>
-                <th>Subdomæne</th>
-                <th>Medlemmer</th>
+                <th>{gettext("Name")}</th>
+                <th>{gettext("Subdomain")}</th>
+                <th>{gettext("Members")}</th>
                 <th>Events</th>
-                <th>Status</th>
+                <th>{gettext("Status")}</th>
                 <th></th>
               </tr>
             </thead>
@@ -151,7 +155,7 @@ defmodule ExhsWeb.SuperadminLive.Dashboard do
                 <td>{Map.get(@event_counts, f.id, 0)}</td>
                 <td>
                   <.badge variant={if f.active, do: "success", else: "default"}>
-                    {if f.active, do: "Aktiv", else: "Arkiveret"}
+                    {if f.active, do: gettext("Active"), else: gettext("Archived")}
                   </.badge>
                 </td>
                 <td class="text-right">
@@ -160,9 +164,9 @@ defmodule ExhsWeb.SuperadminLive.Dashboard do
                     variant="ghost"
                     phx-click="archive"
                     phx-value-id={f.id}
-                    data-confirm={"Arkivér \"#{f.name}\"?"}
+                    data-confirm={gettext("Archive \"%{name}\"?", name: f.name)}
                   >
-                    Arkivér
+                    {gettext("Archive")}
                   </.button>
                 </td>
               </tr>
@@ -172,17 +176,18 @@ defmodule ExhsWeb.SuperadminLive.Dashboard do
       </div>
 
       <.modal :if={@creating} id="forening-modal" show on_cancel={JS.push("cancel")}>
-        <h3 class="text-base-content text-lg font-semibold">Ny forening</h3>
+        <h3 class="text-base-content text-lg font-semibold">{gettext("New association")}</h3>
         <.form for={@form} phx-submit="save" class="mt-4 space-y-4">
-          <.input field={@form[:name]} label="Navn" required />
-          <.input field={@form[:subdomain]} label="Subdomæne" required />
-          <.input field={@form[:admin_email]} type="email" label="Admin e-mail" required />
+          <.input field={@form[:name]} label={gettext("Name")} required />
+          <.input field={@form[:subdomain]} label={gettext("Subdomain")} required />
+          <.input field={@form[:admin_email]} type="email" label={gettext("Admin email")} required />
           <p class="text-base-content/50 text-xs">
-            Foreningen bliver tilgængelig på <code>subdomæne.exhs.dk</code>. Admin modtager et magisk login-link.
+            {gettext("The association becomes available at")}
+            <code>subdomain.exhs.dk</code>. {gettext("The admin receives a magic login link.")}
           </p>
           <div class="flex justify-end gap-2">
-            <.button type="button" variant="ghost" phx-click="cancel">Annuller</.button>
-            <.button type="submit" variant="primary">Opret</.button>
+            <.button type="button" variant="ghost" phx-click="cancel">{gettext("Cancel")}</.button>
+            <.button type="submit" variant="primary">{gettext("Create")}</.button>
           </div>
         </.form>
       </.modal>

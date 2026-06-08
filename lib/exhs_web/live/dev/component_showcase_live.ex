@@ -144,7 +144,7 @@ defmodule ExhsWeb.Dev.ComponentShowcaseLive do
       <.showcase title="Stat Cards">
         <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <.stat_card
-            label="Medlemmer"
+            label={gettext("Members")}
             value="1,247"
             change="+12%"
             change_type="positive"
@@ -152,7 +152,7 @@ defmodule ExhsWeb.Dev.ComponentShowcaseLive do
             color="primary"
           />
           <.stat_card
-            label="Aktive events"
+            label={gettext("Active events")}
             value="8"
             change="+2"
             change_type="positive"
@@ -160,7 +160,7 @@ defmodule ExhsWeb.Dev.ComponentShowcaseLive do
             color="secondary"
           />
           <.stat_card
-            label="Omsætning"
+            label={gettext("Revenue")}
             value="48.290 kr"
             change="-3%"
             change_type="negative"
@@ -168,7 +168,7 @@ defmodule ExhsWeb.Dev.ComponentShowcaseLive do
             color="accent"
           />
           <.stat_card
-            label="Venteliste"
+            label={gettext("Waitlist")}
             value="23"
             icon="hero-clock"
             color="warning"
@@ -223,11 +223,11 @@ defmodule ExhsWeb.Dev.ComponentShowcaseLive do
       <%!-- Empty State --%>
       <.showcase title="Empty State">
         <.card>
-          <.empty_state icon="hero-calendar" title="Ingen events endnu">
-            Opret dit første event for at komme i gang.
+          <.empty_state icon="hero-calendar" title={gettext("No events yet")}>
+            {gettext("Create your first event to get started.")}
             <:action>
               <.button variant="primary">
-                <.icon name="hero-plus" class="mr-1 size-4" /> Opret event
+                <.icon name="hero-plus" class="mr-1 size-4" /> {gettext("Create event")}
               </.button>
             </:action>
           </.empty_state>
@@ -244,13 +244,13 @@ defmodule ExhsWeb.Dev.ComponentShowcaseLive do
       <.showcase title="Table">
         <.card>
           <.table id="demo-table" rows={sample_members()}>
-            <:col :let={m} label="Navn">{m.name}</:col>
+            <:col :let={m} label={gettext("Name")}>{m.name}</:col>
             <:col :let={m} label="Email">{m.email}</:col>
-            <:col :let={m} label="Rolle">
+            <:col :let={m} label={gettext("Role")}>
               <.badge variant={m.badge}>{m.role}</.badge>
             </:col>
             <:action :let={_m}>
-              <.button variant="ghost">Vis</.button>
+              <.button variant="ghost">{gettext("View")}</.button>
             </:action>
           </.table>
         </.card>
@@ -260,10 +260,10 @@ defmodule ExhsWeb.Dev.ComponentShowcaseLive do
       <.showcase title="List">
         <.card>
           <.list>
-            <:item title="Navn">Rolf Andersen</:item>
+            <:item title={gettext("Name")}>Rolf Andersen</:item>
             <:item title="Email">rolf@example.com</:item>
-            <:item title="Rolle">Administrator</:item>
-            <:item title="Oprettet">27. maj 2026</:item>
+            <:item title={gettext("Role")}>Administrator</:item>
+            <:item title={gettext("Created")}>27. maj 2026</:item>
           </.list>
         </.card>
       </.showcase>
@@ -271,10 +271,10 @@ defmodule ExhsWeb.Dev.ComponentShowcaseLive do
       <%!-- Tabs --%>
       <.showcase title="Tabs">
         <.tabs id="demo-tabs">
-          <:tab label="Oversigt" active />
-          <:tab label="Medlemmer" />
+          <:tab label={gettext("Overview")} active />
+          <:tab label={gettext("Members")} />
           <:tab label="Events" />
-          <:tab label="Indstillinger" />
+          <:tab label={gettext("Settings")} />
         </.tabs>
       </.showcase>
     </div>
@@ -319,13 +319,13 @@ defmodule ExhsWeb.Dev.ComponentShowcaseLive do
       <.showcase title="Empty States">
         <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
           <.card>
-            <.empty_state icon="hero-users" title="Ingen medlemmer">
-              Inviter medlemmer til din forening.
+            <.empty_state icon="hero-users" title={gettext("No members")}>
+              {gettext("Invite members to your association.")}
             </.empty_state>
           </.card>
           <.card>
-            <.empty_state icon="hero-document-text" title="Ingen dokumenter">
-              Upload filer for at komme i gang.
+            <.empty_state icon="hero-document-text" title={gettext("No documents")}>
+              {gettext("Upload files to get started.")}
               <:action>
                 <.button variant="secondary">Upload</.button>
               </:action>
@@ -343,14 +343,23 @@ defmodule ExhsWeb.Dev.ComponentShowcaseLive do
       <.showcase title="Form Inputs">
         <.card class="max-w-md p-6">
           <form class="space-y-4">
-            <.input name="name" label="Navn" value="" placeholder="Indtast dit navn" />
+            <.input
+              name="name"
+              label={gettext("Name")}
+              value=""
+              placeholder={gettext("Enter your name")}
+            />
             <.input name="email" label="Email" type="email" value="" placeholder="din@email.dk" />
-            <.input name="password" label="Adgangskode" type="password" value="" />
+            <.input name="password" label={gettext("Password")} type="password" value="" />
             <.input
               name="role"
-              label="Rolle"
+              label={gettext("Role")}
               type="select"
-              options={[{"Medlem", "member"}, {"Bestyrelse", "board"}, {"Admin", "admin"}]}
+              options={[
+                {gettext("Member"), "member"},
+                {gettext("Board"), "board"},
+                {"Admin", "admin"}
+              ]}
               value="member"
             />
             <.input
@@ -358,11 +367,11 @@ defmodule ExhsWeb.Dev.ComponentShowcaseLive do
               label="Bio"
               type="textarea"
               value=""
-              placeholder="Fortæl lidt om dig selv..."
+              placeholder={gettext("Tell us a bit about yourself...")}
             />
-            <.input name="accept" label="Accepter vilkår" type="checkbox" value="false" />
+            <.input name="accept" label={gettext("Accept terms")} type="checkbox" value="false" />
             <div class="pt-2">
-              <.button variant="primary" type="submit">Gem</.button>
+              <.button variant="primary" type="submit">{gettext("Save")}</.button>
             </div>
           </form>
         </.card>
@@ -377,7 +386,7 @@ defmodule ExhsWeb.Dev.ComponentShowcaseLive do
             value="not-an-email"
             errors={["is not a valid email address"]}
           />
-          <.input name="name" label="Navn" value="" errors={["can't be blank"]} />
+          <.input name="name" label={gettext("Name")} value="" errors={["can't be blank"]} />
         </.card>
       </.showcase>
     </div>

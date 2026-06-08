@@ -240,7 +240,7 @@ defmodule ExhsWeb.AdminLive.AdminEventsTest do
       assert reg.status == :confirmed
 
       {:ok, view, _html} = live(conn, "/admin/events/#{event.id}")
-      view |> element("button[phx-value-id='#{reg.id}']", "Annullér") |> render_click()
+      view |> element("button[phx-value-id='#{reg.id}']", "Annuller") |> render_click()
 
       {:ok, cancelled} =
         Events.get_registration_by_id(reg.id, tenant: forening.id, authorize?: false)
