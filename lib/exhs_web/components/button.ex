@@ -17,9 +17,11 @@ defmodule ExhsWeb.Components.Button do
     }
 
     assigns =
-      assign_new(assigns, :class, fn ->
-        ["btn", Map.fetch!(variants, assigns[:variant])]
-      end)
+      assign(assigns, :class, [
+        "btn",
+        Map.fetch!(variants, assigns[:variant]),
+        Map.get(assigns, :class)
+      ])
 
     if rest[:href] || rest[:navigate] || rest[:patch] do
       ~H"""
