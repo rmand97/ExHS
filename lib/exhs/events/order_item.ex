@@ -39,6 +39,7 @@ defmodule Exhs.Events.OrderItem do
       validate Exhs.Events.Validations.OrderItemValid
       validate Exhs.Events.Validations.QuestionsAnswered
 
+      change Exhs.Events.Changes.CheckAddonCapacity
       change Exhs.Events.Changes.OrderItemSnapshot
       change Exhs.Events.Changes.CreateTicketRegistration
       change Exhs.Events.Changes.RecomputeOrderTotal

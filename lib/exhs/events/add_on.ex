@@ -26,10 +26,14 @@ defmodule Exhs.Events.AddOn do
 
     create :create do
       accept [:event_id, :name, :description, :price_cents, :currency, :capacity]
+
+      validate attribute_equals(:currency, "DKK"), message: "only DKK is supported"
     end
 
     update :update do
       accept [:name, :description, :price_cents, :currency, :capacity]
+
+      validate attribute_equals(:currency, "DKK"), message: "only DKK is supported"
     end
 
     read :get_by_id do

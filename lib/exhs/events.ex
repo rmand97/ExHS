@@ -85,6 +85,7 @@ defmodule Exhs.Events do
       define :list_orders, action: :read
       define :list_orders_for_membership, action: :list_for_membership, args: [:membership_id]
       define :list_my_orders, action: :my_orders
+      define :list_stale_building_orders, action: :stale_building, args: [:cutoff]
     end
 
     resource Exhs.Events.OrderItem do

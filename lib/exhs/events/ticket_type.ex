@@ -36,6 +36,8 @@ defmodule Exhs.Events.TicketType do
         :sales_ends_at,
         :allow_multiple
       ]
+
+      validate attribute_equals(:currency, "DKK"), message: "only DKK is supported"
     end
 
     update :update do
@@ -49,6 +51,8 @@ defmodule Exhs.Events.TicketType do
         :sales_ends_at,
         :allow_multiple
       ]
+
+      validate attribute_equals(:currency, "DKK"), message: "only DKK is supported"
     end
 
     update :set_groups do

@@ -91,6 +91,15 @@ defmodule Exhs.Events.Order do
       prepare build(load: [:items, :payment])
     end
 
+    # Abandoned carts left in `:building` past the cutoff, across all tenants —
+    # swept by `Exhs.Events.AbandonedOrderSweeper` so their dangling ticket
+    # registrations get cancelled and stop blocking the member's re-purchase.
+    read :stale_building do
+      multitenancy :bypass_all
+      argument :cutoff, :utc_datetime_usec, allow_nil?: false
+      filter expr(status == :building and inserted_at < ^arg(:cutoff))
+    end
+
     read :get_by_session_id do
       argument :session_id, :string, allow_nil?: false
       filter expr(stripe_checkout_session_id == ^arg(:session_id))

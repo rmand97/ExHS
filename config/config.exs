@@ -74,7 +74,8 @@ config :exhs, Oban,
     {Oban.Plugins.Pruner, max_age: 60 * 60 * 24 * 7},
     {Oban.Plugins.Cron,
      crontab: [
-       {"0 3 * * *", Exhs.Billing.MembershipDeactivator}
+       {"0 3 * * *", Exhs.Billing.MembershipDeactivator},
+       {"*/15 * * * *", Exhs.Events.AbandonedOrderSweeper}
      ]}
   ]
 
