@@ -34,6 +34,9 @@ Legend: `[x]` core delivered (residuals deferred to a dependent task or tracked 
 - [ ] [Task 10 — Shop (mostly TBD)](./10-shop.md) — not started
 - [ ] [Task 11 — Communications & newsletters](./11-communications.md) — not started
 
+### Quality
+- [ ] [Task 26 — End-to-end (browser) testing](./26-e2e-testing.md) — Playwright E2E layer; JS + full journeys against a running server
+
 ### Cross-cutting infrastructure
 - [~] [Task 12 — File uploads & S3/Minio](./12-uploads-s3.md) — storage + S3 client + presign helper done; upload LiveViews (logo/banner/cover/avatar) deferred
 - [x] [Task 13 — Background jobs (Oban)](./13-oban-workers.md) — queues + core workers (invite, waitlist, webhooks, upload cleanup, membership deactivation); newsletter/GDPR/orphan-sweeper workers pending their tasks
