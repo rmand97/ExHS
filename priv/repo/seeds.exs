@@ -45,12 +45,18 @@ defmodule Exhs.Seeds do
     second_membership = upsert_membership(user, second, :member)
     upsert_sport_events(second, second_membership)
 
+    ihs = upsert_ihs_forening()
+    ihs_membership = upsert_membership(user, ihs, :admin)
+    upsert_ihs_board(ihs)
+    upsert_ihs_events(ihs, ihs_membership)
+
     seed_audit_activity(user, forening, membership, second, second_membership)
 
     Logger.info(
       "Seed complete. Sign in with #{user.email} / #{@test_password}\n" <>
         "  Demo:   #{forening.subdomain}.lvh.me\n" <>
         "  Sport:  #{second.subdomain}.lvh.me\n" <>
+        "  IHS:    #{ihs.subdomain}.lvh.me\n" <>
         "  Dashboard: lvh.me:4000/dashboard\n" <>
         "  Superadmin: #{superadmin.email} / #{@test_password} → lvh.me:4000/superadmin"
     )
@@ -898,6 +904,268 @@ defmodule Exhs.Seeds do
     ensure_ticket_type(forening, event, "Deltager", 5_000, 40)
     ensure_ticket_type(forening, yoga, "Gratis", 0, nil)
     if membership, do: upsert_seed_registration(forening, event, membership, "Deltager")
+  end
+
+  # ──────────────────────────────────────────────────────────────────────────
+  # IHS Elevforening — a realistic, scraped forening (ihselevforening.dk).
+  # Idrætshøjskolen Sønderborgs Elevforening: ~1.000 tidligere elever, en
+  # 11-personers bestyrelse, repræsentantskab øst/vest for Storebælt, og det
+  # årlige elevmøde i maj med generalforsamling.
+  # ──────────────────────────────────────────────────────────────────────────
+
+  defp upsert_ihs_forening do
+    existing =
+      Forening
+      |> Ash.Query.filter(slug == "ihs")
+      |> Ash.read_one!(authorize?: false)
+
+    case existing do
+      %Forening{} = f ->
+        Logger.info("IHS forening already exists: #{f.name}")
+        f
+
+      nil ->
+        f =
+          Organizations.create_forening!(
+            %{
+              name: "IHS Elevforening",
+              slug: "ihs",
+              subdomain: "ihs",
+              # Årskontingent: 150 DKK
+              kontingent_amount_cents: 15_000,
+              kontingent_currency: "DKK",
+              branding: %{
+                "tagline" => "Fællesskab for tidligere elever på Idrætshøjskolen Sønderborg",
+                "about" =>
+                  "Idrætshøjskolen Sønderborgs Elevforening samler ca. 1.000 tidligere IHS'ere, " <>
+                    "der vil bevare forbindelsen til skolen og hinanden. En weekend i maj vender " <>
+                    "ca. 800 glade tidligere IHS'ere tilbage til skolen til samvær, cricket, " <>
+                    "adventureløb, den årlige klassefodboldturnering og fest — og foreningens " <>
+                    "generalforsamling. Foreningen er aktiv i to landsdele øst og vest for " <>
+                    "Storebælt med adventureløb, sangaftener, banko, spilaftener, padel, " <>
+                    "landsdelsfester og beachvolley."
+              }
+            },
+            authorize?: false
+          )
+
+        Logger.info("Created IHS forening: #{f.name}")
+        f
+    end
+  end
+
+  @ihs_groups [
+    %{name: "Bestyrelse", color: "#1d4ed8", description: "Den 11-personers bestyrelse"},
+    %{
+      name: "Repræsentantskab Øst",
+      color: "#0ea5e9",
+      description: "Repræsentanter øst for Storebælt (København)"
+    },
+    %{
+      name: "Repræsentantskab Vest",
+      color: "#f97316",
+      description: "Repræsentanter vest for Storebælt (Aarhus, Aalborg, Odense)"
+    },
+    %{
+      name: "Else Petersens Idrætslegat",
+      color: "#a855f7",
+      description: "Legatudvalg — støtte til tidligere elever, der er aktive omkring IHS"
+    }
+  ]
+
+  # Bestyrelse + repræsentantskab scraped from ihselevforening.dk/kontakt.
+  # Emails are seed placeholders (@ihs.dk), not the real personal addresses.
+  @ihs_members [
+    %{
+      email: "julie@ihs.dk",
+      first: "Julie",
+      last: "Jørge",
+      role: :admin,
+      groups: ["Bestyrelse", "Repræsentantskab Øst", "Else Petersens Idrætslegat"]
+    },
+    %{
+      email: "philip@ihs.dk",
+      first: "Philip",
+      last: "Ankjær Andersen",
+      role: :admin,
+      groups: ["Bestyrelse", "Repræsentantskab Øst"]
+    },
+    %{
+      email: "silke@ihs.dk",
+      first: "Silke",
+      last: "Nørbæk Sørensen",
+      role: :board,
+      groups: ["Bestyrelse", "Repræsentantskab Øst"]
+    },
+    %{
+      email: "kecia@ihs.dk",
+      first: "Kecia",
+      last: "Meldgaard Hansen",
+      role: :board,
+      groups: ["Bestyrelse", "Repræsentantskab Vest"]
+    },
+    %{
+      email: "louise.l@ihs.dk",
+      first: "Louise",
+      last: "Langæble Petersen",
+      role: :board,
+      groups: ["Bestyrelse", "Repræsentantskab Vest"]
+    },
+    %{
+      email: "louise.k@ihs.dk",
+      first: "Louise",
+      last: "Kirkegaard",
+      role: :board,
+      groups: ["Bestyrelse", "Repræsentantskab Øst"]
+    },
+    %{
+      email: "morten@ihs.dk",
+      first: "Morten",
+      last: "Kræpping",
+      role: :board,
+      groups: ["Bestyrelse", "Repræsentantskab Vest"]
+    },
+    %{
+      email: "anna@ihs.dk",
+      first: "Anna",
+      last: "Kanstrup",
+      role: :board,
+      groups: ["Bestyrelse", "Repræsentantskab Vest"]
+    },
+    %{
+      email: "benjamin@ihs.dk",
+      first: "Benjamin",
+      last: "Kirkeby",
+      role: :board,
+      groups: ["Bestyrelse", "Repræsentantskab Vest"]
+    },
+    %{
+      email: "martin@ihs.dk",
+      first: "Martin",
+      last: "Svarrer",
+      role: :member,
+      groups: ["Repræsentantskab Vest"]
+    },
+    %{
+      email: "lea@ihs.dk",
+      first: "Lea",
+      last: "Kjær Kristensen",
+      role: :member,
+      groups: ["Repræsentantskab Vest"]
+    },
+    %{
+      email: "maria@ihs.dk",
+      first: "Maria",
+      last: "Larsen",
+      role: :member,
+      groups: ["Repræsentantskab Vest"]
+    },
+    %{
+      email: "jacob@ihs.dk",
+      first: "Jacob",
+      last: "Guldborg",
+      role: :admin,
+      groups: ["Bestyrelse"]
+    }
+  ]
+
+  defp upsert_ihs_board(forening) do
+    seed_groups(forening, @ihs_groups)
+
+    groups =
+      Group
+      |> Ash.read!(tenant: forening.id, authorize?: false)
+      |> Map.new(&{&1.name, &1})
+
+    Enum.each(@ihs_members, fn attrs ->
+      member = upsert_member_user(attrs)
+      membership = upsert_membership(member, forening, attrs.role)
+      Enum.each(attrs.groups, &ensure_member_group(membership, groups[&1], forening))
+    end)
+  end
+
+  defp seed_groups(forening, groups) do
+    existing =
+      Group
+      |> Ash.read!(tenant: forening.id, authorize?: false)
+      |> MapSet.new(& &1.name)
+
+    Enum.each(groups, fn attrs ->
+      if MapSet.member?(existing, attrs.name) do
+        Logger.info("Group already exists: #{attrs.name}")
+      else
+        Organizations.create_group!(attrs, tenant: forening.id, authorize?: false)
+        Logger.info("Created group: #{attrs.name}")
+      end
+    end)
+  end
+
+  @ihs_school_location "Idrætshøjskolen Sønderborg, Friheds Alle 42, 6400 Sønderborg"
+
+  defp upsert_ihs_events(forening, membership) do
+    brunch =
+      upsert_ihs_event(forening, %{
+        title: "Tinderbox Champagnebrunch 2026",
+        description:
+          "Traditionen tro inviterer repræsentantskabet i Odense til champagnebrunch før " <>
+            "lørdagen på Tinderbox 🍾. Ankomst og icebreaker, brunch og champagne, fælles " <>
+            "aktivitet og fri leg.",
+        location: "Odense Beach Center, Klokkestøbervej 3, 5230 Odense",
+        starts_at: ~U[2026-06-27 08:00:00Z],
+        ends_at: ~U[2026-06-27 11:00:00Z],
+        membership_required: false
+      })
+
+    elevmoede =
+      upsert_ihs_event(forening, %{
+        title: "Elevmødet 2027",
+        description:
+          "En weekend i maj vender ca. 800 glade tidligere IHS'ere tilbage til skolen. " <>
+            "Samvær, cricket, adventureløb, den årlige klassefodboldturnering og fest.",
+        location: @ihs_school_location,
+        starts_at: ~U[2027-05-07 16:00:00Z],
+        ends_at: ~U[2027-05-09 12:00:00Z],
+        membership_required: true
+      })
+
+    generalforsamling =
+      upsert_ihs_event(forening, %{
+        title: "Generalforsamling 2027",
+        description:
+          "Foreningens ordinære generalforsamling afholdes under elevmødet. " <>
+            "Halvdelen af bestyrelsen er på valg.",
+        location: @ihs_school_location,
+        starts_at: ~U[2027-05-08 14:00:00Z],
+        ends_at: ~U[2027-05-08 16:00:00Z],
+        membership_required: true
+      })
+
+    ensure_ticket_type(forening, brunch, "Gratis", 0, 60)
+    ensure_ticket_type(forening, elevmoede, "Weekendpas", 45_000, 800)
+    ensure_ticket_type(forening, elevmoede, "Dagsbillet lørdag", 20_000, nil)
+    ensure_ticket_type(forening, generalforsamling, "Medlem", 0, nil)
+
+    if membership,
+      do: upsert_seed_registration(forening, generalforsamling, membership, "Medlem")
+  end
+
+  defp upsert_ihs_event(forening, attrs) do
+    existing =
+      Event
+      |> Ash.Query.filter(title == ^attrs.title)
+      |> Ash.read_one!(tenant: forening.id, authorize?: false)
+
+    case existing do
+      %Event{} = e ->
+        Logger.info("Event already exists: #{e.title}")
+        e
+
+      nil ->
+        e = Events.create_event!(attrs, tenant: forening.id, authorize?: false)
+
+        Events.publish_event!(e, authorize?: false)
+        |> tap(fn _ -> Logger.info("Created and published event: #{attrs.title}") end)
+    end
   end
 end
 

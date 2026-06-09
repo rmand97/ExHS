@@ -2,3 +2,4 @@
 erlang = "29"
 elixir = "1.20.0-otp-29"
 node = "22"
+gh = "latest"
