@@ -95,6 +95,18 @@ defmodule ExhsWeb.AdminLive.Events.Show do
     {:noreply, socket |> assign(:modal, {:ticket, tt}) |> assign(:ticket_form, form)}
   end
 
+  def handle_event("live_select_change", %{"text" => text, "id" => live_select_id}, socket) do
+    query = String.downcase(text)
+
+    options =
+      socket.assigns.groups
+      |> Enum.filter(&String.contains?(String.downcase(&1.name), query))
+      |> Enum.map(&{&1.name, &1.id})
+
+    send_update(LiveSelect.Component, id: live_select_id, options: options)
+    {:noreply, socket}
+  end
+
   def handle_event("save_ticket", %{"ticket" => params}, socket) do
     scope = socket.assigns.current_scope
     group_ids = params["group_ids"] || []
@@ -480,7 +492,7 @@ defmodule ExhsWeb.AdminLive.Events.Show do
                     phx-click="manage_questions"
                     phx-value-id={tt.id}
                     aria-label={gettext("Questions")}
-                    class="hover:text-base-content text-base-content/40"
+                    class="hover:text-base-content text-base-content/40 hover:cursor-pointer"
                   >
                     <.icon name="hero-question-mark-circle" class="size-4" />
                   </button>
@@ -488,7 +500,7 @@ defmodule ExhsWeb.AdminLive.Events.Show do
                     phx-click="edit_ticket"
                     phx-value-id={tt.id}
                     aria-label={gettext("Edit")}
-                    class="hover:text-base-content text-base-content/40"
+                    class="hover:text-base-content text-base-content/40 hover:cursor-pointer"
                   >
                     <.icon name="hero-pencil-square" class="size-4" />
                   </button>
@@ -497,7 +509,7 @@ defmodule ExhsWeb.AdminLive.Events.Show do
                     phx-value-id={tt.id}
                     data-confirm={gettext("Delete \"%{name}\"?", name: tt.name)}
                     aria-label={gettext("Delete")}
-                    class="hover:text-error text-base-content/40"
+                    class="hover:text-error text-base-content/40 hover:cursor-pointer"
                   >
                     <.icon name="hero-trash" class="size-4" />
                   </button>
@@ -542,7 +554,7 @@ defmodule ExhsWeb.AdminLive.Events.Show do
         <%!-- Registrations --%>
         <div class="space-y-6 lg:col-span-2">
           <.card class="p-5">
-            <div class="flex items-center justify-between">
+            <div class="flex items-center justify-between pb-1">
               <h3 class="text-base-content font-semibold">
                 {gettext("Registered (%{count})", count: length(@confirmed))}
               </h3>
@@ -628,14 +640,18 @@ defmodule ExhsWeb.AdminLive.Events.Show do
             label={gettext("Allow multiple per member")}
             options={[{gettext("No"), "false"}, {gettext("Yes"), "true"}]}
           />
-          <.input
-            :if={@groups != []}
-            field={@ticket_form[:group_ids]}
-            type="select"
-            multiple
-            label={gettext("Restrict to groups (presale)")}
-            options={Enum.map(@groups, &{&1.name, &1.id})}
-          />
+          <div :if={@groups != []} class="fieldset mb-2">
+            <label>
+              <span class="label mb-1">{gettext("Restrict to groups (presale)")}</span>
+              <.live_select
+                field={@ticket_form[:group_ids]}
+                mode={:tags}
+                style={:daisyui}
+                placeholder={gettext("Search groups...")}
+                options={Enum.map(@groups, &{&1.name, &1.id})}
+              />
+            </label>
+          </div>
           <div class="flex justify-end gap-2">
             <.button type="button" variant="ghost" phx-click="close">{gettext("Cancel")}</.button>
             <.button type="submit" variant="primary">{gettext("Save")}</.button>

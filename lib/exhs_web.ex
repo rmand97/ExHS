@@ -103,6 +103,9 @@ defmodule ExhsWeb do
       import ExhsWeb.Components.Skeleton
       import ExhsWeb.Components.Dropdown
 
+      # Third-party combobox / multiselect component (<.live_select>)
+      import LiveSelect
+
       # Common display helpers
       import ExhsWeb.DisplayHelpers
 

@@ -3,9 +3,19 @@ defmodule ExhsWeb.Dev.ComponentShowcaseLive do
 
   import ExhsWeb.Components.Modal, only: [modal: 1, show_modal: 1]
 
+  # Sample data backing the <.live_select> demos in the Forms tab.
+  @cities ~w(København Aarhus Odense Aalborg Esbjerg Randers Kolding Horsens Vejle Roskilde)
+
   @impl true
   def mount(_params, _session, socket) do
-    {:ok, assign(socket, page_title: "Component Showcase", active_tab: "overview")}
+    socket =
+      assign(socket,
+        page_title: "Component Showcase",
+        active_tab: "overview",
+        select_form: to_form(%{"city" => nil, "cities" => []})
+      )
+
+    {:ok, socket}
   end
 
   @impl true
@@ -15,6 +25,18 @@ defmodule ExhsWeb.Dev.ComponentShowcaseLive do
 
   @impl true
   def handle_event("open-modal", _params, socket) do
+    {:noreply, socket}
+  end
+
+  # LiveSelect sends this whenever the user types in the search box. Reply by
+  # pushing filtered options back into the component via send_update/2.
+  def handle_event("live_select_change", %{"text" => text, "id" => live_select_id}, socket) do
+    matches = Enum.filter(@cities, &String.contains?(String.downcase(&1), String.downcase(text)))
+    send_update(LiveSelect.Component, id: live_select_id, options: matches)
+    {:noreply, socket}
+  end
+
+  def handle_event("select_demo_change", _params, socket) do
     {:noreply, socket}
   end
 
@@ -58,7 +80,7 @@ defmodule ExhsWeb.Dev.ComponentShowcaseLive do
           <.section_feedback />
         </div>
         <div :if={@active_tab == "forms"}>
-          <.section_forms />
+          <.section_forms select_form={@select_form} />
         </div>
         <div :if={@active_tab == "branding"}>
           <.section_branding />
@@ -337,6 +359,8 @@ defmodule ExhsWeb.Dev.ComponentShowcaseLive do
     """
   end
 
+  attr :select_form, :map, required: true
+
   defp section_forms(assigns) do
     ~H"""
     <div class="space-y-10">
@@ -374,6 +398,30 @@ defmodule ExhsWeb.Dev.ComponentShowcaseLive do
               <.button variant="primary" type="submit">{gettext("Save")}</.button>
             </div>
           </form>
+        </.card>
+      </.showcase>
+
+      <.showcase title="Combobox / Multiselect (live_select)">
+        <.card class="max-w-md space-y-6 p-6">
+          <.form for={@select_form} phx-change="select_demo_change">
+            <div class="space-y-1">
+              <label class="text-sm font-medium">{gettext("City (single)")}</label>
+              <.live_select
+                field={@select_form[:city]}
+                placeholder={gettext("Search city...")}
+                style={:daisyui}
+              />
+            </div>
+            <div class="mt-4 space-y-1">
+              <label class="text-sm font-medium">{gettext("Cities (multiselect)")}</label>
+              <.live_select
+                field={@select_form[:cities]}
+                mode={:tags}
+                placeholder={gettext("Search cities...")}
+                style={:daisyui}
+              />
+            </div>
+          </.form>
         </.card>
       </.showcase>
 

@@ -71,9 +71,19 @@ defmodule ExhsWeb.AdminLive.Members.Show do
     {:noreply, socket |> put_flash(:info, gettext("Member deactivated.")) |> reload()}
   end
 
-  def handle_event("add_group", %{"group_id" => ""}, socket), do: {:noreply, socket}
+  def handle_event("live_select_change", %{"text" => text, "id" => live_select_id}, socket) do
+    query = String.downcase(text)
 
-  def handle_event("add_group", %{"group_id" => group_id}, socket) do
+    options =
+      socket.assigns.available_groups
+      |> Enum.filter(&String.contains?(String.downcase(&1.name), query))
+      |> group_options()
+
+    send_update(LiveSelect.Component, id: live_select_id, options: options)
+    {:noreply, socket}
+  end
+
+  def handle_event("add_group", %{"group_id" => group_id}, socket) when group_id != "" do
     Organizations.add_member_to_group(
       %{membership_id: socket.assigns.membership.id, group_id: group_id},
       scope: socket.assigns.current_scope
@@ -82,6 +92,8 @@ defmodule ExhsWeb.AdminLive.Members.Show do
     MembersPubSub.broadcast(socket.assigns.current_forening.id)
     {:noreply, socket |> put_flash(:info, gettext("Added to group.")) |> reload()}
   end
+
+  def handle_event("add_group", _params, socket), do: {:noreply, socket}
 
   def handle_event("remove_group", %{"group_id" => group_id}, socket) do
     Organizations.remove_member_from_group_by_keys(
@@ -95,6 +107,8 @@ defmodule ExhsWeb.AdminLive.Members.Show do
   end
 
   # ── Loading ────────────────────────────────────
+
+  defp group_options(groups), do: Enum.map(groups, &%{label: &1.name, value: &1.id})
 
   defp reload(socket) do
     scope = socket.assigns.current_scope
@@ -237,16 +251,21 @@ defmodule ExhsWeb.AdminLive.Members.Show do
                 </button>
               </span>
             </div>
-            <form
+            <.form
+              :let={f}
               :if={@can_write? and @available_groups != []}
+              for={to_form(%{"group_id" => nil}, as: nil)}
               phx-change="add_group"
               class="mt-3"
             >
-              <select name="group_id" class="select select-bordered select-sm w-full">
-                <option value="">{gettext("Add to group…")}</option>
-                <option :for={g <- @available_groups} value={g.id}>{g.name}</option>
-              </select>
-            </form>
+              <.live_select
+                id="add-group-select"
+                field={f[:group_id]}
+                options={group_options(@available_groups)}
+                style={:daisyui}
+                placeholder={gettext("Add to group…")}
+              />
+            </.form>
           </.card>
         </div>
 

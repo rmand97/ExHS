@@ -120,6 +120,7 @@ defmodule Exhs.MixProject do
       {:dialyxir, "~> 1.4", only: [:dev, :test], runtime: false},
       {:canonical_tailwind, "~> 0.1", only: [:dev, :test], runtime: false},
       {:livefilter, "~> 0.1.8"},
+      {:live_select, "~> 1.0"},
       {:localize, "~> 0.41"},
       {:localize_web, "~> 0.7"},
       {:localize_datetime_inputs, "~> 0.1"},

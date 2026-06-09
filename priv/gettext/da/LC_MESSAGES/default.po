@@ -11,43 +11,43 @@ msgstr ""
 "Language: da\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: lib/exhs_web/live/public/join.ex:139
+#: lib/exhs_web/live/public/join.ex:140
 #, elixir-autogen, elixir-format
 msgid "%{amount}/year"
 msgstr "%{amount}/år"
 
-#: lib/exhs_web/live/admin/groups/index.ex:101
+#: lib/exhs_web/live/admin/groups/index.ex:102
 #, elixir-autogen, elixir-format
 msgid "%{count} groups"
 msgstr "%{count} grupper"
 
-#: lib/exhs_web/live/admin/events/show.ex:460
+#: lib/exhs_web/live/admin/events/show.ex:480
 #, elixir-autogen, elixir-format
 msgid "%{count} left"
 msgstr "%{count} tilbage"
 
-#: lib/exhs_web/live/admin/members/index.ex:224
+#: lib/exhs_web/live/admin/members/index.ex:238
 #, elixir-autogen, elixir-format
 msgid "%{count} members"
 msgstr "%{count} medlemmer"
 
-#: lib/exhs_web/live/admin/members/index.ex:299
+#: lib/exhs_web/live/admin/members/index.ex:316
 #, elixir-autogen, elixir-format
 msgid "%{count} selected"
 msgstr "%{count} valgt"
 
-#: lib/exhs_web/live/admin/events/show.ex:460
-#: lib/exhs_web/live/admin/events/show.ex:466
+#: lib/exhs_web/live/admin/events/show.ex:480
+#: lib/exhs_web/live/admin/events/show.ex:486
 #, elixir-autogen, elixir-format
 msgid "%{count} sold"
 msgstr "%{count} solgt"
 
-#: lib/exhs_web/live/admin/members/index.ex:104
+#: lib/exhs_web/live/admin/members/index.ex:116
 #, elixir-autogen, elixir-format
 msgid "%{email} has been invited. A sign-in email is on its way."
 msgstr "%{email} er inviteret. En log-ind-mail er på vej."
 
-#: lib/exhs_web/live/admin/members/index.ex:182
+#: lib/exhs_web/live/admin/members/index.ex:196
 #, elixir-autogen, elixir-format
 msgid "%{message} %{count} could not be updated."
 msgstr "%{message} %{count} kunne ikke opdateres."
@@ -57,12 +57,12 @@ msgstr "%{message} %{count} kunne ikke opdateres."
 msgid "%{tickets} ticket type(s) · %{count} registered"
 msgstr "%{tickets} billettype(r) · %{count} tilmeldte"
 
-#: lib/exhs_web/components/layouts.ex:413
+#: lib/exhs_web/components/layouts.ex:426
 #, elixir-autogen, elixir-format
 msgid "(read-only)"
 msgstr "(skrivebeskyttet)"
 
-#: lib/exhs_web/live/admin/settings/index.ex:198
+#: lib/exhs_web/live/admin/settings/index.ex:220
 #, elixir-autogen, elixir-format
 msgid "About the association"
 msgstr "Om foreningen"
@@ -72,7 +72,7 @@ msgstr "Om foreningen"
 msgid "About us"
 msgstr "Om os"
 
-#: lib/exhs_web/live/admin/settings/index.ex:211
+#: lib/exhs_web/live/admin/settings/index.ex:233
 #, elixir-autogen, elixir-format
 msgid "Accent colour"
 msgstr "Accentfarve"
@@ -82,12 +82,12 @@ msgstr "Accentfarve"
 msgid "Accept all"
 msgstr "Acceptér alle"
 
-#: lib/exhs_web/live/dev/component_showcase_live.ex:367
+#: lib/exhs_web/live/dev/component_showcase_live.ex:396
 #, elixir-autogen, elixir-format
 msgid "Accept terms"
 msgstr "Accepter vilkår"
 
-#: lib/exhs_web/live/public/join.ex:78
+#: lib/exhs_web/live/public/join.ex:79
 #, elixir-autogen, elixir-format
 msgid "Access to all member events"
 msgstr "Adgang til alle medlemsevents"
@@ -102,12 +102,12 @@ msgstr "Handling"
 msgid "Actions"
 msgstr "Handlinger"
 
-#: lib/exhs_web/live/admin/members/index.ex:307
+#: lib/exhs_web/live/admin/members/index.ex:331
 #, elixir-autogen, elixir-format
 msgid "Activate"
 msgstr "Aktiver"
 
-#: lib/exhs_web/live/admin/members/show.ex:213
+#: lib/exhs_web/live/admin/members/show.ex:227
 #, elixir-autogen, elixir-format
 msgid "Activate member"
 msgstr "Aktiver medlem"
@@ -117,14 +117,14 @@ msgstr "Aktiver medlem"
 msgid "Activated"
 msgstr "Aktiveret"
 
-#: lib/exhs_web/live/admin/members/index.ex:133
+#: lib/exhs_web/live/admin/members/index.ex:147
 #, elixir-autogen, elixir-format
 msgid "Activated."
 msgstr "Aktiveret."
 
 #: lib/exhs_web/display_helpers.ex:28
 #: lib/exhs_web/live/admin/dashboard.ex:43
-#: lib/exhs_web/live/admin/members/index.ex:248
+#: lib/exhs_web/live/admin/members/index.ex:262
 #: lib/exhs_web/live/member/dashboard.ex:178
 #: lib/exhs_web/live/member/membership_show.ex:193
 #: lib/exhs_web/live/superadmin/dashboard.ex:119
@@ -133,7 +133,7 @@ msgstr "Aktiveret."
 msgid "Active"
 msgstr "Aktiv"
 
-#: lib/exhs_web/live/dev/component_showcase_live.ex:155
+#: lib/exhs_web/live/dev/component_showcase_live.ex:177
 #, elixir-autogen, elixir-format
 msgid "Active events"
 msgstr "Aktive events"
@@ -143,8 +143,8 @@ msgstr "Aktive events"
 msgid "Active memberships"
 msgstr "Aktive medlemskaber"
 
-#: lib/exhs_web/components/layouts.ex:171
-#: lib/exhs_web/components/layouts.ex:234
+#: lib/exhs_web/components/layouts.ex:179
+#: lib/exhs_web/components/layouts.ex:244
 #: lib/exhs_web/live/member/activity.ex:64
 #: lib/exhs_web/live/member/activity.ex:154
 #: lib/exhs_web/live/member/activity.ex:163
@@ -152,38 +152,38 @@ msgstr "Aktive medlemskaber"
 msgid "Activity"
 msgstr "Aktivitet"
 
-#: lib/exhs_web/live/admin/events/show.ex:704
+#: lib/exhs_web/live/admin/events/show.ex:728
 #, elixir-autogen, elixir-format
 msgid "Add"
 msgstr "Tilføj"
 
-#: lib/exhs_web/live/admin/members/show.ex:246
+#: lib/exhs_web/live/admin/members/show.ex:265
 #, elixir-autogen, elixir-format
 msgid "Add to group…"
 msgstr "Tilføj til gruppe…"
 
-#: lib/exhs_web/live/admin/events/show.ex:639
+#: lib/exhs_web/live/admin/events/show.ex:663
 #, elixir-autogen, elixir-format
 msgid "Add-on"
 msgstr "Tilkøb"
 
-#: lib/exhs_web/live/admin/events/show.ex:155
+#: lib/exhs_web/live/admin/events/show.ex:172
 #, elixir-autogen, elixir-format
 msgid "Add-on deleted."
 msgstr "Tilkøb slettet."
 
-#: lib/exhs_web/live/admin/events/show.ex:145
+#: lib/exhs_web/live/admin/events/show.ex:161
 #, elixir-autogen, elixir-format
 msgid "Add-on saved."
 msgstr "Tilkøb gemt."
 
-#: lib/exhs_web/live/admin/events/show.ex:503
+#: lib/exhs_web/live/admin/events/show.ex:523
 #: lib/exhs_web/live/public/events/show.ex:332
 #, elixir-autogen, elixir-format
 msgid "Add-ons"
 msgstr "Tilkøb"
 
-#: lib/exhs_web/live/admin/members/show.ex:83
+#: lib/exhs_web/live/admin/members/show.ex:93
 #, elixir-autogen, elixir-format
 msgid "Added to group."
 msgstr "Tilføjet til gruppe."
@@ -208,7 +208,7 @@ msgstr "Admin"
 msgid "Admin email"
 msgstr "Admin e-mail"
 
-#: lib/exhs_web/live/admin/settings/index.ex:185
+#: lib/exhs_web/live/admin/settings/index.ex:207
 #, elixir-autogen, elixir-format
 msgid "Administrators"
 msgstr "Administratorer"
@@ -223,7 +223,7 @@ msgstr "Alle foreninger på platformen"
 msgid "All events"
 msgstr "Alle events"
 
-#: lib/exhs_web/live/admin/members/index.ex:260
+#: lib/exhs_web/live/admin/members/index.ex:278
 #, elixir-autogen, elixir-format
 msgid "All groups"
 msgstr "Alle grupper"
@@ -233,13 +233,13 @@ msgstr "Alle grupper"
 msgid "All months"
 msgstr "Alle måneder"
 
-#: lib/exhs_web/live/admin/members/index.ex:254
+#: lib/exhs_web/live/admin/members/index.ex:268
 #, elixir-autogen, elixir-format
 msgid "All roles"
 msgstr "Alle roller"
 
 #: lib/exhs_web/live/admin/economy/index.ex:147
-#: lib/exhs_web/live/admin/members/index.ex:247
+#: lib/exhs_web/live/admin/members/index.ex:261
 #, elixir-autogen, elixir-format
 msgid "All statuses"
 msgstr "Alle statusser"
@@ -249,17 +249,17 @@ msgstr "Alle statusser"
 msgid "All types"
 msgstr "Alle typer"
 
-#: lib/exhs_web/live/admin/events/show.ex:620
+#: lib/exhs_web/live/admin/events/show.ex:640
 #, elixir-autogen, elixir-format
 msgid "Allow multiple per member"
 msgstr "Tillad flere pr. medlem"
 
-#: lib/exhs_web/live/public/home.ex:265
+#: lib/exhs_web/live/public/home.ex:268
 #, elixir-autogen, elixir-format
 msgid "Already have an account"
 msgstr "Har du allerede en konto"
 
-#: lib/exhs_web/live/public/join.ex:111
+#: lib/exhs_web/live/public/join.ex:112
 #, elixir-autogen, elixir-format
 msgid "Already have an account?"
 msgstr "Har du allerede en konto?"
@@ -276,7 +276,7 @@ msgstr "Beløb"
 msgid "Amount (high→low)"
 msgstr "Beløb (høj→lav)"
 
-#: lib/exhs_web/live/admin/settings/index.ex:238
+#: lib/exhs_web/live/admin/settings/index.ex:260
 #, elixir-autogen, elixir-format
 msgid "Amount (kr)"
 msgstr "Beløb (kr)"
@@ -321,12 +321,12 @@ msgstr "Arkiveret"
 msgid "Are you sure you want to leave %{name}?"
 msgstr "Er du sikker på, at du vil forlade %{name}?"
 
-#: lib/exhs_web/live/admin/members/index.ex:303
+#: lib/exhs_web/live/admin/members/index.ex:328
 #, elixir-autogen, elixir-format
 msgid "Assign group…"
 msgstr "Tildel gruppe…"
 
-#: lib/exhs_web/live/admin/members/index.ex:129
+#: lib/exhs_web/live/admin/members/index.ex:141
 #, elixir-autogen, elixir-format
 msgid "Assigned to group."
 msgstr "Tildelt gruppe."
@@ -355,13 +355,13 @@ msgstr "Forening oprettet og admin inviteret."
 msgid "Associations"
 msgstr "Foreninger"
 
-#: lib/exhs_web/components/layouts.ex:617
-#: lib/exhs_web/components/layouts.ex:629
+#: lib/exhs_web/components/layouts.ex:630
+#: lib/exhs_web/components/layouts.ex:642
 #, elixir-autogen, elixir-format
 msgid "Attempting to reconnect"
 msgstr "Forsøger at genoprette forbindelsen"
 
-#: lib/exhs_web/components/layouts.ex:262
+#: lib/exhs_web/components/layouts.ex:272
 #, elixir-autogen, elixir-format
 msgid "Audit"
 msgstr "Audit"
@@ -378,17 +378,17 @@ msgstr "Automatisk opkrævning via Stripe. Hold styr på hvem der har betalt."
 msgid "Awaiting payment"
 msgstr "Afventer betaling"
 
-#: lib/exhs_web/live/admin/events/show.ex:398
+#: lib/exhs_web/live/admin/events/show.ex:416
 #, elixir-autogen, elixir-format
 msgid "Back to events"
 msgstr "Tilbage til events"
 
-#: lib/exhs_web/live/admin/members/show.ex:151
+#: lib/exhs_web/live/admin/members/show.ex:165
 #, elixir-autogen, elixir-format
 msgid "Back to members"
 msgstr "Tilbage til medlemmer"
 
-#: lib/exhs_web/components/layouts.ex:331
+#: lib/exhs_web/components/layouts.ex:341
 #, elixir-autogen, elixir-format
 msgid "Back to your page"
 msgstr "Tilbage til Din side"
@@ -397,7 +397,7 @@ msgstr "Tilbage til Din side"
 #: lib/exhs_web/components/layouts.ex:119
 #: lib/exhs_web/live/public/home.ex:113
 #: lib/exhs_web/live/public/home.ex:163
-#: lib/exhs_web/live/public/join.ex:101
+#: lib/exhs_web/live/public/join.ex:102
 #, elixir-autogen, elixir-format
 msgid "Become a member"
 msgstr "Bliv medlem"
@@ -408,7 +408,7 @@ msgid "Become a member and get access to events, community and much more."
 msgstr "Bliv medlem og få adgang til events, fællesskab og meget mere."
 
 #: lib/exhs_web/live/public/join.ex:13
-#: lib/exhs_web/live/public/join.ex:68
+#: lib/exhs_web/live/public/join.ex:69
 #, elixir-autogen, elixir-format
 msgid "Become a member of %{name}"
 msgstr "Bliv medlem af %{name}"
@@ -419,12 +419,12 @@ msgid "Become a member of %{name} and get access to events, community and much m
 msgstr "Bliv medlem af %{name} og få adgang til events, fællesskab og meget mere."
 
 #: lib/exhs_web/display_helpers.ex:22
-#: lib/exhs_web/live/admin/members/index.ex:256
-#: lib/exhs_web/live/admin/members/index.ex:413
-#: lib/exhs_web/live/admin/members/show.ex:191
-#: lib/exhs_web/live/admin/settings/index.ex:287
-#: lib/exhs_web/live/admin/settings/index.ex:316
-#: lib/exhs_web/live/dev/component_showcase_live.ex:355
+#: lib/exhs_web/live/admin/members/index.ex:270
+#: lib/exhs_web/live/admin/members/index.ex:437
+#: lib/exhs_web/live/admin/members/show.ex:205
+#: lib/exhs_web/live/admin/settings/index.ex:309
+#: lib/exhs_web/live/admin/settings/index.ex:345
+#: lib/exhs_web/live/dev/component_showcase_live.ex:384
 #: lib/exhs_web/live/member/dashboard.ex:174
 #, elixir-autogen, elixir-format
 msgid "Board"
@@ -436,19 +436,19 @@ msgid "Board/admin"
 msgstr "Bestyrelse/admin"
 
 #: lib/exhs_web/live/admin/events/index.ex:269
-#: lib/exhs_web/live/admin/events/show.ex:586
-#: lib/exhs_web/live/admin/events/show.ex:632
-#: lib/exhs_web/live/admin/events/show.ex:652
-#: lib/exhs_web/live/admin/events/show.ex:754
-#: lib/exhs_web/live/admin/groups/index.ex:159
-#: lib/exhs_web/live/admin/members/index.ex:419
+#: lib/exhs_web/live/admin/events/show.ex:606
+#: lib/exhs_web/live/admin/events/show.ex:656
+#: lib/exhs_web/live/admin/events/show.ex:676
+#: lib/exhs_web/live/admin/events/show.ex:778
+#: lib/exhs_web/live/admin/groups/index.ex:160
+#: lib/exhs_web/live/admin/members/index.ex:443
 #: lib/exhs_web/live/public/events/show.ex:300
 #: lib/exhs_web/live/superadmin/dashboard.ex:189
 #, elixir-autogen, elixir-format
 msgid "Cancel"
 msgstr "Annuller"
 
-#: lib/exhs_web/live/admin/events/show.ex:751
+#: lib/exhs_web/live/admin/events/show.ex:775
 #, elixir-autogen, elixir-format
 msgid "Cancel the registration?"
 msgstr "Annullér tilmeldingen?"
@@ -471,8 +471,8 @@ msgstr "Annulleret"
 msgid "Cancelled — expires at end of period"
 msgstr "Opsagt — udløber ved periodens slut"
 
-#: lib/exhs_web/live/admin/events/show.ex:601
-#: lib/exhs_web/live/admin/events/show.ex:647
+#: lib/exhs_web/live/admin/events/show.ex:621
+#: lib/exhs_web/live/admin/events/show.ex:671
 #, elixir-autogen, elixir-format
 msgid "Capacity (optional)"
 msgstr "Kapacitet (valgfri)"
@@ -482,7 +482,7 @@ msgstr "Kapacitet (valgfri)"
 msgid "Check your answers and try again."
 msgstr "Tjek dine svar og prøv igen."
 
-#: lib/exhs_web/live/admin/events/show.ex:691
+#: lib/exhs_web/live/admin/events/show.ex:715
 #, elixir-autogen, elixir-format
 msgid "Choice"
 msgstr "Valg"
@@ -507,18 +507,18 @@ msgstr "Vælg lyst, mørkt eller følg systemets indstilling. Gælder på tværs
 msgid "Choose…"
 msgstr "Vælg…"
 
-#: lib/exhs_web/live/admin/members/show.ex:175
+#: lib/exhs_web/live/admin/members/show.ex:189
 #: lib/exhs_web/live/member/profile.ex:66
 #, elixir-autogen, elixir-format
 msgid "City"
 msgstr "By"
 
-#: lib/exhs_web/live/admin/events/show.ex:703
+#: lib/exhs_web/live/admin/events/show.ex:727
 #, elixir-autogen, elixir-format
 msgid "Close"
 msgstr "Luk"
 
-#: lib/exhs_web/live/admin/groups/index.ex:157
+#: lib/exhs_web/live/admin/groups/index.ex:158
 #, elixir-autogen, elixir-format
 msgid "Colour"
 msgstr "Farve"
@@ -528,7 +528,7 @@ msgstr "Farve"
 msgid "Completed"
 msgstr "Gennemført"
 
-#: lib/exhs_web/live/admin/events/show.ex:745
+#: lib/exhs_web/live/admin/events/show.ex:769
 #, elixir-autogen, elixir-format
 msgid "Confirm"
 msgstr "Bekræft"
@@ -554,7 +554,7 @@ msgstr "Fortsæt"
 msgid "Continue to payment"
 msgstr "Fortsæt til betaling"
 
-#: lib/exhs_web/live/admin/settings/index.ex:66
+#: lib/exhs_web/live/admin/settings/index.ex:81
 #, elixir-autogen, elixir-format
 msgid "Could not change role (at least one admin required)."
 msgstr "Kunne ikke ændre rolle (mindst én admin kræves)."
@@ -574,12 +574,12 @@ msgstr "Kunne ikke oprette foreningen. Subdomæne skal være unikt."
 msgid "Could not create the event. Check title and date."
 msgstr "Kunne ikke oprette eventet. Tjek titel og dato."
 
-#: lib/exhs_web/live/admin/members/index.ex:469
+#: lib/exhs_web/live/admin/members/index.ex:495
 #, elixir-autogen, elixir-format
 msgid "Could not invite."
 msgstr "Kunne ikke invitere."
 
-#: lib/exhs_web/live/admin/members/index.ex:465
+#: lib/exhs_web/live/admin/members/index.ex:491
 #, elixir-autogen, elixir-format
 msgid "Could not invite. Check the email address."
 msgstr "Kunne ikke invitere. Tjek emailadressen."
@@ -589,22 +589,22 @@ msgstr "Kunne ikke invitere. Tjek emailadressen."
 msgid "Could not leave the association. Are you the last admin?"
 msgstr "Kunne ikke forlade foreningen. Er du den sidste admin?"
 
-#: lib/exhs_web/live/admin/events/show.ex:148
+#: lib/exhs_web/live/admin/events/show.ex:165
 #, elixir-autogen, elixir-format
 msgid "Could not save the add-on. Name is required."
 msgstr "Kunne ikke gemme tilkøb. Navn er påkrævet."
 
-#: lib/exhs_web/live/admin/groups/index.ex:64
+#: lib/exhs_web/live/admin/groups/index.ex:65
 #, elixir-autogen, elixir-format
 msgid "Could not save the group. Name is required."
 msgstr "Kunne ikke gemme gruppen. Navn er påkrævet."
 
-#: lib/exhs_web/live/admin/events/show.ex:189
+#: lib/exhs_web/live/admin/events/show.ex:207
 #, elixir-autogen, elixir-format
 msgid "Could not save the question. Text is required."
 msgstr "Kunne ikke gemme spørgsmål. Tekst er påkrævet."
 
-#: lib/exhs_web/live/admin/events/show.ex:123
+#: lib/exhs_web/live/admin/events/show.ex:138
 #, elixir-autogen, elixir-format
 msgid "Could not save the ticket type. Name is required."
 msgstr "Kunne ikke gemme billettypen. Navn er påkrævet."
@@ -624,7 +624,7 @@ msgstr "Kunne ikke gemme. Navn er påkrævet."
 msgid "Could not update the payment."
 msgstr "Kunne ikke opdatere betalingen."
 
-#: lib/exhs_web/live/admin/events/show.ex:569
+#: lib/exhs_web/live/admin/events/show.ex:589
 #, elixir-autogen, elixir-format
 msgid "Cover image URL"
 msgstr "Cover-billede URL"
@@ -635,18 +635,18 @@ msgstr "Cover-billede URL"
 msgid "Create"
 msgstr "Opret"
 
-#: lib/exhs_web/live/admin/groups/index.ex:111
+#: lib/exhs_web/live/admin/groups/index.ex:112
 #, elixir-autogen, elixir-format
 msgid "Create a group to organise your members."
 msgstr "Opret en gruppe for at organisere dine medlemmer."
 
 #: lib/exhs_web/components/layouts.ex:29
-#: lib/exhs_web/live/public/join.ex:94
+#: lib/exhs_web/live/public/join.ex:95
 #, elixir-autogen, elixir-format
 msgid "Create account"
 msgstr "Opret konto"
 
-#: lib/exhs_web/live/public/join.ex:71
+#: lib/exhs_web/live/public/join.ex:72
 #, elixir-autogen, elixir-format
 msgid "Create an account and get access to events, community and much more."
 msgstr "Opret konto og få adgang til events, fællesskab og meget mere."
@@ -656,7 +656,7 @@ msgstr "Opret konto og få adgang til events, fællesskab og meget mere."
 msgid "Create and manage events"
 msgstr "Opret og administrer arrangementer"
 
-#: lib/exhs_web/live/dev/component_showcase_live.ex:230
+#: lib/exhs_web/live/dev/component_showcase_live.ex:252
 #, elixir-autogen, elixir-format
 msgid "Create event"
 msgstr "Opret event"
@@ -666,12 +666,12 @@ msgstr "Opret event"
 msgid "Create events with registration, waitlists and automatic reminders."
 msgstr "Opret events med tilmelding, ventelister og automatiske påmindelser."
 
-#: lib/exhs_web/live/public/home.ex:264
+#: lib/exhs_web/live/public/home.ex:265
 #, elixir-autogen, elixir-format
 msgid "Create free account"
 msgstr "Opret gratis konto"
 
-#: lib/exhs_web/live/admin/dashboard.ex:72
+#: lib/exhs_web/live/admin/dashboard.ex:73
 #, elixir-autogen, elixir-format
 msgid "Create groups and assign members"
 msgstr "Opret grupper og tildel medlemmer"
@@ -681,24 +681,24 @@ msgstr "Opret grupper og tildel medlemmer"
 msgid "Create your association in under 5 minutes. Free to try."
 msgstr "Opret din forening på under 5 minutter. Gratis at prøve."
 
-#: lib/exhs_web/live/dev/component_showcase_live.ex:227
+#: lib/exhs_web/live/dev/component_showcase_live.ex:249
 #, elixir-autogen, elixir-format
 msgid "Create your first event to get started."
 msgstr "Opret dit første event for at komme i gang."
 
 #: lib/exhs_web/labels.ex:90
-#: lib/exhs_web/live/dev/component_showcase_live.ex:266
+#: lib/exhs_web/live/dev/component_showcase_live.ex:288
 #, elixir-autogen, elixir-format
 msgid "Created"
 msgstr "Oprettet"
 
 #: lib/exhs_web/controllers/admin_export_controller.ex:108
-#: lib/exhs_web/live/admin/settings/index.ex:243
+#: lib/exhs_web/live/admin/settings/index.ex:265
 #, elixir-autogen, elixir-format
 msgid "Currency"
 msgstr "Valuta"
 
-#: lib/exhs_web/live/admin/settings/index.ex:265
+#: lib/exhs_web/live/admin/settings/index.ex:287
 #, elixir-autogen, elixir-format
 msgid "Current administrators"
 msgstr "Nuværende administratorer"
@@ -721,12 +721,12 @@ msgstr "Dashboard & statistik"
 msgid "Date"
 msgstr "Dato"
 
-#: lib/exhs_web/live/admin/members/index.ex:308
+#: lib/exhs_web/live/admin/members/index.ex:332
 #, elixir-autogen, elixir-format
 msgid "Deactivate"
 msgstr "Deaktiver"
 
-#: lib/exhs_web/live/admin/members/show.ex:205
+#: lib/exhs_web/live/admin/members/show.ex:219
 #, elixir-autogen, elixir-format
 msgid "Deactivate member"
 msgstr "Deaktiver medlem"
@@ -736,26 +736,26 @@ msgstr "Deaktiver medlem"
 msgid "Deactivated"
 msgstr "Deaktiveret"
 
-#: lib/exhs_web/live/admin/members/index.ex:137
+#: lib/exhs_web/live/admin/members/index.ex:151
 #, elixir-autogen, elixir-format
 msgid "Deactivated."
 msgstr "Deaktiveret."
 
-#: lib/exhs_web/live/admin/events/show.ex:491
-#: lib/exhs_web/live/admin/events/show.ex:524
-#: lib/exhs_web/live/admin/events/show.ex:676
-#: lib/exhs_web/live/admin/groups/index.ex:141
+#: lib/exhs_web/live/admin/events/show.ex:511
+#: lib/exhs_web/live/admin/events/show.ex:544
+#: lib/exhs_web/live/admin/events/show.ex:700
+#: lib/exhs_web/live/admin/groups/index.ex:142
 #, elixir-autogen, elixir-format
 msgid "Delete"
 msgstr "Slet"
 
-#: lib/exhs_web/live/admin/events/show.ex:490
-#: lib/exhs_web/live/admin/events/show.ex:523
+#: lib/exhs_web/live/admin/events/show.ex:510
+#: lib/exhs_web/live/admin/events/show.ex:543
 #, elixir-autogen, elixir-format
 msgid "Delete \"%{name}\"?"
 msgstr "Slet \"%{name}\"?"
 
-#: lib/exhs_web/live/admin/groups/index.ex:139
+#: lib/exhs_web/live/admin/groups/index.ex:140
 #, elixir-autogen, elixir-format
 msgid "Delete the group \"%{name}\"?"
 msgstr "Slet gruppen \"%{name}\"?"
@@ -767,16 +767,16 @@ msgstr "Slettet"
 
 #: lib/exhs_web/controllers/admin_export_controller.ex:105
 #: lib/exhs_web/live/admin/events/index.ex:251
-#: lib/exhs_web/live/admin/events/show.ex:567
-#: lib/exhs_web/live/admin/events/show.ex:604
-#: lib/exhs_web/live/admin/events/show.ex:650
-#: lib/exhs_web/live/admin/groups/index.ex:156
+#: lib/exhs_web/live/admin/events/show.ex:587
+#: lib/exhs_web/live/admin/events/show.ex:624
+#: lib/exhs_web/live/admin/events/show.ex:674
+#: lib/exhs_web/live/admin/groups/index.ex:157
 #: lib/exhs_web/live/member/payments.ex:79
 #, elixir-autogen, elixir-format
 msgid "Description"
 msgstr "Beskrivelse"
 
-#: lib/exhs_web/live/admin/events/show.ex:423
+#: lib/exhs_web/live/admin/events/show.ex:443
 #: lib/exhs_web/live/member/activity.ex:103
 #: lib/exhs_web/live/member/dashboard.ex:131
 #: lib/exhs_web/live/public/events/show.ex:387
@@ -786,7 +786,7 @@ msgstr "Detaljer"
 
 #: lib/exhs_web/labels.ex:78
 #: lib/exhs_web/live/admin/events/index.ex:208
-#: lib/exhs_web/live/admin/events/show.ex:407
+#: lib/exhs_web/live/admin/events/show.ex:425
 #, elixir-autogen, elixir-format
 msgid "Draft"
 msgstr "Kladde"
@@ -796,32 +796,32 @@ msgstr "Kladde"
 msgid "Drafts"
 msgstr "Kladder"
 
-#: lib/exhs_web/components/layouts.ex:261
+#: lib/exhs_web/components/layouts.ex:271
 #: lib/exhs_web/live/admin/economy/index.ex:17
 #: lib/exhs_web/live/admin/economy/index.ex:98
 #, elixir-autogen, elixir-format
 msgid "Economy"
 msgstr "Økonomi"
 
-#: lib/exhs_web/live/admin/events/show.ex:409
-#: lib/exhs_web/live/admin/events/show.ex:482
-#: lib/exhs_web/live/admin/groups/index.ex:132
+#: lib/exhs_web/live/admin/events/show.ex:428
+#: lib/exhs_web/live/admin/events/show.ex:502
+#: lib/exhs_web/live/admin/groups/index.ex:133
 #, elixir-autogen, elixir-format
 msgid "Edit"
 msgstr "Rediger"
 
-#: lib/exhs_web/live/admin/events/show.ex:564
+#: lib/exhs_web/live/admin/events/show.ex:584
 #, elixir-autogen, elixir-format
 msgid "Edit event"
 msgstr "Rediger event"
 
-#: lib/exhs_web/live/admin/groups/index.ex:152
+#: lib/exhs_web/live/admin/groups/index.ex:153
 #, elixir-autogen, elixir-format
 msgid "Edit group"
 msgstr "Rediger gruppe"
 
-#: lib/exhs_web/live/admin/events/show.ex:427
-#: lib/exhs_web/live/admin/events/show.ex:577
+#: lib/exhs_web/live/admin/events/show.ex:447
+#: lib/exhs_web/live/admin/events/show.ex:597
 #: lib/exhs_web/live/public/events/show.ex:397
 #, elixir-autogen, elixir-format
 msgid "End"
@@ -837,7 +837,7 @@ msgstr "Sluttidspunkt"
 msgid "English"
 msgstr "English"
 
-#: lib/exhs_web/live/dev/component_showcase_live.ex:346
+#: lib/exhs_web/live/dev/component_showcase_live.ex:374
 #, elixir-autogen, elixir-format
 msgid "Enter your name"
 msgstr "Indtast dit navn"
@@ -877,7 +877,7 @@ msgstr "Event afpubliceret."
 msgid "Event updated."
 msgstr "Event opdateret."
 
-#: lib/exhs_web/components/layouts.ex:258
+#: lib/exhs_web/components/layouts.ex:268
 #, elixir-autogen, elixir-format
 msgid "Events"
 msgstr "Events"
@@ -908,7 +908,7 @@ msgid "Expired"
 msgstr "Udløbet"
 
 #: lib/exhs_web/live/admin/economy/index.ex:107
-#: lib/exhs_web/live/admin/members/index.ex:286
+#: lib/exhs_web/live/admin/members/index.ex:303
 #, elixir-autogen, elixir-format
 msgid "Export CSV"
 msgstr "Eksportér CSV"
@@ -928,7 +928,7 @@ msgstr "Fornavn"
 #: lib/exhs_web/display_helpers.ex:32
 #: lib/exhs_web/display_helpers.ex:37
 #: lib/exhs_web/live/member/membership_show.ex:176
-#: lib/exhs_web/live/public/join.ex:136
+#: lib/exhs_web/live/public/join.ex:137
 #, elixir-autogen, elixir-format
 msgid "Free"
 msgstr "Gratis"
@@ -938,7 +938,7 @@ msgstr "Gratis"
 msgid "GDPR & security"
 msgstr "GDPR & sikkerhed"
 
-#: lib/exhs_web/live/admin/settings/index.ex:177
+#: lib/exhs_web/live/admin/settings/index.ex:199
 #, elixir-autogen, elixir-format
 msgid "General"
 msgstr "Generelt"
@@ -948,7 +948,7 @@ msgstr "Generelt"
 msgid "Get started for free"
 msgstr "Kom i gang gratis"
 
-#: lib/exhs_web/live/admin/settings/index.ex:298
+#: lib/exhs_web/live/admin/settings/index.ex:320
 #, elixir-autogen, elixir-format
 msgid "Give an active member an admin or board role."
 msgstr "Giv et aktivt medlem admin- eller bestyrelsesrolle."
@@ -965,7 +965,7 @@ msgstr "Gå til forsiden"
 msgid "Group"
 msgstr "Gruppe"
 
-#: lib/exhs_web/live/admin/groups/index.ex:75
+#: lib/exhs_web/live/admin/groups/index.ex:76
 #, elixir-autogen, elixir-format
 msgid "Group deleted."
 msgstr "Gruppe slettet."
@@ -980,19 +980,19 @@ msgstr "Gruppemedlemskab"
 msgid "Group saved."
 msgstr "Gruppe gemt."
 
-#: lib/exhs_web/components/layouts.ex:257
+#: lib/exhs_web/components/layouts.ex:267
 #: lib/exhs_web/controllers/admin_export_controller.ex:135
 #: lib/exhs_web/live/admin/dashboard.ex:45
 #: lib/exhs_web/live/admin/dashboard.ex:71
 #: lib/exhs_web/live/admin/groups/index.ex:13
-#: lib/exhs_web/live/admin/groups/index.ex:100
-#: lib/exhs_web/live/admin/members/index.ex:336
-#: lib/exhs_web/live/admin/members/show.ex:219
+#: lib/exhs_web/live/admin/groups/index.ex:101
+#: lib/exhs_web/live/admin/members/index.ex:360
+#: lib/exhs_web/live/admin/members/show.ex:233
 #, elixir-autogen, elixir-format
 msgid "Groups"
 msgstr "Grupper"
 
-#: lib/exhs_web/live/admin/members/show.ex:289
+#: lib/exhs_web/live/admin/members/show.ex:307
 #, elixir-autogen, elixir-format
 msgid "History"
 msgstr "Historik"
@@ -1004,7 +1004,7 @@ msgid "Home"
 msgstr "Hjem"
 
 #: lib/exhs_web/display_helpers.ex:29
-#: lib/exhs_web/live/admin/members/index.ex:250
+#: lib/exhs_web/live/admin/members/index.ex:264
 #: lib/exhs_web/live/member/dashboard.ex:178
 #, elixir-autogen, elixir-format
 msgid "Inactive"
@@ -1015,17 +1015,17 @@ msgstr "Inaktiv"
 msgid "Incomplete"
 msgstr "Ufuldstændig"
 
-#: lib/exhs_web/live/admin/members/index.ex:227
+#: lib/exhs_web/live/admin/members/index.ex:241
 #, elixir-autogen, elixir-format
 msgid "Invite member"
 msgstr "Inviter medlem"
 
-#: lib/exhs_web/live/dev/component_showcase_live.ex:323
+#: lib/exhs_web/live/dev/component_showcase_live.ex:345
 #, elixir-autogen, elixir-format
 msgid "Invite members to your association."
 msgstr "Inviter medlemmer til din forening."
 
-#: lib/exhs_web/live/admin/members/index.ex:401
+#: lib/exhs_web/live/admin/members/index.ex:425
 #, elixir-autogen, elixir-format
 msgid "Invite new member"
 msgstr "Inviter nyt medlem"
@@ -1071,14 +1071,14 @@ msgid "Left"
 msgstr "Forladt"
 
 #: lib/exhs_web/live/admin/events/index.ex:252
-#: lib/exhs_web/live/admin/events/show.ex:425
-#: lib/exhs_web/live/admin/events/show.ex:568
+#: lib/exhs_web/live/admin/events/show.ex:445
+#: lib/exhs_web/live/admin/events/show.ex:588
 #: lib/exhs_web/live/public/events/show.ex:403
 #, elixir-autogen, elixir-format
 msgid "Location"
 msgstr "Sted"
 
-#: lib/exhs_web/live/admin/settings/index.ex:167
+#: lib/exhs_web/live/admin/settings/index.ex:189
 #, elixir-autogen, elixir-format
 msgid "Manage your association's profile and administrators"
 msgstr "Administrer din forenings profil og administratorer"
@@ -1088,17 +1088,17 @@ msgstr "Administrer din forenings profil og administratorer"
 msgid "Manage, invite and role administration"
 msgstr "Administrer, inviter og rolleadministration"
 
-#: lib/exhs_web/live/admin/economy/index.ex:231
+#: lib/exhs_web/live/admin/economy/index.ex:232
 #, elixir-autogen, elixir-format
 msgid "Mark the payment as refunded? (does not trigger a Stripe refund)"
 msgstr "Markér betalingen som refunderet? (udløser ikke en Stripe-refundering)"
 
 #: lib/exhs_web/display_helpers.ex:23
-#: lib/exhs_web/live/admin/members/index.ex:257
-#: lib/exhs_web/live/admin/members/index.ex:412
-#: lib/exhs_web/live/admin/members/show.ex:188
-#: lib/exhs_web/live/admin/settings/index.ex:305
-#: lib/exhs_web/live/dev/component_showcase_live.ex:354
+#: lib/exhs_web/live/admin/members/index.ex:271
+#: lib/exhs_web/live/admin/members/index.ex:436
+#: lib/exhs_web/live/admin/members/show.ex:202
+#: lib/exhs_web/live/admin/settings/index.ex:333
+#: lib/exhs_web/live/dev/component_showcase_live.ex:383
 #: lib/exhs_web/live/member/dashboard.ex:174
 #, elixir-autogen, elixir-format
 msgid "Member"
@@ -1125,8 +1125,8 @@ msgid "Member not found."
 msgstr "Medlem ikke fundet."
 
 #: lib/exhs_web/controllers/admin_export_controller.ex:136
-#: lib/exhs_web/live/admin/members/index.ex:337
-#: lib/exhs_web/live/admin/members/show.ex:176
+#: lib/exhs_web/live/admin/members/index.ex:361
+#: lib/exhs_web/live/admin/members/show.ex:190
 #: lib/exhs_web/live/member/membership_show.ex:85
 #, elixir-autogen, elixir-format
 msgid "Member since"
@@ -1137,13 +1137,13 @@ msgstr "Medlem siden"
 msgid "Member since %{date}"
 msgstr "Medlem siden %{date}"
 
-#: lib/exhs_web/components/layouts.ex:256
+#: lib/exhs_web/components/layouts.ex:266
 #: lib/exhs_web/live/admin/dashboard.ex:42
 #: lib/exhs_web/live/admin/dashboard.ex:56
 #: lib/exhs_web/live/admin/members/index.ex:27
-#: lib/exhs_web/live/admin/members/index.ex:223
-#: lib/exhs_web/live/dev/component_showcase_live.ex:147
-#: lib/exhs_web/live/dev/component_showcase_live.ex:275
+#: lib/exhs_web/live/admin/members/index.ex:237
+#: lib/exhs_web/live/dev/component_showcase_live.ex:169
+#: lib/exhs_web/live/dev/component_showcase_live.ex:297
 #: lib/exhs_web/live/superadmin/dashboard.ex:144
 #, elixir-autogen, elixir-format
 msgid "Members"
@@ -1173,13 +1173,13 @@ msgid "Membership and membership fee"
 msgstr "Medlemskab og kontingent"
 
 #: lib/exhs_web/labels.ex:59
-#: lib/exhs_web/live/admin/settings/index.ex:233
+#: lib/exhs_web/live/admin/settings/index.ex:255
 #: lib/exhs_web/live/member/membership_show.ex:104
 #, elixir-autogen, elixir-format
 msgid "Membership fee"
 msgstr "Kontingent"
 
-#: lib/exhs_web/live/public/join.ex:84
+#: lib/exhs_web/live/public/join.ex:85
 #, elixir-autogen, elixir-format
 msgid "Membership fee: %{amount}"
 msgstr "Kontingent: %{amount}"
@@ -1204,13 +1204,13 @@ msgstr "Medlemskaber"
 msgid "Memberships in total"
 msgstr "Medlemskaber i alt"
 
-#: lib/exhs_web/live/admin/events/show.ex:220
+#: lib/exhs_web/live/admin/events/show.ex:238
 #, elixir-autogen, elixir-format
 msgid "Moved from waitlist."
 msgstr "Flyttet fra venteliste."
 
-#: lib/exhs_web/components/layouts.ex:169
-#: lib/exhs_web/components/layouts.ex:232
+#: lib/exhs_web/components/layouts.ex:175
+#: lib/exhs_web/components/layouts.ex:242
 #: lib/exhs_web/live/member/registrations.ex:51
 #: lib/exhs_web/live/member/registrations.ex:133
 #: lib/exhs_web/live/member/registrations.ex:142
@@ -1226,24 +1226,24 @@ msgid "My tickets"
 msgstr "Mine billetter"
 
 #: lib/exhs_web/controllers/admin_export_controller.ex:131
-#: lib/exhs_web/controllers/admin_export_controller.ex:155
-#: lib/exhs_web/live/admin/events/show.ex:595
-#: lib/exhs_web/live/admin/events/show.ex:641
-#: lib/exhs_web/live/admin/groups/index.ex:155
-#: lib/exhs_web/live/admin/members/index.ex:332
-#: lib/exhs_web/live/admin/members/show.ex:172
-#: lib/exhs_web/live/admin/settings/index.ex:193
-#: lib/exhs_web/live/dev/component_showcase_live.ex:247
-#: lib/exhs_web/live/dev/component_showcase_live.ex:263
-#: lib/exhs_web/live/dev/component_showcase_live.ex:346
-#: lib/exhs_web/live/dev/component_showcase_live.ex:384
+#: lib/exhs_web/controllers/admin_export_controller.ex:156
+#: lib/exhs_web/live/admin/events/show.ex:615
+#: lib/exhs_web/live/admin/events/show.ex:665
+#: lib/exhs_web/live/admin/groups/index.ex:156
+#: lib/exhs_web/live/admin/members/index.ex:356
+#: lib/exhs_web/live/admin/members/show.ex:186
+#: lib/exhs_web/live/admin/settings/index.ex:215
+#: lib/exhs_web/live/dev/component_showcase_live.ex:269
+#: lib/exhs_web/live/dev/component_showcase_live.ex:285
+#: lib/exhs_web/live/dev/component_showcase_live.ex:372
+#: lib/exhs_web/live/dev/component_showcase_live.ex:437
 #: lib/exhs_web/live/superadmin/dashboard.ex:142
 #: lib/exhs_web/live/superadmin/dashboard.ex:181
 #, elixir-autogen, elixir-format
 msgid "Name"
 msgstr "Navn"
 
-#: lib/exhs_web/live/admin/members/index.ex:279
+#: lib/exhs_web/live/admin/members/index.ex:296
 #, elixir-autogen, elixir-format
 msgid "Name (A–Z)"
 msgstr "Navn (A–Å)"
@@ -1260,38 +1260,38 @@ msgstr "Ny forening"
 msgid "New event"
 msgstr "Nyt event"
 
-#: lib/exhs_web/live/admin/groups/index.ex:104
-#: lib/exhs_web/live/admin/groups/index.ex:152
+#: lib/exhs_web/live/admin/groups/index.ex:105
+#: lib/exhs_web/live/admin/groups/index.ex:153
 #, elixir-autogen, elixir-format
 msgid "New group"
 msgstr "Ny gruppe"
 
 #: lib/exhs_web/live/admin/economy/index.ex:177
-#: lib/exhs_web/live/admin/members/index.ex:274
+#: lib/exhs_web/live/admin/members/index.ex:291
 #, elixir-autogen, elixir-format
 msgid "Newest first"
 msgstr "Nyeste først"
 
-#: lib/exhs_web/live/public/join.ex:80
+#: lib/exhs_web/live/public/join.ex:81
 #, elixir-autogen, elixir-format
 msgid "News and updates"
 msgstr "Nyheder og opdateringer"
 
-#: lib/exhs_web/components/layouts.ex:260
+#: lib/exhs_web/components/layouts.ex:270
 #, elixir-autogen, elixir-format
 msgid "Newsletters"
 msgstr "Nyhedsbreve"
 
-#: lib/exhs_web/live/admin/members/index.ex:396
+#: lib/exhs_web/live/admin/members/index.ex:420
 #, elixir-autogen, elixir-format
 msgid "Next"
 msgstr "Næste"
 
 #: lib/exhs_web/live/admin/events/index.ex:266
-#: lib/exhs_web/live/admin/events/show.ex:430
-#: lib/exhs_web/live/admin/events/show.ex:583
-#: lib/exhs_web/live/admin/events/show.ex:621
-#: lib/exhs_web/live/admin/events/show.ex:700
+#: lib/exhs_web/live/admin/events/show.ex:450
+#: lib/exhs_web/live/admin/events/show.ex:603
+#: lib/exhs_web/live/admin/events/show.ex:641
+#: lib/exhs_web/live/admin/events/show.ex:724
 #, elixir-autogen, elixir-format
 msgid "No"
 msgstr "Nej"
@@ -1306,22 +1306,22 @@ msgstr "Intet aktivt abonnement."
 msgid "No activity yet"
 msgstr "Ingen aktivitet endnu"
 
-#: lib/exhs_web/live/admin/events/show.ex:509
+#: lib/exhs_web/live/admin/events/show.ex:529
 #, elixir-autogen, elixir-format
 msgid "No add-ons yet."
 msgstr "Ingen tilkøb endnu."
 
-#: lib/exhs_web/live/admin/settings/index.ex:267
+#: lib/exhs_web/live/admin/settings/index.ex:289
 #, elixir-autogen, elixir-format
 msgid "No administrators"
 msgstr "Ingen administratorer"
 
-#: lib/exhs_web/live/admin/events/show.ex:549
+#: lib/exhs_web/live/admin/events/show.ex:569
 #, elixir-autogen, elixir-format
 msgid "No confirmed registrations."
 msgstr "Ingen bekræftede tilmeldinger."
 
-#: lib/exhs_web/live/dev/component_showcase_live.ex:327
+#: lib/exhs_web/live/dev/component_showcase_live.ex:349
 #, elixir-autogen, elixir-format
 msgid "No documents"
 msgstr "Ingen dokumenter"
@@ -1331,7 +1331,7 @@ msgstr "Ingen dokumenter"
 msgid "No drafts. Create an event to get started."
 msgstr "Ingen kladder. Opret et event for at komme i gang."
 
-#: lib/exhs_web/live/admin/members/show.ex:291
+#: lib/exhs_web/live/admin/members/show.ex:309
 #, elixir-autogen, elixir-format
 msgid "No events"
 msgstr "Ingen events"
@@ -1341,28 +1341,28 @@ msgstr "Ingen events"
 msgid "No events here"
 msgstr "Ingen events her"
 
-#: lib/exhs_web/live/dev/component_showcase_live.ex:226
+#: lib/exhs_web/live/dev/component_showcase_live.ex:248
 #, elixir-autogen, elixir-format
 msgid "No events yet"
 msgstr "Ingen events endnu"
 
-#: lib/exhs_web/live/admin/members/show.ex:222
+#: lib/exhs_web/live/admin/members/show.ex:236
 #, elixir-autogen, elixir-format
 msgid "No groups"
 msgstr "Ingen grupper"
 
-#: lib/exhs_web/live/admin/groups/index.ex:110
+#: lib/exhs_web/live/admin/groups/index.ex:111
 #, elixir-autogen, elixir-format
 msgid "No groups yet"
 msgstr "Ingen grupper endnu"
 
-#: lib/exhs_web/live/admin/members/index.ex:312
-#: lib/exhs_web/live/dev/component_showcase_live.ex:322
+#: lib/exhs_web/live/admin/members/index.ex:336
+#: lib/exhs_web/live/dev/component_showcase_live.ex:344
 #, elixir-autogen, elixir-format
 msgid "No members"
 msgstr "Ingen medlemmer"
 
-#: lib/exhs_web/live/admin/members/index.ex:313
+#: lib/exhs_web/live/admin/members/index.ex:337
 #, elixir-autogen, elixir-format
 msgid "No members match your filters."
 msgstr "Ingen medlemmer matcher dine filtre."
@@ -1378,7 +1378,7 @@ msgid "No past events yet."
 msgstr "Ingen tidligere events endnu."
 
 #: lib/exhs_web/live/admin/economy/index.ex:198
-#: lib/exhs_web/live/admin/members/show.ex:258
+#: lib/exhs_web/live/admin/members/show.ex:276
 #, elixir-autogen, elixir-format
 msgid "No payments"
 msgstr "Ingen betalinger"
@@ -1388,7 +1388,7 @@ msgstr "Ingen betalinger"
 msgid "No payments yet"
 msgstr "Ingen betalinger endnu"
 
-#: lib/exhs_web/live/admin/members/show.ex:278
+#: lib/exhs_web/live/admin/members/show.ex:296
 #, elixir-autogen, elixir-format
 msgid "No registrations"
 msgstr "Ingen tilmeldinger"
@@ -1398,7 +1398,7 @@ msgstr "Ingen tilmeldinger"
 msgid "No registrations yet"
 msgstr "Ingen tilmeldinger endnu"
 
-#: lib/exhs_web/live/admin/settings/index.ex:301
+#: lib/exhs_web/live/admin/settings/index.ex:323
 #, elixir-autogen, elixir-format
 msgid "No regular members to promote."
 msgstr "Ingen menige medlemmer at forfremme."
@@ -1408,7 +1408,7 @@ msgstr "Ingen menige medlemmer at forfremme."
 msgid "No ticket types available."
 msgstr "Ingen billettyper tilgængelige."
 
-#: lib/exhs_web/live/admin/events/show.ex:446
+#: lib/exhs_web/live/admin/events/show.ex:466
 #, elixir-autogen, elixir-format
 msgid "No ticket types yet."
 msgstr "Ingen billettyper endnu."
@@ -1429,13 +1429,13 @@ msgstr "Ingen kommende events lige nu"
 msgid "No upcoming events. Create a new event."
 msgstr "Ingen kommende events. Opret et nyt event."
 
-#: lib/exhs_web/live/admin/events/show.ex:692
+#: lib/exhs_web/live/admin/events/show.ex:716
 #, elixir-autogen, elixir-format
 msgid "Number"
 msgstr "Tal"
 
 #: lib/exhs_web/live/admin/economy/index.ex:179
-#: lib/exhs_web/live/admin/members/index.ex:277
+#: lib/exhs_web/live/admin/members/index.ex:294
 #, elixir-autogen, elixir-format
 msgid "Oldest first"
 msgstr "Ældste først"
@@ -1465,12 +1465,12 @@ msgstr "Kun nødvendige"
 msgid "Open"
 msgstr "Åbn"
 
-#: lib/exhs_web/components/layouts.ex:302
+#: lib/exhs_web/components/layouts.ex:312
 #, elixir-autogen, elixir-format
 msgid "Open menu"
 msgstr "Åbn menu"
 
-#: lib/exhs_web/live/admin/events/show.ex:695
+#: lib/exhs_web/live/admin/events/show.ex:719
 #, elixir-autogen, elixir-format
 msgid "Options (comma-separated)"
 msgstr "Valgmuligheder (komma-adskilt)"
@@ -1487,7 +1487,7 @@ msgstr "Ordre"
 msgid "Outstanding"
 msgstr "Udestående"
 
-#: lib/exhs_web/live/dev/component_showcase_live.ex:274
+#: lib/exhs_web/live/dev/component_showcase_live.ex:296
 #, elixir-autogen, elixir-format
 msgid "Overview"
 msgstr "Oversigt"
@@ -1497,7 +1497,7 @@ msgstr "Oversigt"
 msgid "Overview of your association"
 msgstr "Oversigt over din forening"
 
-#: lib/exhs_web/live/admin/members/index.ex:389
+#: lib/exhs_web/live/admin/members/index.ex:413
 #, elixir-autogen, elixir-format
 msgid "Page %{page} of %{pages}"
 msgstr "Side %{page} af %{pages}"
@@ -1518,12 +1518,12 @@ msgstr "Betalt"
 msgid "Paid %{datetime} · receipt sent by email."
 msgstr "Betalt %{datetime} · kvittering sendt på e-mail."
 
-#: lib/exhs_web/live/public/join.ex:79
+#: lib/exhs_web/live/public/join.ex:80
 #, elixir-autogen, elixir-format
 msgid "Part of the community"
 msgstr "Del af fællesskabet"
 
-#: lib/exhs_web/live/dev/component_showcase_live.ex:348
+#: lib/exhs_web/live/dev/component_showcase_live.ex:377
 #, elixir-autogen, elixir-format
 msgid "Password"
 msgstr "Adgangskode"
@@ -1538,7 +1538,7 @@ msgstr "Tidligere"
 msgid "Past due"
 msgstr "Forfalden"
 
-#: lib/exhs_web/live/admin/members/show.ex:262
+#: lib/exhs_web/live/admin/members/show.ex:280
 #: lib/exhs_web/live/member/activity.ex:18
 #: lib/exhs_web/live/member/activity.ex:197
 #, elixir-autogen, elixir-format
@@ -1555,9 +1555,9 @@ msgstr "Betaling er ikke klar for denne forening."
 msgid "Payment marked as refunded."
 msgstr "Betaling markeret som refunderet."
 
-#: lib/exhs_web/components/layouts.ex:170
-#: lib/exhs_web/components/layouts.ex:233
-#: lib/exhs_web/live/admin/members/show.ex:256
+#: lib/exhs_web/components/layouts.ex:178
+#: lib/exhs_web/components/layouts.ex:243
+#: lib/exhs_web/live/admin/members/show.ex:274
 #: lib/exhs_web/live/member/payments.ex:57
 #, elixir-autogen, elixir-format
 msgid "Payments"
@@ -1574,7 +1574,7 @@ msgstr "Afventer"
 msgid "Period"
 msgstr "Periode"
 
-#: lib/exhs_web/live/admin/members/show.ex:174
+#: lib/exhs_web/live/admin/members/show.ex:188
 #: lib/exhs_web/live/member/profile.ex:59
 #, elixir-autogen, elixir-format
 msgid "Phone"
@@ -1590,18 +1590,18 @@ msgstr "Postnummer"
 msgid "Powered by Exhs"
 msgstr "Drevet af Exhs"
 
-#: lib/exhs_web/live/admin/members/index.ex:386
+#: lib/exhs_web/live/admin/members/index.ex:410
 #, elixir-autogen, elixir-format
 msgid "Previous"
 msgstr "Forrige"
 
-#: lib/exhs_web/live/admin/events/show.ex:597
-#: lib/exhs_web/live/admin/events/show.ex:643
+#: lib/exhs_web/live/admin/events/show.ex:617
+#: lib/exhs_web/live/admin/events/show.ex:667
 #, elixir-autogen, elixir-format
 msgid "Price (kr)"
 msgstr "Pris (kr)"
 
-#: lib/exhs_web/live/admin/settings/index.ex:205
+#: lib/exhs_web/live/admin/settings/index.ex:227
 #, elixir-autogen, elixir-format
 msgid "Primary colour"
 msgstr "Primærfarve"
@@ -1611,10 +1611,10 @@ msgstr "Primærfarve"
 msgid "Processing…"
 msgstr "Behandler…"
 
-#: lib/exhs_web/components/layouts.ex:203
-#: lib/exhs_web/components/layouts.ex:235
-#: lib/exhs_web/live/admin/members/show.ex:170
-#: lib/exhs_web/live/admin/settings/index.ex:192
+#: lib/exhs_web/components/layouts.ex:211
+#: lib/exhs_web/components/layouts.ex:245
+#: lib/exhs_web/live/admin/members/show.ex:184
+#: lib/exhs_web/live/admin/settings/index.ex:214
 #: lib/exhs_web/live/member/profile.ex:13
 #: lib/exhs_web/live/member/profile.ex:47
 #, elixir-autogen, elixir-format
@@ -1626,41 +1626,41 @@ msgstr "Profil"
 msgid "Profile updated"
 msgstr "Profil opdateret"
 
-#: lib/exhs_web/live/admin/settings/index.ex:319
+#: lib/exhs_web/live/admin/settings/index.ex:348
 #, elixir-autogen, elixir-format
 msgid "Promote"
 msgstr "Forfrem"
 
-#: lib/exhs_web/live/admin/settings/index.ex:268
+#: lib/exhs_web/live/admin/settings/index.ex:290
 #, elixir-autogen, elixir-format
 msgid "Promote a member to admin or board."
 msgstr "Forfrem et medlem til admin eller bestyrelse."
 
-#: lib/exhs_web/live/admin/settings/index.ex:296
+#: lib/exhs_web/live/admin/settings/index.ex:318
 #, elixir-autogen, elixir-format
 msgid "Promote member"
 msgstr "Forfrem medlem"
 
 #: lib/exhs_web/live/admin/events/index.ex:233
-#: lib/exhs_web/live/admin/events/show.ex:411
+#: lib/exhs_web/live/admin/events/show.ex:431
 #, elixir-autogen, elixir-format
 msgid "Publish"
 msgstr "Publicér"
 
 #: lib/exhs_web/labels.ex:99
 #: lib/exhs_web/live/admin/events/index.ex:208
-#: lib/exhs_web/live/admin/events/show.ex:407
+#: lib/exhs_web/live/admin/events/show.ex:425
 #, elixir-autogen, elixir-format
 msgid "Published"
 msgstr "Publiceret"
 
-#: lib/exhs_web/live/admin/events/show.ex:684
+#: lib/exhs_web/live/admin/events/show.ex:708
 #, elixir-autogen, elixir-format
 msgid "Question"
 msgstr "Spørgsmål"
 
-#: lib/exhs_web/live/admin/events/show.ex:474
-#: lib/exhs_web/live/admin/events/show.ex:664
+#: lib/exhs_web/live/admin/events/show.ex:494
+#: lib/exhs_web/live/admin/events/show.ex:688
 #, elixir-autogen, elixir-format
 msgid "Questions"
 msgstr "Spørgsmål"
@@ -1685,7 +1685,7 @@ msgstr "Registreret"
 msgid "Recurring subscription"
 msgstr "Løbende abonnement"
 
-#: lib/exhs_web/live/admin/economy/index.ex:233
+#: lib/exhs_web/live/admin/economy/index.ex:235
 #, elixir-autogen, elixir-format
 msgid "Refund"
 msgstr "Refundér"
@@ -1696,13 +1696,13 @@ msgstr "Refundér"
 msgid "Refunded"
 msgstr "Refunderet"
 
-#: lib/exhs_web/controllers/admin_export_controller.ex:155
+#: lib/exhs_web/controllers/admin_export_controller.ex:160
 #: lib/exhs_web/labels.ex:100
 #, elixir-autogen, elixir-format
 msgid "Registered"
 msgstr "Tilmeldt"
 
-#: lib/exhs_web/live/admin/events/show.ex:539
+#: lib/exhs_web/live/admin/events/show.ex:559
 #, elixir-autogen, elixir-format
 msgid "Registered (%{count})"
 msgstr "Tilmeldte (%{count})"
@@ -1714,37 +1714,37 @@ msgstr "Tilmeldte (%{count})"
 msgid "Registration"
 msgstr "Tilmelding"
 
-#: lib/exhs_web/live/admin/events/show.ex:214
+#: lib/exhs_web/live/admin/events/show.ex:232
 #, elixir-autogen, elixir-format
 msgid "Registration cancelled."
 msgstr "Tilmelding annulleret."
 
-#: lib/exhs_web/live/admin/members/show.ex:276
+#: lib/exhs_web/live/admin/members/show.ex:294
 #, elixir-autogen, elixir-format
 msgid "Registrations"
 msgstr "Tilmeldinger"
 
-#: lib/exhs_web/live/admin/settings/index.ex:288
+#: lib/exhs_web/live/admin/settings/index.ex:310
 #, elixir-autogen, elixir-format
 msgid "Remove (make member)"
 msgstr "Fjern (gør til medlem)"
 
-#: lib/exhs_web/live/admin/members/show.ex:234
+#: lib/exhs_web/live/admin/members/show.ex:248
 #, elixir-autogen, elixir-format
 msgid "Remove from group"
 msgstr "Fjern fra gruppe"
 
-#: lib/exhs_web/live/admin/members/show.ex:94
+#: lib/exhs_web/live/admin/members/show.ex:106
 #, elixir-autogen, elixir-format
 msgid "Removed from group."
 msgstr "Fjernet fra gruppe."
 
-#: lib/exhs_web/live/admin/settings/index.ex:227
+#: lib/exhs_web/live/admin/settings/index.ex:249
 #, elixir-autogen, elixir-format
 msgid "Reply-to address"
 msgstr "Svar-til adresse"
 
-#: lib/exhs_web/live/admin/events/show.ex:699
+#: lib/exhs_web/live/admin/events/show.ex:723
 #, elixir-autogen, elixir-format
 msgid "Required"
 msgstr "Påkrævet"
@@ -1755,8 +1755,8 @@ msgid "Requirement"
 msgstr "Krav"
 
 #: lib/exhs_web/live/admin/events/index.ex:265
-#: lib/exhs_web/live/admin/events/show.ex:429
-#: lib/exhs_web/live/admin/events/show.ex:582
+#: lib/exhs_web/live/admin/events/show.ex:449
+#: lib/exhs_web/live/admin/events/show.ex:602
 #, elixir-autogen, elixir-format
 msgid "Requires membership"
 msgstr "Kræver medlemskab"
@@ -1772,12 +1772,12 @@ msgstr "Reservation afventer betaling"
 msgid "Resource"
 msgstr "Ressource"
 
-#: lib/exhs_web/live/admin/events/show.ex:628
+#: lib/exhs_web/live/admin/events/show.ex:645
 #, elixir-autogen, elixir-format
 msgid "Restrict to groups (presale)"
 msgstr "Begræns til grupper (presale)"
 
-#: lib/exhs_web/live/dev/component_showcase_live.ex:163
+#: lib/exhs_web/live/dev/component_showcase_live.ex:185
 #, elixir-autogen, elixir-format
 msgid "Revenue"
 msgstr "Omsætning"
@@ -1793,13 +1793,13 @@ msgid "Revenue, payments and bookkeeping"
 msgstr "Indtægter, betalinger og bogføring"
 
 #: lib/exhs_web/controllers/admin_export_controller.ex:133
-#: lib/exhs_web/live/admin/members/index.ex:334
-#: lib/exhs_web/live/admin/members/index.ex:410
-#: lib/exhs_web/live/admin/members/show.ex:184
-#: lib/exhs_web/live/admin/settings/index.ex:313
-#: lib/exhs_web/live/dev/component_showcase_live.ex:249
-#: lib/exhs_web/live/dev/component_showcase_live.ex:265
-#: lib/exhs_web/live/dev/component_showcase_live.ex:351
+#: lib/exhs_web/live/admin/members/index.ex:358
+#: lib/exhs_web/live/admin/members/index.ex:434
+#: lib/exhs_web/live/admin/members/show.ex:198
+#: lib/exhs_web/live/admin/settings/index.ex:342
+#: lib/exhs_web/live/dev/component_showcase_live.ex:271
+#: lib/exhs_web/live/dev/component_showcase_live.ex:287
+#: lib/exhs_web/live/dev/component_showcase_live.ex:380
 #: lib/exhs_web/live/member/dashboard.ex:173
 #: lib/exhs_web/live/member/membership_show.ex:75
 #, elixir-autogen, elixir-format
@@ -1812,12 +1812,12 @@ msgid "Role changed"
 msgstr "Rolle ændret"
 
 #: lib/exhs_web/live/admin/members/show.ex:52
-#: lib/exhs_web/live/admin/settings/index.ex:63
+#: lib/exhs_web/live/admin/settings/index.ex:75
 #, elixir-autogen, elixir-format
 msgid "Role updated."
 msgstr "Rolle opdateret."
 
-#: lib/exhs_web/components/layouts.ex:412
+#: lib/exhs_web/components/layouts.ex:424
 #, elixir-autogen, elixir-format
 msgid "Role:"
 msgstr "Rolle:"
@@ -1827,7 +1827,7 @@ msgstr "Rolle:"
 msgid "Sales closed"
 msgstr "Salg lukket"
 
-#: lib/exhs_web/live/admin/events/show.ex:614
+#: lib/exhs_web/live/admin/events/show.ex:634
 #, elixir-autogen, elixir-format
 msgid "Sales closes"
 msgstr "Salg lukker"
@@ -1837,21 +1837,21 @@ msgstr "Salg lukker"
 msgid "Sales not open yet"
 msgstr "Salg ikke åbnet endnu"
 
-#: lib/exhs_web/live/admin/events/show.ex:609
+#: lib/exhs_web/live/admin/events/show.ex:629
 #, elixir-autogen, elixir-format
 msgid "Sales opens"
 msgstr "Salg åbner"
 
-#: lib/exhs_web/live/admin/events/show.ex:587
-#: lib/exhs_web/live/admin/events/show.ex:633
-#: lib/exhs_web/live/admin/events/show.ex:653
-#: lib/exhs_web/live/admin/groups/index.ex:160
-#: lib/exhs_web/live/dev/component_showcase_live.ex:369
+#: lib/exhs_web/live/admin/events/show.ex:607
+#: lib/exhs_web/live/admin/events/show.ex:657
+#: lib/exhs_web/live/admin/events/show.ex:677
+#: lib/exhs_web/live/admin/groups/index.ex:161
+#: lib/exhs_web/live/dev/component_showcase_live.ex:398
 #, elixir-autogen, elixir-format
 msgid "Save"
 msgstr "Gem"
 
-#: lib/exhs_web/live/admin/settings/index.ex:255
+#: lib/exhs_web/live/admin/settings/index.ex:277
 #: lib/exhs_web/live/member/profile.ex:77
 #, elixir-autogen, elixir-format
 msgid "Save changes"
@@ -1878,7 +1878,7 @@ msgstr "Søg beskrivelse"
 msgid "Search event"
 msgstr "Søg event"
 
-#: lib/exhs_web/live/admin/members/index.ex:243
+#: lib/exhs_web/live/admin/members/index.ex:257
 #, elixir-autogen, elixir-format
 msgid "Search name or email…"
 msgstr "Søg navn eller email…"
@@ -1911,20 +1911,20 @@ msgstr "Se events"
 msgid "See your association's key figures at a glance."
 msgstr "Se din forenings nøgletal med ét blik."
 
-#: lib/exhs_web/live/admin/members/index.ex:421
+#: lib/exhs_web/live/admin/members/index.ex:445
 #, elixir-autogen, elixir-format
 msgid "Send invitation"
 msgstr "Send invitation"
 
-#: lib/exhs_web/live/admin/settings/index.ex:221
+#: lib/exhs_web/live/admin/settings/index.ex:243
 #, elixir-autogen, elixir-format
 msgid "Sender name"
 msgstr "Afsendernavn"
 
-#: lib/exhs_web/components/layouts.ex:263
+#: lib/exhs_web/components/layouts.ex:273
 #: lib/exhs_web/live/admin/settings/index.ex:14
-#: lib/exhs_web/live/admin/settings/index.ex:166
-#: lib/exhs_web/live/dev/component_showcase_live.ex:277
+#: lib/exhs_web/live/admin/settings/index.ex:188
+#: lib/exhs_web/live/dev/component_showcase_live.ex:299
 #, elixir-autogen, elixir-format
 msgid "Settings"
 msgstr "Indstillinger"
@@ -1934,7 +1934,7 @@ msgstr "Indstillinger"
 msgid "Settings saved."
 msgstr "Indstillinger gemt."
 
-#: lib/exhs_web/components/layouts.ex:259
+#: lib/exhs_web/components/layouts.ex:269
 #, elixir-autogen, elixir-format
 msgid "Shop"
 msgstr "Shop"
@@ -1946,7 +1946,7 @@ msgstr "Vis"
 
 #: lib/exhs_web/components/layouts.ex:26
 #: lib/exhs_web/components/layouts.ex:109
-#: lib/exhs_web/live/public/join.ex:113
+#: lib/exhs_web/live/public/join.ex:114
 #, elixir-autogen, elixir-format
 msgid "Sign in"
 msgstr "Log ind"
@@ -1956,13 +1956,13 @@ msgstr "Log ind"
 msgid "Sign in to register"
 msgstr "Log ind for at tilmelde"
 
-#: lib/exhs_web/components/layouts.ex:220
-#: lib/exhs_web/components/layouts.ex:340
+#: lib/exhs_web/components/layouts.ex:228
+#: lib/exhs_web/components/layouts.ex:350
 #, elixir-autogen, elixir-format
 msgid "Sign out"
 msgstr "Log ud"
 
-#: lib/exhs_web/components/layouts.ex:320
+#: lib/exhs_web/components/layouts.ex:330
 #, elixir-autogen, elixir-format
 msgid "Signed in as"
 msgstr "Logget ind som"
@@ -1977,19 +1977,19 @@ msgstr "Udsolgt"
 msgid "Something went wrong"
 msgstr "Noget gik galt"
 
-#: lib/exhs_web/components/layouts.ex:624
+#: lib/exhs_web/components/layouts.ex:637
 #, elixir-autogen, elixir-format
 msgid "Something went wrong!"
 msgstr "Noget gik galt!"
 
 #: lib/exhs_web/live/public/events/show.ex:600
-#: lib/exhs_web/live/public/join.ex:50
+#: lib/exhs_web/live/public/join.ex:51
 #, elixir-autogen, elixir-format
 msgid "Something went wrong. Please try again."
 msgstr "Noget gik galt. Prøv igen."
 
-#: lib/exhs_web/live/admin/events/show.ex:426
-#: lib/exhs_web/live/admin/events/show.ex:574
+#: lib/exhs_web/live/admin/events/show.ex:446
+#: lib/exhs_web/live/admin/events/show.ex:594
 #, elixir-autogen, elixir-format
 msgid "Start"
 msgstr "Start"
@@ -2001,8 +2001,8 @@ msgstr "Starttidspunkt"
 
 #: lib/exhs_web/controllers/admin_export_controller.ex:109
 #: lib/exhs_web/controllers/admin_export_controller.ex:134
-#: lib/exhs_web/controllers/admin_export_controller.ex:155
-#: lib/exhs_web/live/admin/members/index.ex:335
+#: lib/exhs_web/controllers/admin_export_controller.ex:159
+#: lib/exhs_web/live/admin/members/index.ex:359
 #: lib/exhs_web/live/member/dashboard.ex:177
 #: lib/exhs_web/live/member/membership_show.ex:80
 #: lib/exhs_web/live/member/payments.ex:85
@@ -2038,17 +2038,17 @@ msgstr "Subdomæne"
 msgid "Subscription"
 msgstr "Abonnement"
 
-#: lib/exhs_web/live/admin/settings/index.ex:194
+#: lib/exhs_web/live/admin/settings/index.ex:216
 #, elixir-autogen, elixir-format
 msgid "Tagline"
 msgstr "Slogan"
 
-#: lib/exhs_web/live/dev/component_showcase_live.ex:365
+#: lib/exhs_web/live/dev/component_showcase_live.ex:394
 #, elixir-autogen, elixir-format
 msgid "Tell us a bit about yourself..."
 msgstr "Fortæl lidt om dig selv..."
 
-#: lib/exhs_web/live/admin/events/show.ex:690
+#: lib/exhs_web/live/admin/events/show.ex:714
 #, elixir-autogen, elixir-format
 msgid "Text"
 msgstr "Tekst"
@@ -2073,7 +2073,7 @@ msgstr "Foreningen bliver tilgængelig på"
 msgid "The page you are looking for does not exist or has been moved."
 msgstr "Den side du leder efter findes ikke eller er blevet flyttet."
 
-#: lib/exhs_web/live/admin/members/index.ex:463
+#: lib/exhs_web/live/admin/members/index.ex:489
 #, elixir-autogen, elixir-format
 msgid "The person is already a member."
 msgstr "Personen er allerede medlem."
@@ -2098,25 +2098,25 @@ msgstr "Der er ingen kommende events fra dine foreninger."
 msgid "Ticket"
 msgstr "Billet"
 
-#: lib/exhs_web/controllers/admin_export_controller.ex:155
-#: lib/exhs_web/live/admin/events/show.ex:593
+#: lib/exhs_web/controllers/admin_export_controller.ex:158
+#: lib/exhs_web/live/admin/events/show.ex:613
 #: lib/exhs_web/live/member/activity.ex:16
 #: lib/exhs_web/live/member/activity.ex:194
 #, elixir-autogen, elixir-format
 msgid "Ticket type"
 msgstr "Billettype"
 
-#: lib/exhs_web/live/admin/events/show.ex:206
+#: lib/exhs_web/live/admin/events/show.ex:224
 #, elixir-autogen, elixir-format
 msgid "Ticket type deleted."
 msgstr "Billettype slettet."
 
-#: lib/exhs_web/live/admin/events/show.ex:119
+#: lib/exhs_web/live/admin/events/show.ex:133
 #, elixir-autogen, elixir-format
 msgid "Ticket type saved."
 msgstr "Billettype gemt."
 
-#: lib/exhs_web/live/admin/events/show.ex:440
+#: lib/exhs_web/live/admin/events/show.ex:460
 #, elixir-autogen, elixir-format
 msgid "Ticket types"
 msgstr "Billettyper"
@@ -2132,7 +2132,7 @@ msgid "Time"
 msgstr "Tidspunkt"
 
 #: lib/exhs_web/live/admin/events/index.ex:250
-#: lib/exhs_web/live/admin/events/show.ex:566
+#: lib/exhs_web/live/admin/events/show.ex:586
 #, elixir-autogen, elixir-format
 msgid "Title"
 msgstr "Titel"
@@ -2149,7 +2149,7 @@ msgid "Trial period"
 msgstr "Prøveperiode"
 
 #: lib/exhs_web/controllers/admin_export_controller.ex:106
-#: lib/exhs_web/live/admin/events/show.ex:688
+#: lib/exhs_web/live/admin/events/show.ex:712
 #: lib/exhs_web/live/member/membership_show.ex:107
 #: lib/exhs_web/live/member/payments.ex:90
 #: lib/exhs_web/live/member/payments.ex:122
@@ -2158,7 +2158,7 @@ msgid "Type"
 msgstr "Type"
 
 #: lib/exhs_web/live/admin/events/index.ex:241
-#: lib/exhs_web/live/admin/events/show.ex:414
+#: lib/exhs_web/live/admin/events/show.ex:434
 #, elixir-autogen, elixir-format
 msgid "Unpublish"
 msgstr "Afpublicér"
@@ -2168,7 +2168,7 @@ msgstr "Afpublicér"
 msgid "Upcoming"
 msgstr "Kommende"
 
-#: lib/exhs_web/components/layouts.ex:168
+#: lib/exhs_web/components/layouts.ex:170
 #: lib/exhs_web/live/member/events.ex:50
 #: lib/exhs_web/live/member/events.ex:145
 #: lib/exhs_web/live/public/home.ex:65
@@ -2192,18 +2192,18 @@ msgstr "Opdater dine personlige oplysninger"
 msgid "Updated"
 msgstr "Opdateret"
 
-#: lib/exhs_web/live/dev/component_showcase_live.ex:328
+#: lib/exhs_web/live/dev/component_showcase_live.ex:350
 #, elixir-autogen, elixir-format
 msgid "Upload files to get started."
 msgstr "Upload filer for at komme i gang."
 
-#: lib/exhs_web/components/layouts.ex:191
-#: lib/exhs_web/components/layouts.ex:312
+#: lib/exhs_web/components/layouts.ex:199
+#: lib/exhs_web/components/layouts.ex:322
 #, elixir-autogen, elixir-format
 msgid "User menu"
 msgstr "Brugermenu"
 
-#: lib/exhs_web/live/dev/component_showcase_live.ex:253
+#: lib/exhs_web/live/dev/component_showcase_live.ex:275
 #, elixir-autogen, elixir-format
 msgid "View"
 msgstr "Vis"
@@ -2215,23 +2215,23 @@ msgid "Visit association"
 msgstr "Besøg forening"
 
 #: lib/exhs_web/labels.ex:65
-#: lib/exhs_web/live/dev/component_showcase_live.ex:171
+#: lib/exhs_web/live/dev/component_showcase_live.ex:193
 #: lib/exhs_web/live/member/registrations.ex:112
 #, elixir-autogen, elixir-format
 msgid "Waitlist"
 msgstr "Venteliste"
 
-#: lib/exhs_web/live/admin/events/show.ex:556
+#: lib/exhs_web/live/admin/events/show.ex:576
 #, elixir-autogen, elixir-format
 msgid "Waitlist (%{count})"
 msgstr "Venteliste (%{count})"
 
-#: lib/exhs_web/components/layouts.ex:612
+#: lib/exhs_web/components/layouts.ex:625
 #, elixir-autogen, elixir-format
 msgid "We can't find the internet"
 msgstr "Vi kan ikke finde internettet"
 
-#: lib/exhs_web/live/admin/members/index.ex:403
+#: lib/exhs_web/live/admin/members/index.ex:427
 #, elixir-autogen, elixir-format
 msgid "We create an account and send a sign-in link by email."
 msgstr "Vi opretter en konto og sender et log-ind-link på email."
@@ -2247,16 +2247,16 @@ msgid "Welcome as a member of %{name}!"
 msgstr "Velkommen som medlem af %{name}!"
 
 #: lib/exhs_web/live/admin/events/index.ex:266
-#: lib/exhs_web/live/admin/events/show.ex:430
-#: lib/exhs_web/live/admin/events/show.ex:583
-#: lib/exhs_web/live/admin/events/show.ex:621
-#: lib/exhs_web/live/admin/events/show.ex:700
+#: lib/exhs_web/live/admin/events/show.ex:450
+#: lib/exhs_web/live/admin/events/show.ex:603
+#: lib/exhs_web/live/admin/events/show.ex:641
+#: lib/exhs_web/live/admin/events/show.ex:724
 #, elixir-autogen, elixir-format
 msgid "Yes"
 msgstr "Ja"
 
 #: lib/exhs_web/live/public/join.ex:47
-#: lib/exhs_web/live/public/join.ex:105
+#: lib/exhs_web/live/public/join.ex:106
 #, elixir-autogen, elixir-format
 msgid "You are already a member!"
 msgstr "Du er allerede medlem!"
@@ -2281,7 +2281,7 @@ msgstr "Du har forladt %{name}"
 msgid "You have no orders yet."
 msgstr "Du har ingen ordrer endnu."
 
-#: lib/exhs_web/live/admin/settings/index.ex:258
+#: lib/exhs_web/live/admin/settings/index.ex:280
 #, elixir-autogen, elixir-format
 msgid "You have read-only access (board)."
 msgstr "Du har skrivebeskyttet adgang (bestyrelse)."
@@ -2296,7 +2296,7 @@ msgstr "Din aktivitet vises her, når du foretager ændringer."
 msgid "Your activity history across associations"
 msgstr "Din aktivitetshistorik på tværs af foreninger"
 
-#: lib/exhs_web/components/layouts.ex:179
+#: lib/exhs_web/components/layouts.ex:187
 #, elixir-autogen, elixir-format
 msgid "Your associations"
 msgstr "Dine foreninger"
@@ -2378,17 +2378,47 @@ msgstr "betalinger.csv"
 msgid "registrations.csv"
 msgstr "tilmeldinger.csv"
 
-#: lib/exhs_web/live/admin/events/show.ex:670
+#: lib/exhs_web/live/admin/events/show.ex:694
 #, elixir-autogen, elixir-format
 msgid "required"
 msgstr "påkrævet"
 
-#: lib/exhs_web/components/layouts.ex:431
+#: lib/exhs_web/components/layouts.ex:444
 #, elixir-autogen, elixir-format
 msgid "soon"
 msgstr "snart"
 
-#: lib/exhs_web/live/admin/events/show.ex:466
+#: lib/exhs_web/live/admin/events/show.ex:486
 #, elixir-autogen, elixir-format
 msgid "unlimited"
 msgstr "ubegrænset"
+
+#: lib/exhs_web/live/dev/component_showcase_live.ex:416
+#, elixir-autogen, elixir-format
+msgid "Cities (multiselect)"
+msgstr "Byer (multivalg)"
+
+#: lib/exhs_web/live/dev/component_showcase_live.ex:408
+#, elixir-autogen, elixir-format
+msgid "City (single)"
+msgstr "By (enkelt)"
+
+#: lib/exhs_web/live/dev/component_showcase_live.ex:420
+#, elixir-autogen, elixir-format
+msgid "Search cities..."
+msgstr "Søg byer..."
+
+#: lib/exhs_web/live/dev/component_showcase_live.ex:411
+#, elixir-autogen, elixir-format
+msgid "Search city..."
+msgstr "Søg by..."
+
+#: lib/exhs_web/live/admin/events/show.ex:650
+#, elixir-autogen, elixir-format
+msgid "Search groups..."
+msgstr "Søg grupper..."
+
+#: lib/exhs_web/live/admin/settings/index.ex:338
+#, elixir-autogen, elixir-format
+msgid "Search member by name or email…"
+msgstr "Søg medlem på navn eller email…"

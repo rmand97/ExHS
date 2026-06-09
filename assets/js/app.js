@@ -24,6 +24,7 @@ import {Socket} from "phoenix"
 import {LiveSocket} from "phoenix_live_view"
 import {hooks as colocatedHooks} from "phoenix-colocated/exhs"
 import {hooks as liveFilterHooks} from "../../deps/livefilter/priv/static/live_filter"
+import liveSelectHooks from "live_select"
 import topbar from "../vendor/topbar"
 import {initCookieConsent} from "./cookie-consent"
 
@@ -55,7 +56,7 @@ const csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute
 const liveSocket = new LiveSocket("/live", Socket, {
   longPollFallbackMs: 2500,
   params: {_csrf_token: csrfToken},
-  hooks: {...colocatedHooks, ...liveFilterHooks},
+  hooks: {...colocatedHooks, ...liveFilterHooks, ...liveSelectHooks},
   uploaders: Uploaders,
 })
 

@@ -54,6 +54,18 @@ defmodule ExhsWeb.AdminLive.Members.Index do
   # ── Filtering ──────────────────────────────────
 
   @impl true
+  def handle_event("live_select_change", %{"text" => text, "id" => live_select_id}, socket) do
+    query = String.downcase(text)
+
+    options =
+      socket.assigns.groups
+      |> Enum.filter(&String.contains?(String.downcase(&1.name), query))
+      |> group_options()
+
+    send_update(LiveSelect.Component, id: live_select_id, options: options)
+    {:noreply, socket}
+  end
+
   def handle_event("filter", params, socket) do
     query =
       %{
@@ -128,6 +140,8 @@ defmodule ExhsWeb.AdminLive.Members.Index do
 
     {:noreply, finish_bulk(socket, gettext("Assigned to group."), failures)}
   end
+
+  def handle_event("bulk_assign_group", _params, socket), do: {:noreply, socket}
 
   def handle_event("bulk_activate", _params, socket) do
     bulk_status(socket, :activate, gettext("Activated."))
@@ -230,8 +244,8 @@ defmodule ExhsWeb.AdminLive.Members.Index do
       </.header>
 
       <.form
-        for={%{}}
-        as={:filter}
+        :let={ff}
+        for={to_form(%{"group" => @filters.group})}
         phx-change="filter"
         phx-submit="filter"
         class="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-5"
@@ -256,10 +270,14 @@ defmodule ExhsWeb.AdminLive.Members.Index do
           <option value="board" selected={@filters.role == "board"}>{gettext("Board")}</option>
           <option value="member" selected={@filters.role == "member"}>{gettext("Member")}</option>
         </select>
-        <select name="group" class="select select-bordered select-sm">
-          <option value="" selected={@filters.group == ""}>{gettext("All groups")}</option>
-          <option :for={g <- @groups} value={g.id} selected={@filters.group == g.id}>{g.name}</option>
-        </select>
+        <.live_select
+          id="filter-group-select"
+          field={ff[:group]}
+          options={group_options(@groups)}
+          style={:daisyui}
+          allow_clear
+          placeholder={gettext("All groups")}
+        />
         <input type="hidden" name="sort" value={@filters.sort} />
       </.form>
 
@@ -298,12 +316,20 @@ defmodule ExhsWeb.AdminLive.Members.Index do
         <span class="text-base-content/70 text-sm font-medium">
           {gettext("%{count} selected", count: MapSet.size(@selected))}
         </span>
-        <form phx-change="bulk_assign_group" class="flex items-center gap-2">
-          <select name="group_id" class="select select-bordered select-sm">
-            <option value="">{gettext("Assign group…")}</option>
-            <option :for={g <- @groups} value={g.id}>{g.name}</option>
-          </select>
-        </form>
+        <.form
+          :let={bf}
+          for={to_form(%{"group_id" => nil}, as: nil)}
+          phx-change="bulk_assign_group"
+          class="flex items-center gap-2"
+        >
+          <.live_select
+            id="bulk-assign-group-select"
+            field={bf[:group_id]}
+            options={group_options(@groups)}
+            style={:daisyui}
+            placeholder={gettext("Assign group…")}
+          />
+        </.form>
         <.button phx-click="bulk_activate" variant="ghost">{gettext("Activate")}</.button>
         <.button phx-click="bulk_deactivate" variant="ghost">{gettext("Deactivate")}</.button>
       </div>
@@ -323,10 +349,7 @@ defmodule ExhsWeb.AdminLive.Members.Index do
                   type="checkbox"
                   class="checkbox checkbox-sm"
                   phx-click="toggle_all"
-                  checked={
-                    @members != [] and
-                      Enum.all?(@members, &MapSet.member?(@selected, &1.id))
-                  }
+                  checked={Enum.all?(@members, &MapSet.member?(@selected, &1.id))}
                 />
               </th>
               <th>{gettext("Name")}</th>
@@ -442,6 +465,8 @@ defmodule ExhsWeb.AdminLive.Members.Index do
   end
 
   defp drop_blank(map), do: Map.reject(map, fn {_k, v} -> v in [nil, ""] end)
+
+  defp group_options(groups), do: Enum.map(groups, &%{label: &1.name, value: &1.id})
 
   defp export_path(filters) do
     query = filters |> Map.take([:q, :status, :role, :group, :sort]) |> drop_blank()

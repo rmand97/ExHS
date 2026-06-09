@@ -50,6 +50,18 @@ defmodule ExhsWeb.AdminLive.Settings.Index do
     end
   end
 
+  def handle_event("live_select_change", %{"text" => text, "id" => live_select_id}, socket) do
+    query = String.downcase(text)
+
+    options =
+      socket.assigns.candidates
+      |> Enum.filter(&String.contains?(String.downcase(candidate_label(&1)), query))
+      |> candidate_options()
+
+    send_update(LiveSelect.Component, id: live_select_id, options: options)
+    {:noreply, socket}
+  end
+
   def handle_event("set_role", %{"id" => id, "role" => role}, socket) do
     role = to_role(role)
     membership = Enum.find(all_memberships(socket), &(&1.id == id))
@@ -120,6 +132,12 @@ defmodule ExhsWeb.AdminLive.Settings.Index do
   end
 
   defp all_memberships(socket), do: socket.assigns[:all_memberships] || []
+
+  defp candidate_options(memberships) do
+    Enum.map(memberships, &%{label: candidate_label(&1), value: &1.id})
+  end
+
+  defp candidate_label(membership), do: "#{member_name(membership)} (#{membership.user.email})"
 
   defp sort_members(memberships) do
     Enum.sort_by(memberships, &String.downcase(member_name(&1)))
@@ -304,14 +322,22 @@ defmodule ExhsWeb.AdminLive.Settings.Index do
           <div :if={@candidates == []} class="text-base-content/50 text-sm">
             {gettext("No regular members to promote.")}
           </div>
-          <form :if={@candidates != []} phx-submit="set_role" class="flex flex-wrap items-end gap-3">
+          <.form
+            :let={f}
+            :if={@candidates != []}
+            for={to_form(%{"id" => nil}, as: nil)}
+            phx-submit="set_role"
+            class="flex flex-wrap items-end gap-3"
+          >
             <div class="grow">
               <label class="text-base-content/70 mb-1 block text-sm">{gettext("Member")}</label>
-              <select name="id" class="select select-bordered w-full">
-                <option :for={m <- @candidates} value={m.id}>
-                  {member_name(m)} ({m.user.email})
-                </option>
-              </select>
+              <.live_select
+                id="promote-member-select"
+                field={f[:id]}
+                options={candidate_options(@candidates)}
+                style={:daisyui}
+                placeholder={gettext("Search member by name or email…")}
+              />
             </div>
             <div>
               <label class="text-base-content/70 mb-1 block text-sm">{gettext("Role")}</label>
@@ -321,7 +347,7 @@ defmodule ExhsWeb.AdminLive.Settings.Index do
               </select>
             </div>
             <.button type="submit" variant="primary">{gettext("Promote")}</.button>
-          </form>
+          </.form>
         </.card>
       </div>
     </Layouts.admin>

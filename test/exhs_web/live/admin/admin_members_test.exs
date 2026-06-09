@@ -146,6 +146,37 @@ defmodule ExhsWeb.AdminLive.AdminMembersTest do
 
       assert reloaded.status == :inactive
     end
+
+    test "bulk assign to a group via live_select", %{
+      conn: conn,
+      forening: forening,
+      membership: membership
+    } do
+      group = create_group!(forening, %{name: "U12"})
+      {:ok, view, _html} = live(conn, "/admin/members")
+
+      view
+      |> element("input[phx-click='toggle_select'][phx-value-id='#{membership.id}']")
+      |> render_click()
+
+      # Pick the group in the bulk-assign live_select, then let the form change fire.
+      view
+      |> element("#bulk-assign-group-select")
+      |> render_hook("option_click", %{"idx" => "0"})
+
+      view
+      |> form("form[phx-change='bulk_assign_group']")
+      |> render_change(%{"group_id" => group.id})
+
+      reloaded =
+        Organizations.get_membership_by_id!(membership.id,
+          tenant: forening.id,
+          load: [:groups],
+          authorize?: false
+        )
+
+      assert Enum.any?(reloaded.groups, &(&1.id == group.id))
+    end
   end
 
   describe "member detail" do
@@ -190,6 +221,33 @@ defmodule ExhsWeb.AdminLive.AdminMembersTest do
                tenant: forening.id,
                authorize?: false
              ).status == :active
+    end
+
+    test "adds member to a group via live_select", %{
+      conn: conn,
+      forening: forening,
+      membership: membership
+    } do
+      group = create_group!(forening, %{name: "Frivillige"})
+      {:ok, view, _html} = live(conn, "/admin/members/#{membership.id}")
+
+      # Pick the group in the add-to-group live_select, then let the form change fire.
+      view
+      |> element("#add-group-select")
+      |> render_hook("option_click", %{"idx" => "0"})
+
+      view
+      |> form("form[phx-change='add_group']")
+      |> render_change(%{"group_id" => group.id})
+
+      reloaded =
+        Organizations.get_membership_by_id!(membership.id,
+          tenant: forening.id,
+          load: [:groups],
+          authorize?: false
+        )
+
+      assert Enum.any?(reloaded.groups, &(&1.id == group.id))
     end
 
     test "rejects a membership id from another forening", %{conn: conn} do

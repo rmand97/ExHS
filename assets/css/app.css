@@ -4,6 +4,7 @@
 @source "../js";
 @source "../../lib/exhs_web";
 @source "../../deps/livefilter";
+@source "../../deps/live_select/lib/live_select/component.*ex";
 
 @plugin "../vendor/heroicons";
 

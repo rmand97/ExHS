@@ -142,8 +142,13 @@ defmodule ExhsWeb.AdminLive.AdminSettingsTest do
       |> element("button", "Administratorer")
       |> render_click()
 
+      # Pick the member in the live_select (first/only candidate).
       view
-      |> form("form[phx-submit='set_role']", %{"id" => membership.id, "role" => "admin"})
+      |> element("#promote-member-select")
+      |> render_hook("option_click", %{"idx" => "0"})
+
+      view
+      |> form("form[phx-submit='set_role']", %{"role" => "admin"})
       |> render_submit()
 
       {:ok, reloaded} =

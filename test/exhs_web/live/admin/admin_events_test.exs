@@ -361,10 +361,13 @@ defmodule ExhsWeb.AdminLive.AdminEventsTest do
       |> element("button[phx-click='edit_ticket'][phx-value-id='#{tt.id}']")
       |> render_click()
 
+      # Pick the group in the live_select tags component (first/only option).
       view
-      |> form("#ticket-modal form",
-        ticket: %{name: "Presale", price_kr: "0", group_ids: [group.id]}
-      )
+      |> element("#ticket_group_ids_live_select_component")
+      |> render_hook("option_click", %{"idx" => "0"})
+
+      view
+      |> form("#ticket-modal form", ticket: %{name: "Presale", price_kr: "0"})
       |> render_submit()
 
       {:ok, groups} =
